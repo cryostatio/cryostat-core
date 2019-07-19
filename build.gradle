@@ -12,12 +12,12 @@ repositories {
 
 dependencies {
     def jmcVersion = '7.1.0-SNAPSHOT'
-    implementation "org.openjdk.jmc:org.openjdk.jmc.flightrecorder.configuration:${jmcVersion}"
-    implementation "org.openjdk.jmc:org.openjdk.jmc.rjmx:${jmcVersion}"
-    implementation "org.openjdk.jmc:org.openjdk.jmc.rjmx.services.jfr:${jmcVersion}"
-    implementation "org.openjdk.jmc:org.openjdk.jmc.ui.common:${jmcVersion}"
+    api "org.openjdk.jmc:org.openjdk.jmc.flightrecorder.configuration:${jmcVersion}"
+    api "org.openjdk.jmc:org.openjdk.jmc.rjmx:${jmcVersion}"
+    api "org.openjdk.jmc:org.openjdk.jmc.rjmx.services.jfr:${jmcVersion}"
+    api "org.openjdk.jmc:org.openjdk.jmc.ui.common:${jmcVersion}"
 
-    implementation 'org.eclipse.core:runtime:3.10.0+'
+    api 'org.eclipse.core:runtime:3.10.0+'
 
     implementation 'org.apache.commons:commons-lang3:3.8.1+'
 
