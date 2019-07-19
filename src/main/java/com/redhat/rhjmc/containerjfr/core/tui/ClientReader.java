@@ -1,4 +1,4 @@
-package com.redhat.rhjmc.containerjfr.tui;
+package com.redhat.rhjmc.containerjfr.core.tui;
 
 import java.io.Closeable;
 

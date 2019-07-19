@@ -1,4 +1,4 @@
-package com.redhat.rhjmc.containerjfr.jmc.internal;
+package com.redhat.rhjmc.containerjfr.core.jmc.internal;
 
 import java.util.Iterator;
 import java.util.HashMap;

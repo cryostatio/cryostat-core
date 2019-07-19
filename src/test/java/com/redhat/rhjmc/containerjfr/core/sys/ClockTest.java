@@ -1,4 +1,4 @@
-package com.redhat.rhjmc.containerjfr.sys;
+package com.redhat.rhjmc.containerjfr.core.sys;
 
 import static org.junit.jupiter.api.Assertions.assertTimeout;
 

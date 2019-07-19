@@ -1,4 +1,4 @@
-package com.redhat.rhjmc.containerjfr.sys;
+package com.redhat.rhjmc.containerjfr.core.sys;
 
 import java.util.Map;
 

@@ -1,4 +1,4 @@
-package com.redhat.rhjmc.containerjfr.net;
+package com.redhat.rhjmc.containerjfr.core.net;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -9,8 +9,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openjdk.jmc.rjmx.internal.WrappedConnectionException;
 
-import com.redhat.rhjmc.containerjfr.sys.Clock;
-import com.redhat.rhjmc.containerjfr.tui.ClientWriter;
+import com.redhat.rhjmc.containerjfr.core.sys.Clock;
+import com.redhat.rhjmc.containerjfr.core.tui.ClientWriter;
 
 @ExtendWith(MockitoExtension.class)
 class JMCConnectionToolkitTest {

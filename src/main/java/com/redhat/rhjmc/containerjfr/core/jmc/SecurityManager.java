@@ -1,9 +1,9 @@
-package com.redhat.rhjmc.containerjfr.jmc;
+package com.redhat.rhjmc.containerjfr.core.jmc;
 
 import java.util.Collections;
 import java.util.Set;
 
-import com.redhat.rhjmc.containerjfr.jmc.internal.Store;
+import com.redhat.rhjmc.containerjfr.core.jmc.internal.Store;
 import org.apache.commons.lang3.NotImplementedException;
 
 import org.openjdk.jmc.ui.common.security.ActionNotGrantedException;

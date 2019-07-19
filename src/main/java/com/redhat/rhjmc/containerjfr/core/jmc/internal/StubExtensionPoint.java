@@ -1,4 +1,4 @@
-package com.redhat.rhjmc.containerjfr.jmc.internal;
+package com.redhat.rhjmc.containerjfr.core.jmc.internal;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IContributor;

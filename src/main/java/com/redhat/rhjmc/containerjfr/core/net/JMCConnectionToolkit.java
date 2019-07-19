@@ -1,7 +1,7 @@
-package com.redhat.rhjmc.containerjfr.net;
+package com.redhat.rhjmc.containerjfr.core.net;
 
-import com.redhat.rhjmc.containerjfr.sys.Clock;
-import com.redhat.rhjmc.containerjfr.tui.ClientWriter;
+import com.redhat.rhjmc.containerjfr.core.sys.Clock;
+import com.redhat.rhjmc.containerjfr.core.tui.ClientWriter;
 
 public class JMCConnectionToolkit {
 

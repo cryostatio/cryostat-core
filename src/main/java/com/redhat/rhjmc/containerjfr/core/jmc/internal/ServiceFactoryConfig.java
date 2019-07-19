@@ -1,4 +1,4 @@
-package com.redhat.rhjmc.containerjfr.jmc.internal;
+package com.redhat.rhjmc.containerjfr.core.jmc.internal;
 
 import org.openjdk.jmc.rjmx.services.internal.CommercialFeaturesServiceFactory;
 import org.eclipse.core.runtime.CoreException;

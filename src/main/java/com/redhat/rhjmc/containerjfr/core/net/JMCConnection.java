@@ -1,9 +1,9 @@
-package com.redhat.rhjmc.containerjfr.net;
+package com.redhat.rhjmc.containerjfr.core.net;
 
 import javax.management.remote.JMXServiceURL;
 
-import com.redhat.rhjmc.containerjfr.sys.Clock;
-import com.redhat.rhjmc.containerjfr.tui.ClientWriter;
+import com.redhat.rhjmc.containerjfr.core.sys.Clock;
+import com.redhat.rhjmc.containerjfr.core.tui.ClientWriter;
 import org.openjdk.jmc.rjmx.IConnectionHandle;
 import org.openjdk.jmc.rjmx.IConnectionListener;
 import org.openjdk.jmc.rjmx.internal.DefaultConnectionHandle;

@@ -1,7 +1,7 @@
-package com.redhat.rhjmc.containerjfr.jmc;
+package com.redhat.rhjmc.containerjfr.core.jmc;
 
-import com.redhat.rhjmc.containerjfr.jmc.internal.ServiceFactoryConfig;
-import com.redhat.rhjmc.containerjfr.jmc.internal.StubExtensionPoint;
+import com.redhat.rhjmc.containerjfr.core.jmc.internal.ServiceFactoryConfig;
+import com.redhat.rhjmc.containerjfr.core.jmc.internal.StubExtensionPoint;
 import org.eclipse.core.internal.registry.ExtensionRegistry;
 import org.eclipse.core.runtime.spi.IRegistryProvider;
 import org.eclipse.core.runtime.spi.RegistryStrategy;
