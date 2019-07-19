@@ -8,7 +8,7 @@ public class JMCConnectionToolkit {
     private final ClientWriter cw;
     private final Clock clock;
 
-    JMCConnectionToolkit(ClientWriter cw, Clock clock) {
+    public JMCConnectionToolkit(ClientWriter cw, Clock clock) {
         this.cw = cw;
         this.clock = clock;
     }
