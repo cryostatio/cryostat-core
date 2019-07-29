@@ -31,11 +31,12 @@ dependencies {
 }
 
 publishing {
+    def coreVersion = '0.2.0';
     publications {
         maven(MavenPublication) {
             groupId = 'com.redhat.rhjmc'
             artifactId = 'containerjfr-core'
-            version = '0.1.4'
+            version = coreVersion
 
             from components.java
         }

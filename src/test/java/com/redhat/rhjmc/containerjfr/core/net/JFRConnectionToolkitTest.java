@@ -13,15 +13,15 @@ import com.redhat.rhjmc.containerjfr.core.sys.Clock;
 import com.redhat.rhjmc.containerjfr.core.tui.ClientWriter;
 
 @ExtendWith(MockitoExtension.class)
-class JMCConnectionToolkitTest {
+class JFRConnectionToolkitTest {
 
-    JMCConnectionToolkit toolkit;
+    JFRConnectionToolkit toolkit;
     @Mock ClientWriter cw;
     @Mock Clock clock;
 
     @BeforeEach
     void setup() {
-        toolkit = new JMCConnectionToolkit(cw, clock);
+        toolkit = new JFRConnectionToolkit(cw, clock);
     }
 
     @Test
