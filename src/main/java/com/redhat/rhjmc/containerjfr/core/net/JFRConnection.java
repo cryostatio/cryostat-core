@@ -14,7 +14,7 @@ import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
 import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceFactory;
 import org.openjdk.jmc.ui.common.security.InMemoryCredentials;
 
-public class JMCConnection implements AutoCloseable {
+public class JFRConnection implements AutoCloseable {
 
     static final String URL_FORMAT = "service:jmx:rmi:///jndi/rmi://%s:%d/jmxrmi";
     public static final int DEFAULT_PORT = 9091;
@@ -27,7 +27,7 @@ public class JMCConnection implements AutoCloseable {
     private final IConnectionHandle handle;
     private final IFlightRecorderService service;
 
-    JMCConnection(ClientWriter cw, Clock clock, String host, int port) throws Exception {
+    JFRConnection(ClientWriter cw, Clock clock, String host, int port) throws Exception {
         this.cw = cw;
         this.clock = clock;
         this.host = host;
@@ -75,7 +75,7 @@ public class JMCConnection implements AutoCloseable {
         int attempts = 0;
         while (true) {
             try {
-                RJMXConnection conn = new RJMXConnection(cd, sd, JMCConnection::failConnection);
+                RJMXConnection conn = new RJMXConnection(cd, sd, JFRConnection::failConnection);
                 if (!conn.connect()) {
                     failConnection();
                 }
