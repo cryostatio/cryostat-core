@@ -18,9 +18,9 @@ dependencies {
     api "org.openjdk.jmc:org.openjdk.jmc.rjmx.services.jfr:${jmcVersion}"
     api "org.openjdk.jmc:org.openjdk.jmc.ui.common:${jmcVersion}"
 
-    api 'org.eclipse.core:runtime:3.10.0+'
+    api 'org.eclipse.platform:org.eclipse.core.runtime:3.15.0'
 
-    implementation 'org.apache.commons:commons-lang3:3.8.1+'
+    implementation 'org.apache.commons:commons-lang3:3.8.1'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.4.1'
