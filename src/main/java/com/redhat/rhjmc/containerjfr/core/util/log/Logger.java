@@ -55,7 +55,7 @@ public enum Logger {
         if (level.ordinal() > this.level.ordinal()) {
             return;
         }
-        stream.format("[%s] %s", level.name(), message);
+        stream.format("[%s] %s%n", level.name(), message);
     }
 
     public void error(String message) {
