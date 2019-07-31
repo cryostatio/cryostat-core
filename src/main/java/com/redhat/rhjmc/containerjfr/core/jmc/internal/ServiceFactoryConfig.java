@@ -100,4 +100,9 @@ public class ServiceFactoryConfig implements IConfigurationElement {
     public boolean isValid() {
         return true;
     }
+
+    @Override
+    public int getHandleId() {
+        return 0;
+    }
 }
