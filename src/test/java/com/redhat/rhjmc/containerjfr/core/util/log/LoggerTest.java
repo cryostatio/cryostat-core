@@ -18,7 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class LoggerTest {
 
-    static final String TAGGED_MESSAGE_FORMAT = "[%s] %s";
+    static final String TAGGED_MESSAGE_FORMAT = "[%s] %s%n";
 
     @Mock PrintStream stream;
     Logger logger;
