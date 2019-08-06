@@ -1,4 +1,4 @@
-package com.redhat.rhjmc.containerjfr.core.util.log;
+package com.redhat.rhjmc.containerjfr.core.log;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
@@ -6,7 +6,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.io.PrintStream;
 
-import com.redhat.rhjmc.containerjfr.core.util.log.Logger.Level;
+import com.redhat.rhjmc.containerjfr.core.log.Logger.Level;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;

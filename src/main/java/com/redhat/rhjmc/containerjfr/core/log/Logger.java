@@ -1,4 +1,4 @@
-package com.redhat.rhjmc.containerjfr.core.util.log;
+package com.redhat.rhjmc.containerjfr.core.log;
 
 import java.io.PrintStream;
 
