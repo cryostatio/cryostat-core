@@ -2,6 +2,8 @@ package com.redhat.rhjmc.containerjfr.core.log;
 
 import java.io.PrintStream;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 /**
  * Built-in lightweight and simple logging facility.
  * TODO evaluate log4j
@@ -58,23 +60,47 @@ public enum Logger {
         stream.format("[%s] %s%n", level.name(), message);
     }
 
+    public synchronized void log(Level level, Exception exception) {
+        log(level, ExceptionUtils.getStackTrace(exception));
+    }
+
     public void error(String message) {
         log(Level.ERROR, message);
+    }
+
+    public void error(Exception exception) {
+        error(ExceptionUtils.getStackTrace(exception));
     }
 
     public void warn(String message) {
         log(Level.WARN, message);
     }
 
+    public void warn(Exception exception) {
+        warn(ExceptionUtils.getStackTrace(exception));
+    }
+
     public void info(String message) {
         log(Level.INFO, message);
+    }
+
+    public void info(Exception exception) {
+        info(ExceptionUtils.getStackTrace(exception));
     }
 
     public void debug(String message) {
         log(Level.DEBUG, message);
     }
 
+    public void debug(Exception exception) {
+        debug(ExceptionUtils.getStackTrace(exception));
+    }
+
     public void trace(String message) {
         log(Level.TRACE, message);
+    }
+
+    public void trace(Exception exception) {
+        trace(ExceptionUtils.getStackTrace(exception));
     }
 }
