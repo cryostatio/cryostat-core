@@ -39,7 +39,7 @@ dependencies {
 }
 
 publishing {
-    def coreVersion = '0.2.3';
+    def coreVersion = '0.2.4';
     publications {
         maven(MavenPublication) {
             groupId = 'com.redhat.rhjmc'

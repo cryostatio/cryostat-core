@@ -21,7 +21,9 @@ class EnvironmentTest {
 
     @Test
     void getEnvShouldNotContainRandomUUIDEnv() {
-        MatcherAssert.assertThat(env.getEnv(UUID.randomUUID().toString()), Matchers.nullValue());
+        String uuid = UUID.randomUUID().toString();
+        MatcherAssert.assertThat(env.hasEnv(uuid), Matchers.is(false));
+        MatcherAssert.assertThat(env.getEnv(uuid), Matchers.nullValue());
     }
 
     @Test
@@ -31,7 +33,9 @@ class EnvironmentTest {
 
     @Test
     void getPropertyShouldNotContainRandomUUIDProperty() {
-        MatcherAssert.assertThat(env.getProperty(UUID.randomUUID().toString()), Matchers.nullValue());
+        String uuid = UUID.randomUUID().toString();
+        MatcherAssert.assertThat(env.hasProperty(uuid), Matchers.is(false));
+        MatcherAssert.assertThat(env.getProperty(uuid), Matchers.nullValue());
     }
 
     @Test
