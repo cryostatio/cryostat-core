@@ -4,20 +4,27 @@ import java.util.Map;
 
 public class Environment {
 
+    public boolean hasEnv(String key) {
+        return getEnv(key) != null && !getEnv(key).isBlank();
+    }
+
     public String getEnv(String key) {
         return System.getenv(key);
     }
 
     public String getEnv(String key, String def) {
-        String res = getEnv(key);
-        if (res == null || res.isBlank()) {
+        if (!hasEnv(key)) {
             return def;
         }
-        return res;
+        return getEnv(key);
     }
 
     public Map<String, String> getEnv() {
         return System.getenv();
+    }
+
+    public boolean hasProperty(String key) {
+        return getProperty(key) != null && !getProperty(key).isBlank();
     }
 
     public String getProperty(String key) {
