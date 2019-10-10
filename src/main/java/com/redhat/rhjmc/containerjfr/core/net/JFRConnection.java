@@ -21,18 +21,20 @@ public class JFRConnection implements AutoCloseable {
 
     private final ClientWriter cw;
     private final Clock clock;
-    private final String host;
-    private final int port;
+    private final JMXServiceURL url;
     private final RJMXConnection rjmxConnection;
     private final IConnectionHandle handle;
     private final IFlightRecorderService service;
 
     JFRConnection(ClientWriter cw, Clock clock, String host, int port) throws Exception {
+        this(cw, clock, new JMXServiceURL(String.format(URL_FORMAT, host, port)));
+    }
+
+    JFRConnection(ClientWriter cw, Clock clock, JMXServiceURL url) throws Exception {
         this.cw = cw;
         this.clock = clock;
-        this.host = host;
-        this.port = port;
-        this.rjmxConnection = attemptConnect(host, port, 0);
+        this.url = url;
+        this.rjmxConnection = attemptConnect(url, 0);
         this.handle = new DefaultConnectionHandle(rjmxConnection, "RJMX Connection", new IConnectionListener[0]);
         this.service = new FlightRecorderServiceFactory().getServiceInstance(handle);
     }
@@ -50,11 +52,11 @@ public class JFRConnection implements AutoCloseable {
     }
 
     public String getHost() {
-        return this.host;
+        return this.url.getHost();
     }
 
     public int getPort() {
-        return this.port;
+        return this.url.getPort();
     }
 
     public void disconnect() {
@@ -66,9 +68,9 @@ public class JFRConnection implements AutoCloseable {
         this.disconnect();
     }
 
-    private RJMXConnection attemptConnect(String host, int port, int maxRetry) throws Exception {
+    private RJMXConnection attemptConnect(JMXServiceURL url, int maxRetry) throws Exception {
         JMXConnectionDescriptor cd = new JMXConnectionDescriptor(
-                new JMXServiceURL(String.format(URL_FORMAT, host, port)),
+                url,
                 new InMemoryCredentials(null, null));
         ServerDescriptor sd = new ServerDescriptor(null, "Container", null);
 
