@@ -4,6 +4,7 @@ import javax.management.remote.JMXServiceURL;
 
 import com.redhat.rhjmc.containerjfr.core.sys.Clock;
 import com.redhat.rhjmc.containerjfr.core.tui.ClientWriter;
+
 import org.openjdk.jmc.rjmx.IConnectionHandle;
 import org.openjdk.jmc.rjmx.IConnectionListener;
 import org.openjdk.jmc.rjmx.internal.DefaultConnectionHandle;
@@ -20,21 +21,19 @@ public class JFRConnection implements AutoCloseable {
     public static final int DEFAULT_PORT = 9091;
 
     private final ClientWriter cw;
-    private final Clock clock;
     private final JMXServiceURL url;
     private final RJMXConnection rjmxConnection;
     private final IConnectionHandle handle;
     private final IFlightRecorderService service;
 
-    JFRConnection(ClientWriter cw, Clock clock, String host, int port) throws Exception {
-        this(cw, clock, new JMXServiceURL(String.format(URL_FORMAT, host, port)));
+    JFRConnection(ClientWriter cw, String host, int port) throws Exception {
+        this(cw, new JMXServiceURL(String.format(URL_FORMAT, host, port)));
     }
 
-    JFRConnection(ClientWriter cw, Clock clock, JMXServiceURL url) throws Exception {
+    JFRConnection(ClientWriter cw, JMXServiceURL url) throws Exception {
         this.cw = cw;
-        this.clock = clock;
         this.url = url;
-        this.rjmxConnection = attemptConnect(url, 0);
+        this.rjmxConnection = attemptConnect(url);
         this.handle = new DefaultConnectionHandle(rjmxConnection, "RJMX Connection", new IConnectionListener[0]);
         this.service = new FlightRecorderServiceFactory().getServiceInstance(handle);
     }
@@ -68,31 +67,21 @@ public class JFRConnection implements AutoCloseable {
         this.disconnect();
     }
 
-    private RJMXConnection attemptConnect(JMXServiceURL url, int maxRetry) throws Exception {
+    private RJMXConnection attemptConnect(JMXServiceURL url) throws Exception {
         JMXConnectionDescriptor cd = new JMXConnectionDescriptor(
                 url,
                 new InMemoryCredentials(null, null));
         ServerDescriptor sd = new ServerDescriptor(null, "Container", null);
 
-        int attempts = 0;
-        while (true) {
-            try {
-                RJMXConnection conn = new RJMXConnection(cd, sd, JFRConnection::failConnection);
-                if (!conn.connect()) {
-                    failConnection();
-                }
-                return conn;
-            } catch (Exception e) {
-                attempts++;
-                cw.println(String.format("Connection attempt %d failed.", attempts));
-                if (attempts >= maxRetry) {
-                    cw.println("Too many failed connections. Aborting.");
-                    throw e;
-                } else {
-                    cw.println(e);
-                }
-                clock.sleep(500);
+        try {
+            RJMXConnection conn = new RJMXConnection(cd, sd, JFRConnection::failConnection);
+            if (!conn.connect()) {
+                failConnection();
             }
+            return conn;
+        } catch (Exception e) {
+            cw.println("connection attempt failed.");
+            throw e;
         }
     }
 
