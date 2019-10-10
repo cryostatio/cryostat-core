@@ -2,21 +2,18 @@ package com.redhat.rhjmc.containerjfr.core.net;
 
 import javax.management.remote.JMXServiceURL;
 
-import com.redhat.rhjmc.containerjfr.core.sys.Clock;
 import com.redhat.rhjmc.containerjfr.core.tui.ClientWriter;
 
 public class JFRConnectionToolkit {
 
     private final ClientWriter cw;
-    private final Clock clock;
 
-    public JFRConnectionToolkit(ClientWriter cw, Clock clock) {
+    public JFRConnectionToolkit(ClientWriter cw) {
         this.cw = cw;
-        this.clock = clock;
     }
 
     public JFRConnection connect(JMXServiceURL url) throws Exception {
-        return new JFRConnection(cw, clock, url);
+        return new JFRConnection(cw, url);
     }
 
     public JFRConnection connect(String host) throws Exception {
@@ -24,6 +21,6 @@ public class JFRConnectionToolkit {
     }
 
     public JFRConnection connect(String host, int port) throws Exception {
-        return new JFRConnection(cw, clock, host, port);
+        return new JFRConnection(cw, host, port);
     }
 }
