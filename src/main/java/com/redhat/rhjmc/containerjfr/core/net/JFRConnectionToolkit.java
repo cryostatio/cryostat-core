@@ -4,6 +4,8 @@ import javax.management.remote.JMXServiceURL;
 
 import com.redhat.rhjmc.containerjfr.core.tui.ClientWriter;
 
+import org.openjdk.jmc.rjmx.ConnectionDescriptorBuilder;
+
 public class JFRConnectionToolkit {
 
     private final ClientWriter cw;
@@ -13,7 +15,7 @@ public class JFRConnectionToolkit {
     }
 
     public JFRConnection connect(JMXServiceURL url) throws Exception {
-        return new JFRConnection(cw, url);
+        return new JFRConnection(cw, new ConnectionDescriptorBuilder().url(url).build());
     }
 
     public JFRConnection connect(String host) throws Exception {
@@ -21,6 +23,6 @@ public class JFRConnectionToolkit {
     }
 
     public JFRConnection connect(String host, int port) throws Exception {
-        return new JFRConnection(cw, host, port);
+        return new JFRConnection(cw, new ConnectionDescriptorBuilder().hostName(host).port(port).build());
     }
 }
