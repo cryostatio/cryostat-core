@@ -14,6 +14,7 @@ import org.openjdk.jmc.rjmx.internal.RJMXConnection;
 import org.openjdk.jmc.rjmx.internal.ServerDescriptor;
 import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
 import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceFactory;
+import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceV2;
 
 public class JFRConnection implements AutoCloseable {
 
@@ -59,6 +60,14 @@ public class JFRConnection implements AutoCloseable {
             cw.println(e);
             return 0;
         }
+    }
+
+    public boolean isV1() {
+        return FlightRecorderServiceV2.isAvailable(this.handle);
+    }
+
+    public boolean isV2() {
+        return !isV1();
     }
 
     public void disconnect() {
