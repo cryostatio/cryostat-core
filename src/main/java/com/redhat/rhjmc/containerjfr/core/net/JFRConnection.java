@@ -63,11 +63,11 @@ public class JFRConnection implements AutoCloseable {
     }
 
     public boolean isV1() {
-        return FlightRecorderServiceV2.isAvailable(this.handle);
+        return !isV2();
     }
 
     public boolean isV2() {
-        return !isV1();
+        return FlightRecorderServiceV2.isAvailable(this.handle);
     }
 
     public void disconnect() {
