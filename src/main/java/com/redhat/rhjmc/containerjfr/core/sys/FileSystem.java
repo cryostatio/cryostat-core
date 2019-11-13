@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +25,10 @@ public class FileSystem {
 
     public boolean deleteIfExists(Path path) throws IOException {
         return Files.deleteIfExists(path);
+    }
+
+    public boolean exists(Path path, LinkOption... linkOptions) {
+        return Files.exists(path, linkOptions);
     }
 
 }
