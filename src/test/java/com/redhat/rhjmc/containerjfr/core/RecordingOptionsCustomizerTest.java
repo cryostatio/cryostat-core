@@ -3,9 +3,14 @@ package com.redhat.rhjmc.containerjfr.core;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import com.redhat.rhjmc.containerjfr.core.RecordingOptionsCustomizer.OptionKey;
 import com.redhat.rhjmc.containerjfr.core.net.JFRConnection;
 
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,6 +74,19 @@ class RecordingOptionsCustomizerTest {
             .set(OptionKey.NAME, "recordingName")
                 .asMap();
         });
+    }
+
+    @Test
+    void shouldBeSelectableFromOptionName() {
+        Optional<OptionKey> key = OptionKey.fromOptionName("toDisk");
+        Assertions.assertTrue(key.isPresent());
+        MatcherAssert.assertThat(key.get(), Matchers.is(OptionKey.TO_DISK));
+    }
+
+    @Test
+    void shouldReturnEmptyIfOptionNameUnrecognized() {
+        Optional<OptionKey> key = OptionKey.fromOptionName(UUID.randomUUID().toString());
+        Assertions.assertFalse(key.isPresent());
     }
 
 }
