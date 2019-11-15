@@ -31,4 +31,7 @@ public class FileSystem {
         return Files.exists(path, linkOptions);
     }
 
+    public Path pathOf(String first, String... more) {
+        return Path.of(first, more);
+    }
 }
