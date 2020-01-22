@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    def jmcVersion = '7.1.0-SNAPSHOT'
+    def jmcVersion = '8.0.0-SNAPSHOT'
     api "org.openjdk.jmc:org.openjdk.jmc.flightrecorder.configuration:${jmcVersion}", {
         exclude group: 'org.jacoco', module: 'jacoco-maven-plugin'
     }
@@ -22,7 +22,7 @@ dependencies {
     api "org.openjdk.jmc:org.openjdk.jmc.rjmx.services.jfr:${jmcVersion}", {
         exclude group: 'org.jacoco', module: 'jacoco-maven-plugin'
     }
-    api "org.openjdk.jmc:org.openjdk.jmc.jdp:${jmcVersion}", {
+    api "org.openjdk.jmc:jdp:${jmcVersion}", {
         exclude group: 'org.jacoco', module: 'jacoco-maven-plugin'
     }
     api "org.openjdk.jmc:org.openjdk.jmc.ui.common:${jmcVersion}", {
@@ -43,7 +43,7 @@ dependencies {
 }
 
 publishing {
-    def coreVersion = '0.6.0';
+    def coreVersion = '0.7.0';
     publications {
         maven(MavenPublication) {
             groupId = 'com.redhat.rhjmc'
