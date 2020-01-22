@@ -22,7 +22,7 @@ dependencies {
     api "org.openjdk.jmc:org.openjdk.jmc.rjmx.services.jfr:${jmcVersion}", {
         exclude group: 'org.jacoco', module: 'jacoco-maven-plugin'
     }
-    api "org.openjdk.jmc:org.openjdk.jmc.jdp:${jmcVersion}", {
+    api "org.openjdk.jmc:jdp:${jmcVersion}", {
         exclude group: 'org.jacoco', module: 'jacoco-maven-plugin'
     }
     api "org.openjdk.jmc:org.openjdk.jmc.ui.common:${jmcVersion}", {
