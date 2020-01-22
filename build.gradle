@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    def jmcVersion = '7.1.0-SNAPSHOT'
+    def jmcVersion = '8.0.0-SNAPSHOT'
     api "org.openjdk.jmc:org.openjdk.jmc.flightrecorder.configuration:${jmcVersion}", {
         exclude group: 'org.jacoco', module: 'jacoco-maven-plugin'
     }
