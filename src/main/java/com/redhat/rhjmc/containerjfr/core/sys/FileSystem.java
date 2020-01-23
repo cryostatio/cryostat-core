@@ -5,14 +5,27 @@ import java.io.InputStream;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class FileSystem {
 
-    public boolean isDirectory(Path path) {
-        return Files.isDirectory(path);
+    public boolean isDirectory(Path path, LinkOption... linkOptions) {
+        return Files.isDirectory(path, linkOptions);
+    }
+
+    public boolean isRegularFile(Path path, LinkOption... linkOptions) {
+        return Files.isRegularFile(path, linkOptions);
+    }
+
+    public boolean isReadable(Path path) {
+        return Files.isReadable(path);
+    }
+
+    public InputStream newInputStream(Path path, OpenOption... openOptions) throws IOException {
+        return Files.newInputStream(path, openOptions);
     }
 
     public long copy(InputStream in, Path out, CopyOption... copyOptions) throws IOException {
