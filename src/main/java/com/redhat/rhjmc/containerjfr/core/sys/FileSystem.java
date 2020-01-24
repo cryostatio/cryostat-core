@@ -1,5 +1,6 @@
 package com.redhat.rhjmc.containerjfr.core.sys;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.CopyOption;
@@ -26,6 +27,10 @@ public class FileSystem {
 
     public InputStream newInputStream(Path path, OpenOption... openOptions) throws IOException {
         return Files.newInputStream(path, openOptions);
+    }
+
+    public BufferedReader readFile(Path path) throws IOException {
+        return Files.newBufferedReader(path);
     }
 
     public long copy(InputStream in, Path out, CopyOption... copyOptions) throws IOException {
