@@ -9,10 +9,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.RegistryFactory;
 
 public class ContainerJfrCore {
-    private ContainerJfrCore() { }
+    private ContainerJfrCore() {}
 
     public static void initialize() throws CoreException {
-        System.setProperty("org.openjdk.jmc.common.security.manager", SecurityManager.class.getCanonicalName());
+        System.setProperty(
+                "org.openjdk.jmc.common.security.manager",
+                SecurityManager.class.getCanonicalName());
         LogManager.getLogManager().reset();
         RegistryFactory.setDefaultRegistryProvider(new RegistryProvider());
     }

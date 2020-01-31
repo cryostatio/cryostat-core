@@ -2,9 +2,6 @@ package com.redhat.rhjmc.containerjfr.core.net;
 
 import java.io.IOException;
 
-import com.redhat.rhjmc.containerjfr.core.sys.Clock;
-import com.redhat.rhjmc.containerjfr.core.tui.ClientWriter;
-
 import org.openjdk.jmc.rjmx.ConnectionToolkit;
 import org.openjdk.jmc.rjmx.IConnectionDescriptor;
 import org.openjdk.jmc.rjmx.IConnectionHandle;
@@ -15,6 +12,9 @@ import org.openjdk.jmc.rjmx.internal.ServerDescriptor;
 import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
 import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceFactory;
 import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceV2;
+
+import com.redhat.rhjmc.containerjfr.core.sys.Clock;
+import com.redhat.rhjmc.containerjfr.core.tui.ClientWriter;
 
 public class JFRConnection implements AutoCloseable {
 
@@ -28,7 +28,9 @@ public class JFRConnection implements AutoCloseable {
     JFRConnection(ClientWriter cw, IConnectionDescriptor cd) throws Exception {
         this.cw = cw;
         this.rjmxConnection = attemptConnect(cd);
-        this.handle = new DefaultConnectionHandle(rjmxConnection, "RJMX Connection", new IConnectionListener[0]);
+        this.handle =
+                new DefaultConnectionHandle(
+                        rjmxConnection, "RJMX Connection", new IConnectionListener[0]);
         this.service = new FlightRecorderServiceFactory().getServiceInstance(handle);
     }
 
@@ -46,7 +48,8 @@ public class JFRConnection implements AutoCloseable {
 
     public String getHost() {
         try {
-            return ConnectionToolkit.getHostName(this.rjmxConnection.getConnectionDescriptor().createJMXServiceURL());
+            return ConnectionToolkit.getHostName(
+                    this.rjmxConnection.getConnectionDescriptor().createJMXServiceURL());
         } catch (IOException e) {
             cw.println(e);
             return "unknown";
@@ -55,7 +58,8 @@ public class JFRConnection implements AutoCloseable {
 
     public int getPort() {
         try {
-            return ConnectionToolkit.getPort(this.rjmxConnection.getConnectionDescriptor().createJMXServiceURL());
+            return ConnectionToolkit.getPort(
+                    this.rjmxConnection.getConnectionDescriptor().createJMXServiceURL());
         } catch (IOException e) {
             cw.println(e);
             return 0;
@@ -81,7 +85,8 @@ public class JFRConnection implements AutoCloseable {
 
     private RJMXConnection attemptConnect(IConnectionDescriptor cd) throws Exception {
         try {
-            RJMXConnection conn = new RJMXConnection(cd, new ServerDescriptor(), JFRConnection::failConnection);
+            RJMXConnection conn =
+                    new RJMXConnection(cd, new ServerDescriptor(), JFRConnection::failConnection);
             if (!conn.connect()) {
                 failConnection();
             }

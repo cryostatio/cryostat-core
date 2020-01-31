@@ -1,7 +1,7 @@
 package com.redhat.rhjmc.containerjfr.core.jmc.internal;
 
-import java.util.Iterator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -55,5 +55,4 @@ public class Store {
     public synchronized Object remove(String key) {
         return this.store.remove(key);
     }
-
 }

@@ -10,7 +10,8 @@ public class StubExtensionPoint implements IExtensionPoint {
     private static int ID = 0;
 
     @Override
-    public IConfigurationElement[] getConfigurationElements() throws InvalidRegistryObjectException {
+    public IConfigurationElement[] getConfigurationElements()
+            throws InvalidRegistryObjectException {
         return new IConfigurationElement[0];
     }
 

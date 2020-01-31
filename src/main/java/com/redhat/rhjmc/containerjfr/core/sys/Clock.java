@@ -5,10 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Clock {
 
-    /**
-     * @deprecated
-     * Use #now()
-     */
+    /** @deprecated Use #now() */
     @Deprecated
     public long getWallTime() {
         return System.currentTimeMillis();
@@ -29,5 +26,4 @@ public class Clock {
     public void sleep(TimeUnit unit, int quant) throws InterruptedException {
         Thread.sleep(unit.toMillis(quant));
     }
-
 }

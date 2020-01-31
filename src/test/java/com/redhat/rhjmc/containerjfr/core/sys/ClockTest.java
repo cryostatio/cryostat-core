@@ -26,14 +26,18 @@ class ClockTest {
     void wallTimeShouldBeCloseToSystem() {
         long clockTime = clock.getWallTime();
         long systemTime = System.currentTimeMillis();
-        MatcherAssert.assertThat(Double.valueOf(clockTime), Matchers.closeTo(systemTime, TimeUnit.SECONDS.toMillis(1)));
+        MatcherAssert.assertThat(
+                Double.valueOf(clockTime),
+                Matchers.closeTo(systemTime, TimeUnit.SECONDS.toMillis(1)));
     }
 
     @Test
     void monotonicTimeShouldBeCloseToSystem() {
         long clockTime = clock.getMonotonicTime();
         long systemTime = System.nanoTime();
-        MatcherAssert.assertThat(Double.valueOf(clockTime), Matchers.closeTo(systemTime, TimeUnit.SECONDS.toNanos(1)));
+        MatcherAssert.assertThat(
+                Double.valueOf(clockTime),
+                Matchers.closeTo(systemTime, TimeUnit.SECONDS.toNanos(1)));
     }
 
     @Test
@@ -43,5 +47,4 @@ class ClockTest {
         long elapsed = System.nanoTime() - start;
         MatcherAssert.assertThat(elapsed, Matchers.greaterThanOrEqualTo(100L));
     }
-
 }

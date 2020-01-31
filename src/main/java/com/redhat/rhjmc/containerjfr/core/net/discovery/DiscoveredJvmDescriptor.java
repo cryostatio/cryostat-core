@@ -25,5 +25,4 @@ public class DiscoveredJvmDescriptor {
     public String toString() {
         return o.toString();
     }
-
 }

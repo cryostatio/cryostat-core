@@ -5,10 +5,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
-import com.redhat.rhjmc.containerjfr.core.net.JFRConnection;
-
 import org.openjdk.jmc.common.unit.IConstrainedMap;
 import org.openjdk.jmc.flightrecorder.configuration.recording.RecordingOptionsBuilder;
+
+import com.redhat.rhjmc.containerjfr.core.net.JFRConnection;
 
 public class RecordingOptionsCustomizer {
 
@@ -75,5 +75,4 @@ public class RecordingOptionsCustomizer {
             return Optional.ofNullable(key);
         }
     }
-
 }

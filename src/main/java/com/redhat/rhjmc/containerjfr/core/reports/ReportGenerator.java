@@ -6,12 +6,13 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
 
+import org.openjdk.jmc.flightrecorder.CouldNotLoadRecordingException;
+import org.openjdk.jmc.flightrecorder.rules.report.html.JfrHtmlRulesReport;
+
 import com.redhat.rhjmc.containerjfr.core.log.Logger;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.openjdk.jmc.flightrecorder.CouldNotLoadRecordingException;
-import org.openjdk.jmc.flightrecorder.rules.report.html.JfrHtmlRulesReport;
 
 public class ReportGenerator {
 
@@ -27,24 +28,24 @@ public class ReportGenerator {
                         return JfrHtmlRulesReport.createReport(is);
                     } catch (IOException | CouldNotLoadRecordingException e) {
                         logger.warn(e);
-                        return
-                            "<html>" +
-                            " <head></head>" +
-                            " <body>" +
-                            "  <div>" +
-                            e.getMessage() +
-                            "  </div>" +
-                            " </body>" +
-                            "</html>"
-                            ;
+                        return "<html>"
+                                + " <head></head>"
+                                + " <body>"
+                                + "  <div>"
+                                + e.getMessage()
+                                + "  </div>"
+                                + " </body>"
+                                + "</html>";
                     }
                 },
-                transformers
-            );
+                transformers);
     }
 
     // testing-only constructor
-    ReportGenerator(Logger logger, Function<InputStream, String> reporter, Set<ReportTransformer> transformers) {
+    ReportGenerator(
+            Logger logger,
+            Function<InputStream, String> reporter,
+            Set<ReportTransformer> transformers) {
         this.logger = logger;
         this.reporter = reporter;
         this.transformers = new TreeSet<>(transformers);
@@ -61,14 +62,21 @@ public class ReportGenerator {
         if (!transformers.isEmpty()) {
             try {
                 Document document = Jsoup.parse(report);
-                transformers.forEach(t -> {
-                    document
-                        .select(t.selector())
-                        .forEach(el -> {
-                            el.html(t.innerHtml(el.html()));
-                            t.attributes().entrySet().forEach(e -> el.attr(e.getKey(), e.getValue()));
+                transformers.forEach(
+                        t -> {
+                            document.select(t.selector())
+                                    .forEach(
+                                            el -> {
+                                                el.html(t.innerHtml(el.html()));
+                                                t.attributes()
+                                                        .entrySet()
+                                                        .forEach(
+                                                                e ->
+                                                                        el.attr(
+                                                                                e.getKey(),
+                                                                                e.getValue()));
+                                            });
                         });
-                });
                 return document.outerHtml();
             } catch (Exception e) {
                 logger.warn(e);

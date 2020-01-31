@@ -2,9 +2,9 @@ package com.redhat.rhjmc.containerjfr.core.net;
 
 import javax.management.remote.JMXServiceURL;
 
-import com.redhat.rhjmc.containerjfr.core.tui.ClientWriter;
-
 import org.openjdk.jmc.rjmx.ConnectionDescriptorBuilder;
+
+import com.redhat.rhjmc.containerjfr.core.tui.ClientWriter;
 
 public class JFRConnectionToolkit {
 
@@ -23,6 +23,7 @@ public class JFRConnectionToolkit {
     }
 
     public JFRConnection connect(String host, int port) throws Exception {
-        return new JFRConnection(cw, new ConnectionDescriptorBuilder().hostName(host).port(port).build());
+        return new JFRConnection(
+                cw, new ConnectionDescriptorBuilder().hostName(host).port(port).build());
     }
 }
