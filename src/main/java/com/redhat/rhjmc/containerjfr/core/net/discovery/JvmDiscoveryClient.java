@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.redhat.rhjmc.containerjfr.core.log.Logger;
-
 import org.openjdk.jmc.jdp.client.JDPClient;
+
+import com.redhat.rhjmc.containerjfr.core.log.Logger;
 
 public class JvmDiscoveryClient {
 
@@ -29,10 +29,8 @@ public class JvmDiscoveryClient {
     }
 
     public List<DiscoveredJvmDescriptor> getDiscoveredJvmDescriptors() {
-        return this.jdp.getDiscoverables()
-                .stream()
+        return this.jdp.getDiscoverables().stream()
                 .map(d -> new DiscoveredJvmDescriptor(d.getPayload()))
                 .collect(Collectors.toList());
     }
-
 }

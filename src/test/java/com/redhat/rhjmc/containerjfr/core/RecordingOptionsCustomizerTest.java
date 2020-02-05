@@ -6,6 +6,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.openjdk.jmc.flightrecorder.configuration.recording.RecordingOptionsBuilder;
+
 import com.redhat.rhjmc.containerjfr.core.RecordingOptionsCustomizer.OptionKey;
 import com.redhat.rhjmc.containerjfr.core.net.JFRConnection;
 
@@ -21,7 +23,6 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openjdk.jmc.flightrecorder.configuration.recording.RecordingOptionsBuilder;
 
 @ExtendWith(MockitoExtension.class)
 class RecordingOptionsCustomizerTest {
@@ -51,7 +52,8 @@ class RecordingOptionsCustomizerTest {
         customizer.set(RecordingOptionsCustomizer.OptionKey.MAX_AGE, "257");
         customizer.asMap();
         InOrder inOrder = Mockito.inOrder(builder);
-        inOrder.verify(builder).addByKey(RecordingOptionsCustomizer.OptionKey.MAX_AGE.getOptionName(), "257");
+        inOrder.verify(builder)
+                .addByKey(RecordingOptionsCustomizer.OptionKey.MAX_AGE.getOptionName(), "257");
         inOrder.verify(builder).build();
         verifyNoMoreInteractions(builder);
     }
@@ -67,13 +69,16 @@ class RecordingOptionsCustomizerTest {
 
     @Test
     void shouldPropagateBuilderException() throws Exception {
-        Assertions.assertThrows(FlightRecorderException.class, () -> {
-            new RecordingOptionsCustomizer(() -> {
-                throw new IllegalArgumentException("foo");
-            })
-            .set(OptionKey.NAME, "recordingName")
-                .asMap();
-        });
+        Assertions.assertThrows(
+                FlightRecorderException.class,
+                () -> {
+                    new RecordingOptionsCustomizer(
+                                    () -> {
+                                        throw new IllegalArgumentException("foo");
+                                    })
+                            .set(OptionKey.NAME, "recordingName")
+                            .asMap();
+                });
     }
 
     @Test
@@ -88,5 +93,4 @@ class RecordingOptionsCustomizerTest {
         Optional<OptionKey> key = OptionKey.fromOptionName(UUID.randomUUID().toString());
         Assertions.assertFalse(key.isPresent());
     }
-
 }

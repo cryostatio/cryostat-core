@@ -28,7 +28,8 @@ class EnvironmentTest {
 
     @Test
     void getEnvShouldReturnSpecifiedDefaultWhenEnvVarUndefined() {
-        MatcherAssert.assertThat(env.getEnv(UUID.randomUUID().toString(), "default"), Matchers.equalTo("default"));
+        MatcherAssert.assertThat(
+                env.getEnv(UUID.randomUUID().toString(), "default"), Matchers.equalTo("default"));
     }
 
     @Test
@@ -40,7 +41,8 @@ class EnvironmentTest {
 
     @Test
     void getPropertyShouldReturnSpecifiedDefaultWhenPropertyUnset() {
-        MatcherAssert.assertThat(env.getProperty(UUID.randomUUID().toString(), "default"), Matchers.equalTo("default"));
+        MatcherAssert.assertThat(
+                env.getProperty(UUID.randomUUID().toString(), "default"),
+                Matchers.equalTo("default"));
     }
-
 }

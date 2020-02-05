@@ -4,10 +4,7 @@ import java.io.PrintStream;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
-/**
- * Built-in lightweight and simple logging facility.
- * TODO evaluate log4j
- */
+/** Built-in lightweight and simple logging facility. TODO evaluate log4j */
 public enum Logger {
     INSTANCE;
 
@@ -25,10 +22,9 @@ public enum Logger {
     }
 
     /**
-     * Set the log level to print. Messages with log level at or above the
-     * specified level will be printed to the Logger's PrintStream. Log output
-     * can be silenced by setting the level to OFF. All output can be written
-     * by setting the level to ALL. Default is INFO.
+     * Set the log level to print. Messages with log level at or above the specified level will be
+     * printed to the Logger's PrintStream. Log output can be silenced by setting the level to OFF.
+     * All output can be written by setting the level to ALL. Default is INFO.
      */
     public void setLevel(Level level) {
         if (level == null) {
@@ -42,9 +38,8 @@ public enum Logger {
     }
 
     /**
-     * Set the PrintStream which this Logger writes to. Log output can be
-     * silenced by passing a PrintStream which drops messages. Default is
-     * System.err.
+     * Set the PrintStream which this Logger writes to. Log output can be silenced by passing a
+     * PrintStream which drops messages. Default is System.err.
      */
     public synchronized void setPrintStream(PrintStream stream) {
         if (stream == null) {

@@ -3,8 +3,6 @@ package com.redhat.rhjmc.containerjfr.core;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.redhat.rhjmc.containerjfr.core.net.JFRConnection;
-
 import org.openjdk.jmc.common.unit.IConstrainedMap;
 import org.openjdk.jmc.common.unit.IConstraint;
 import org.openjdk.jmc.common.unit.IMutableConstrainedMap;
@@ -13,6 +11,8 @@ import org.openjdk.jmc.common.unit.QuantityConversionException;
 import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
 import org.openjdk.jmc.flightrecorder.configuration.events.IEventTypeID;
 import org.openjdk.jmc.rjmx.services.jfr.IEventTypeInfo;
+
+import com.redhat.rhjmc.containerjfr.core.net.JFRConnection;
 
 public class EventOptionsCustomizer {
 
@@ -26,7 +26,9 @@ public class EventOptionsCustomizer {
         this.map = connection.getService().getDefaultEventOptions().emptyWithSameConstraints();
     }
 
-    public EventOptionsCustomizer set(String typeId, String option, String value) throws FlightRecorderException, EventTypeException, EventOptionException, OptionValueException {
+    public EventOptionsCustomizer set(String typeId, String option, String value)
+            throws FlightRecorderException, EventTypeException, EventOptionException,
+                    OptionValueException {
         if (!isInitialized()) {
             initialize();
         }
@@ -63,8 +65,12 @@ public class EventOptionsCustomizer {
         eventIds = new HashMap<>();
         try {
             for (IEventTypeInfo eventTypeInfo : connection.getService().getAvailableEventTypes()) {
-                eventIds.put(eventTypeInfo.getEventTypeID().getFullKey(), eventTypeInfo.getEventTypeID());
-                knownTypes.putIfAbsent(eventTypeInfo.getEventTypeID(), new HashMap<>(eventTypeInfo.getOptionDescriptors()));
+                eventIds.put(
+                        eventTypeInfo.getEventTypeID().getFullKey(),
+                        eventTypeInfo.getEventTypeID());
+                knownTypes.putIfAbsent(
+                        eventTypeInfo.getEventTypeID(),
+                        new HashMap<>(eventTypeInfo.getOptionDescriptors()));
             }
         } catch (org.openjdk.jmc.rjmx.services.jfr.FlightRecorderException e) {
             throw new FlightRecorderException(e);
@@ -93,7 +99,11 @@ public class EventOptionsCustomizer {
     @SuppressWarnings("serial")
     public static class OptionValueException extends Exception {
         OptionValueException(String eventType, String option, String value, Throwable cause) {
-            super(String.format("Invalid value \"%s\" for event \"%s\", option \"%s\"", value, eventType, option), cause);
+            super(
+                    String.format(
+                            "Invalid value \"%s\" for event \"%s\", option \"%s\"",
+                            value, eventType, option),
+                    cause);
         }
     }
 }

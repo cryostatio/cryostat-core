@@ -3,13 +3,14 @@ package com.redhat.rhjmc.containerjfr.core.jmc;
 import java.util.Collections;
 import java.util.Set;
 
-import com.redhat.rhjmc.containerjfr.core.jmc.internal.Store;
-import org.apache.commons.lang3.NotImplementedException;
-
 import org.openjdk.jmc.ui.common.security.ActionNotGrantedException;
 import org.openjdk.jmc.ui.common.security.FailedToSaveException;
 import org.openjdk.jmc.ui.common.security.ISecurityManager;
 import org.openjdk.jmc.ui.common.security.SecurityException;
+
+import com.redhat.rhjmc.containerjfr.core.jmc.internal.Store;
+
+import org.apache.commons.lang3.NotImplementedException;
 
 public class SecurityManager implements ISecurityManager {
 
@@ -40,32 +41,32 @@ public class SecurityManager implements ISecurityManager {
     }
 
     @Override
-    public String store(byte ... value) throws SecurityException {
+    public String store(byte... value) throws SecurityException {
         return this.store.insert(null, true, value);
     }
 
     @Override
-    public String store(String ... value) throws SecurityException {
+    public String store(String... value) throws SecurityException {
         return this.store.insert(null, true, value);
     }
 
     @Override
-    public String storeInFamily(String family, byte ... value) throws SecurityException {
+    public String storeInFamily(String family, byte... value) throws SecurityException {
         return this.store.insert(family, true, value);
     }
 
     @Override
-    public String storeInFamily(String family, String ... value) throws SecurityException {
+    public String storeInFamily(String family, String... value) throws SecurityException {
         return this.store.insert(family, true, value);
     }
 
     @Override
-    public void storeWithKey(String key, byte ... value) throws SecurityException {
+    public void storeWithKey(String key, byte... value) throws SecurityException {
         this.store.insert(key, false, value);
     }
 
     @Override
-    public void storeWithKey(String key, String ... value) throws SecurityException {
+    public void storeWithKey(String key, String... value) throws SecurityException {
         this.store.insert(key, false, value);
     }
 
@@ -98,5 +99,4 @@ public class SecurityManager implements ISecurityManager {
     public void unlock() throws ActionNotGrantedException {
         // no-op
     }
-
 }

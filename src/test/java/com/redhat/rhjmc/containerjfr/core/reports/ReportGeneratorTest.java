@@ -21,14 +21,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ReportGeneratorTest {
 
     static final String SAMPLE_REPORT =
-        "<html>" +
-        "<head></head>" +
-        "<body>" +
-        "<div class=\"foo\">" +
-        "<a id=\"hl\" href=\"http://example.com\">link text</a>" +
-        "</div>" +
-        "</body>" +
-        "</html>";
+            "<html>"
+                    + "<head></head>"
+                    + "<body>"
+                    + "<div class=\"foo\">"
+                    + "<a id=\"hl\" href=\"http://example.com\">link text</a>"
+                    + "</div>"
+                    + "</body>"
+                    + "</html>";
 
     @Mock Logger logger;
     @Mock Function<InputStream, String> reporter;
@@ -57,34 +57,37 @@ class ReportGeneratorTest {
     void shouldApplySingleReplacementTransformation() {
         Mockito.when(reporter.apply(Mockito.any())).thenReturn(SAMPLE_REPORT);
 
-        generator.setTransformers(Set.of(new ReportTransformer() {
-            @Override
-            public String innerHtml(String s) {
-                return s.replaceAll("link text", "new description");
-            }
+        generator.setTransformers(
+                Set.of(
+                        new ReportTransformer() {
+                            @Override
+                            public String innerHtml(String s) {
+                                return s.replaceAll("link text", "new description");
+                            }
 
-            @Override
-            public String selector() {
-                return "#hl";
-            }
+                            @Override
+                            public String selector() {
+                                return "#hl";
+                            }
 
-            @Override
-            public int priority() {
-                return 0;
-            }
-        }));
+                            @Override
+                            public int priority() {
+                                return 0;
+                            }
+                        }));
 
         String report = generator.generateReport(recording);
-        MatcherAssert.assertThat(report, Matchers.is(
-                    "<html>\n" +
-                    " <head></head>\n" +
-                    " <body>\n" +
-                    "  <div class=\"foo\">\n" +
-                    "   <a id=\"hl\" href=\"http://example.com\">new description</a>\n" +
-                    "  </div>\n" +
-                    " </body>\n" +
-                    "</html>"
-                    ));
+        MatcherAssert.assertThat(
+                report,
+                Matchers.is(
+                        "<html>\n"
+                                + " <head></head>\n"
+                                + " <body>\n"
+                                + "  <div class=\"foo\">\n"
+                                + "   <a id=\"hl\" href=\"http://example.com\">new description</a>\n"
+                                + "  </div>\n"
+                                + " </body>\n"
+                                + "</html>"));
 
         Mockito.verify(reporter).apply(Mockito.any());
         Mockito.verifyZeroInteractions(logger);
@@ -94,40 +97,43 @@ class ReportGeneratorTest {
     void shouldApplySingleAppendTransformation() {
         Mockito.when(reporter.apply(Mockito.any())).thenReturn(SAMPLE_REPORT);
 
-        generator.setTransformers(Set.of(new ReportTransformer() {
-            @Override
-            public String innerHtml(String s) {
-                return s + "<a href=\"http://localhost:1234\">hello</a>";
-            }
+        generator.setTransformers(
+                Set.of(
+                        new ReportTransformer() {
+                            @Override
+                            public String innerHtml(String s) {
+                                return s + "<a href=\"http://localhost:1234\">hello</a>";
+                            }
 
-            @Override
-            public Map<String, String> attributes() {
-                return Map.of("data-someprop", "someval");
-            }
+                            @Override
+                            public Map<String, String> attributes() {
+                                return Map.of("data-someprop", "someval");
+                            }
 
-            @Override
-            public String selector() {
-                return ".foo";
-            }
+                            @Override
+                            public String selector() {
+                                return ".foo";
+                            }
 
-            @Override
-            public int priority() {
-                return 0;
-            }
-        }));
+                            @Override
+                            public int priority() {
+                                return 0;
+                            }
+                        }));
 
         String report = generator.generateReport(recording);
-        MatcherAssert.assertThat(report, Matchers.is(
-                    "<html>\n" +
-                    " <head></head>\n" +
-                    " <body>\n" +
-                    "  <div class=\"foo\" data-someprop=\"someval\">\n" +
-                    "   <a id=\"hl\" href=\"http://example.com\">link text</a>\n" +
-                    "   <a href=\"http://localhost:1234\">hello</a>\n" +
-                    "  </div>\n" +
-                    " </body>\n" +
-                    "</html>"
-                    ));
+        MatcherAssert.assertThat(
+                report,
+                Matchers.is(
+                        "<html>\n"
+                                + " <head></head>\n"
+                                + " <body>\n"
+                                + "  <div class=\"foo\" data-someprop=\"someval\">\n"
+                                + "   <a id=\"hl\" href=\"http://example.com\">link text</a>\n"
+                                + "   <a href=\"http://localhost:1234\">hello</a>\n"
+                                + "  </div>\n"
+                                + " </body>\n"
+                                + "</html>"));
 
         Mockito.verify(reporter).apply(Mockito.any());
         Mockito.verifyZeroInteractions(logger);
@@ -135,84 +141,82 @@ class ReportGeneratorTest {
 
     @Test
     void shouldApplyMultipleTransformationsAccordingToPriority() {
-        Mockito.when(reporter.apply(Mockito.any())).thenReturn(
-            "<html>" +
-            "<head></head>" +
-            "<body>" +
-            "<div>" +
-            "foo" +
-            "</div>" +
-            "</body>" +
-            "</html>"
-                );
+        Mockito.when(reporter.apply(Mockito.any()))
+                .thenReturn(
+                        "<html>"
+                                + "<head></head>"
+                                + "<body>"
+                                + "<div>"
+                                + "foo"
+                                + "</div>"
+                                + "</body>"
+                                + "</html>");
 
         generator.setTransformers(
                 Set.of(
-                    new ReportTransformer() {
-                        @Override
-                        public String innerHtml(String s) {
-                            return s.replaceAll("foo", "bar");
-                        }
+                        new ReportTransformer() {
+                            @Override
+                            public String innerHtml(String s) {
+                                return s.replaceAll("foo", "bar");
+                            }
 
-                        @Override
-                        public String selector() {
-                            return "div";
-                        }
+                            @Override
+                            public String selector() {
+                                return "div";
+                            }
 
-                        @Override
-                        public int priority() {
-                            return 0;
-                        }
-                    },
-                    new ReportTransformer() {
-                        @Override
-                        public String innerHtml(String s) {
-                            return s.replaceAll("123", "final");
-                        }
+                            @Override
+                            public int priority() {
+                                return 0;
+                            }
+                        },
+                        new ReportTransformer() {
+                            @Override
+                            public String innerHtml(String s) {
+                                return s.replaceAll("123", "final");
+                            }
 
-                        @Override
-                        public String selector() {
-                            return "div";
-                        }
+                            @Override
+                            public String selector() {
+                                return "div";
+                            }
 
-                        @Override
-                        public int priority() {
-                            return 2;
-                        }
-                    },
-                    new ReportTransformer() {
-                        @Override
-                        public String innerHtml(String s) {
-                            return s.replaceAll("bar", "123");
-                        }
+                            @Override
+                            public int priority() {
+                                return 2;
+                            }
+                        },
+                        new ReportTransformer() {
+                            @Override
+                            public String innerHtml(String s) {
+                                return s.replaceAll("bar", "123");
+                            }
 
-                        @Override
-                        public String selector() {
-                            return "div";
-                        }
+                            @Override
+                            public String selector() {
+                                return "div";
+                            }
 
-                        @Override
-                        public int priority() {
-                            return 1;
-                        }
-                    }
-                    )
-                );
+                            @Override
+                            public int priority() {
+                                return 1;
+                            }
+                        }));
 
         String report = generator.generateReport(recording);
-        MatcherAssert.assertThat(report, Matchers.is(
-                    "<html>\n" +
-                    " <head></head>\n" +
-                    " <body>\n" +
-                    "  <div>\n" +
-                    "   final\n" +
-                    "  </div>\n" +
-                    " </body>\n" +
-                    "</html>"
-                    ));
+        MatcherAssert.assertThat(
+                report,
+                Matchers.is(
+                        "<html>\n"
+                                + " <head></head>\n"
+                                + " <body>\n"
+                                + "  <div>\n"
+                                + "   final\n"
+                                + "  </div>\n"
+                                + " </body>\n"
+                                + "</html>"));
 
         Mockito.verify(reporter).apply(Mockito.any());
         Mockito.verifyZeroInteractions(logger);
     }
-
 }

@@ -2,6 +2,16 @@ package com.redhat.rhjmc.containerjfr.core;
 
 import java.util.Collections;
 
+import org.openjdk.jmc.common.unit.IConstrainedMap;
+import org.openjdk.jmc.common.unit.IConstraint;
+import org.openjdk.jmc.common.unit.IDescribedMap;
+import org.openjdk.jmc.common.unit.IMutableConstrainedMap;
+import org.openjdk.jmc.common.unit.IOptionDescriptor;
+import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
+import org.openjdk.jmc.flightrecorder.configuration.events.IEventTypeID;
+import org.openjdk.jmc.rjmx.services.jfr.IEventTypeInfo;
+import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
+
 import com.redhat.rhjmc.containerjfr.core.EventOptionsCustomizer.EventOptionException;
 import com.redhat.rhjmc.containerjfr.core.EventOptionsCustomizer.EventTypeException;
 import com.redhat.rhjmc.containerjfr.core.EventOptionsCustomizer.OptionValueException;
@@ -17,15 +27,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openjdk.jmc.common.unit.IConstrainedMap;
-import org.openjdk.jmc.common.unit.IConstraint;
-import org.openjdk.jmc.common.unit.IDescribedMap;
-import org.openjdk.jmc.common.unit.IMutableConstrainedMap;
-import org.openjdk.jmc.common.unit.IOptionDescriptor;
-import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
-import org.openjdk.jmc.flightrecorder.configuration.events.IEventTypeID;
-import org.openjdk.jmc.rjmx.services.jfr.IEventTypeInfo;
-import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
 
 @ExtendWith(MockitoExtension.class)
 class EventOptionsCustomizerTest {
@@ -56,10 +57,14 @@ class EventOptionsCustomizerTest {
     @Test
     void shouldThrowExceptionForUnknownEventType() throws Exception {
         Mockito.when(service.getAvailableEventTypes()).thenReturn(Collections.emptySet());
-        Exception e = Assertions.assertThrows(EventTypeException.class, () -> {
-            customizer.set("com.example.FooType", "fooOption", "fooVal");
-        });
-        MatcherAssert.assertThat(e.getMessage(), Matchers.equalTo("Unknown event type \"com.example.FooType\""));
+        Exception e =
+                Assertions.assertThrows(
+                        EventTypeException.class,
+                        () -> {
+                            customizer.set("com.example.FooType", "fooOption", "fooVal");
+                        });
+        MatcherAssert.assertThat(
+                e.getMessage(), Matchers.equalTo("Unknown event type \"com.example.FooType\""));
     }
 
     @Test
@@ -70,14 +75,23 @@ class EventOptionsCustomizerTest {
         Mockito.when(typeId.getFullKey()).thenReturn("com.example.FooType");
 
         IOptionDescriptor optionDescriptor = Mockito.mock(IOptionDescriptor.class);
-        Mockito.when(event.getOptionDescriptors()).thenReturn(Collections.singletonMap("fooOption", EventOptionsCustomizer.capture(optionDescriptor)));
+        Mockito.when(event.getOptionDescriptors())
+                .thenReturn(
+                        Collections.singletonMap(
+                                "fooOption", EventOptionsCustomizer.capture(optionDescriptor)));
 
-        Mockito.when(service.getAvailableEventTypes()).thenReturn(Collections.singleton(EventOptionsCustomizer.capture(event)));
+        Mockito.when(service.getAvailableEventTypes())
+                .thenReturn(Collections.singleton(EventOptionsCustomizer.capture(event)));
 
-        Exception e = Assertions.assertThrows(EventOptionException.class, () -> {
-            customizer.set("com.example.FooType", "barOption", "fooVal");
-        });
-        MatcherAssert.assertThat(e.getMessage(), Matchers.equalTo("Unknown option \"barOption\" for event \"com.example.FooType\""));
+        Exception e =
+                Assertions.assertThrows(
+                        EventOptionException.class,
+                        () -> {
+                            customizer.set("com.example.FooType", "barOption", "fooVal");
+                        });
+        MatcherAssert.assertThat(
+                e.getMessage(),
+                Matchers.equalTo("Unknown option \"barOption\" for event \"com.example.FooType\""));
     }
 
     @Test
@@ -88,18 +102,28 @@ class EventOptionsCustomizerTest {
         Mockito.when(typeId.getFullKey()).thenReturn("com.example.FooType");
 
         IOptionDescriptor optionDescriptor = Mockito.mock(IOptionDescriptor.class);
-        Mockito.when(event.getOptionDescriptors()).thenReturn(Collections.singletonMap("fooOption", EventOptionsCustomizer.capture(optionDescriptor)));
+        Mockito.when(event.getOptionDescriptors())
+                .thenReturn(
+                        Collections.singletonMap(
+                                "fooOption", EventOptionsCustomizer.capture(optionDescriptor)));
 
         IConstraint constraint = Mockito.mock(IConstraint.class);
         Mockito.doThrow(IllegalArgumentException.class).when(constraint).validate(Mockito.any());
         Mockito.when(optionDescriptor.getConstraint()).thenReturn(constraint);
 
-        Mockito.when(service.getAvailableEventTypes()).thenReturn(Collections.singleton(EventOptionsCustomizer.capture(event)));
+        Mockito.when(service.getAvailableEventTypes())
+                .thenReturn(Collections.singleton(EventOptionsCustomizer.capture(event)));
 
-        Exception e = Assertions.assertThrows(OptionValueException.class, () -> {
-            customizer.set("com.example.FooType", "fooOption", "fooVal");
-        });
-        MatcherAssert.assertThat(e.getMessage(), Matchers.equalTo("Invalid value \"fooVal\" for event \"com.example.FooType\", option \"fooOption\""));
+        Exception e =
+                Assertions.assertThrows(
+                        OptionValueException.class,
+                        () -> {
+                            customizer.set("com.example.FooType", "fooOption", "fooVal");
+                        });
+        MatcherAssert.assertThat(
+                e.getMessage(),
+                Matchers.equalTo(
+                        "Invalid value \"fooVal\" for event \"com.example.FooType\", option \"fooOption\""));
     }
 
     @Test
@@ -110,14 +134,18 @@ class EventOptionsCustomizerTest {
         Mockito.when(typeId.getFullKey()).thenReturn("com.example.FooType");
 
         IOptionDescriptor optionDescriptor = Mockito.mock(IOptionDescriptor.class);
-        Mockito.when(event.getOptionDescriptors()).thenReturn(Collections.singletonMap("fooOption", EventOptionsCustomizer.capture(optionDescriptor)));
+        Mockito.when(event.getOptionDescriptors())
+                .thenReturn(
+                        Collections.singletonMap(
+                                "fooOption", EventOptionsCustomizer.capture(optionDescriptor)));
 
         Object parsedValue = new Object();
         IConstraint constraint = Mockito.mock(IConstraint.class);
         Mockito.when(constraint.parseInteractive(Mockito.anyString())).thenReturn(parsedValue);
         Mockito.when(optionDescriptor.getConstraint()).thenReturn(constraint);
 
-        Mockito.when(service.getAvailableEventTypes()).thenReturn(Collections.singleton(EventOptionsCustomizer.capture(event)));
+        Mockito.when(service.getAvailableEventTypes())
+                .thenReturn(Collections.singleton(EventOptionsCustomizer.capture(event)));
 
         customizer.set("com.example.FooType", "fooOption", "fooVal");
 
@@ -131,5 +159,4 @@ class EventOptionsCustomizerTest {
         MatcherAssert.assertThat(createdId.getOptionKey(), Matchers.equalTo("fooOption"));
         MatcherAssert.assertThat(valueCaptor.getValue(), Matchers.sameInstance(parsedValue));
     }
-
 }

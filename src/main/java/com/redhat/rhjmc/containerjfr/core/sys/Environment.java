@@ -34,5 +34,4 @@ public class Environment {
     public String getProperty(String key, String def) {
         return System.getProperty(key, def);
     }
-
 }

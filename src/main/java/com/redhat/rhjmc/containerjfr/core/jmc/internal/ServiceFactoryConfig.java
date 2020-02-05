@@ -1,6 +1,7 @@
 package com.redhat.rhjmc.containerjfr.core.jmc.internal;
 
 import org.openjdk.jmc.rjmx.services.internal.CommercialFeaturesServiceFactory;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IContributor;
@@ -22,7 +23,8 @@ public class ServiceFactoryConfig implements IConfigurationElement {
     }
 
     @Override
-    public String getAttribute(String attrName, String locale) throws InvalidRegistryObjectException {
+    public String getAttribute(String attrName, String locale)
+            throws InvalidRegistryObjectException {
         return null;
     }
 

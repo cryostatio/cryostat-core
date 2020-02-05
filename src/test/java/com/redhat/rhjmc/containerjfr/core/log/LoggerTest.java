@@ -85,7 +85,6 @@ public class LoggerTest {
             logger.trace(message);
             verifyZeroInteractions(stream);
         }
-
     }
 
     @Nested
@@ -108,13 +107,16 @@ public class LoggerTest {
         @Test
         void testPrintsErrorException() {
             String message = "this is a test message";
-            Mockito.doAnswer(new Answer<Void>() {
-                @Override
-                public Void answer(InvocationOnMock invocation) throws Throwable {
-                    ((PrintWriter) invocation.getArgument(0)).print(message);
-                    return null;
-                }
-            }).when(exception).printStackTrace(Mockito.any(PrintWriter.class));
+            Mockito.doAnswer(
+                            new Answer<Void>() {
+                                @Override
+                                public Void answer(InvocationOnMock invocation) throws Throwable {
+                                    ((PrintWriter) invocation.getArgument(0)).print(message);
+                                    return null;
+                                }
+                            })
+                    .when(exception)
+                    .printStackTrace(Mockito.any(PrintWriter.class));
             logger.error(exception);
             verify(stream).format(TAGGED_MESSAGE_FORMAT, Level.ERROR.name(), message);
         }
@@ -129,13 +131,16 @@ public class LoggerTest {
         @Test
         void testPrintsWarnException() {
             String message = "this is a test message";
-            Mockito.doAnswer(new Answer<Void>() {
-                @Override
-                public Void answer(InvocationOnMock invocation) throws Throwable {
-                    ((PrintWriter) invocation.getArgument(0)).print(message);
-                    return null;
-                }
-            }).when(exception).printStackTrace(Mockito.any(PrintWriter.class));
+            Mockito.doAnswer(
+                            new Answer<Void>() {
+                                @Override
+                                public Void answer(InvocationOnMock invocation) throws Throwable {
+                                    ((PrintWriter) invocation.getArgument(0)).print(message);
+                                    return null;
+                                }
+                            })
+                    .when(exception)
+                    .printStackTrace(Mockito.any(PrintWriter.class));
             logger.warn(exception);
             verify(stream).format(TAGGED_MESSAGE_FORMAT, Level.WARN.name(), message);
         }
@@ -150,13 +155,16 @@ public class LoggerTest {
         @Test
         void testPrintsInfoException() {
             String message = "this is a test message";
-            Mockito.doAnswer(new Answer<Void>() {
-                @Override
-                public Void answer(InvocationOnMock invocation) throws Throwable {
-                    ((PrintWriter) invocation.getArgument(0)).print(message);
-                    return null;
-                }
-            }).when(exception).printStackTrace(Mockito.any(PrintWriter.class));
+            Mockito.doAnswer(
+                            new Answer<Void>() {
+                                @Override
+                                public Void answer(InvocationOnMock invocation) throws Throwable {
+                                    ((PrintWriter) invocation.getArgument(0)).print(message);
+                                    return null;
+                                }
+                            })
+                    .when(exception)
+                    .printStackTrace(Mockito.any(PrintWriter.class));
             logger.info(exception);
             verify(stream).format(TAGGED_MESSAGE_FORMAT, Level.INFO.name(), message);
         }
@@ -171,13 +179,16 @@ public class LoggerTest {
         @Test
         void testPrintsDebugException() {
             String message = "this is a test message";
-            Mockito.doAnswer(new Answer<Void>() {
-                @Override
-                public Void answer(InvocationOnMock invocation) throws Throwable {
-                    ((PrintWriter) invocation.getArgument(0)).print(message);
-                    return null;
-                }
-            }).when(exception).printStackTrace(Mockito.any(PrintWriter.class));
+            Mockito.doAnswer(
+                            new Answer<Void>() {
+                                @Override
+                                public Void answer(InvocationOnMock invocation) throws Throwable {
+                                    ((PrintWriter) invocation.getArgument(0)).print(message);
+                                    return null;
+                                }
+                            })
+                    .when(exception)
+                    .printStackTrace(Mockito.any(PrintWriter.class));
             logger.debug(exception);
             verify(stream).format(TAGGED_MESSAGE_FORMAT, Level.DEBUG.name(), message);
         }
@@ -192,17 +203,19 @@ public class LoggerTest {
         @Test
         void testPrintsTraceException() {
             String message = "this is a test message";
-            Mockito.doAnswer(new Answer<Void>() {
-                @Override
-                public Void answer(InvocationOnMock invocation) throws Throwable {
-                    ((PrintWriter) invocation.getArgument(0)).print(message);
-                    return null;
-                }
-            }).when(exception).printStackTrace(Mockito.any(PrintWriter.class));
+            Mockito.doAnswer(
+                            new Answer<Void>() {
+                                @Override
+                                public Void answer(InvocationOnMock invocation) throws Throwable {
+                                    ((PrintWriter) invocation.getArgument(0)).print(message);
+                                    return null;
+                                }
+                            })
+                    .when(exception)
+                    .printStackTrace(Mockito.any(PrintWriter.class));
             logger.trace(exception);
             verify(stream).format(TAGGED_MESSAGE_FORMAT, Level.TRACE.name(), message);
         }
-
     }
 
     @Nested
@@ -247,7 +260,5 @@ public class LoggerTest {
             logger.trace(message);
             verifyZeroInteractions(stream);
         }
-
     }
-
 }
