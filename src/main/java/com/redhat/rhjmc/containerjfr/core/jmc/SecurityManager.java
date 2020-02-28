@@ -3,14 +3,14 @@ package com.redhat.rhjmc.containerjfr.core.jmc;
 import java.util.Collections;
 import java.util.Set;
 
+import org.apache.commons.lang3.NotImplementedException;
+
 import org.openjdk.jmc.ui.common.security.ActionNotGrantedException;
 import org.openjdk.jmc.ui.common.security.FailedToSaveException;
 import org.openjdk.jmc.ui.common.security.ISecurityManager;
 import org.openjdk.jmc.ui.common.security.SecurityException;
 
 import com.redhat.rhjmc.containerjfr.core.jmc.internal.Store;
-
-import org.apache.commons.lang3.NotImplementedException;
 
 public class SecurityManager implements ISecurityManager {
 

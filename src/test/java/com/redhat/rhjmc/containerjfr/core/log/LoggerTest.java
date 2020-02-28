@@ -7,8 +7,6 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
-import com.redhat.rhjmc.containerjfr.core.log.Logger.Level;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -18,6 +16,8 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+
+import com.redhat.rhjmc.containerjfr.core.log.Logger.Level;
 
 @ExtendWith(MockitoExtension.class)
 public class LoggerTest {
