@@ -2,6 +2,17 @@ package com.redhat.rhjmc.containerjfr.core;
 
 import java.util.Collections;
 
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import org.openjdk.jmc.common.unit.IConstrainedMap;
 import org.openjdk.jmc.common.unit.IConstraint;
 import org.openjdk.jmc.common.unit.IDescribedMap;
@@ -16,17 +27,6 @@ import com.redhat.rhjmc.containerjfr.core.EventOptionsCustomizer.EventOptionExce
 import com.redhat.rhjmc.containerjfr.core.EventOptionsCustomizer.EventTypeException;
 import com.redhat.rhjmc.containerjfr.core.EventOptionsCustomizer.OptionValueException;
 import com.redhat.rhjmc.containerjfr.core.net.JFRConnection;
-
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class EventOptionsCustomizerTest {

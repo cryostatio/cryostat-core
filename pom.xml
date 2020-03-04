@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<modelVersion>4.0.0</modelVersion>
+<groupId>com.redhat.rhjmc</groupId>
+<artifactId>containerjfr-core</artifactId>
+<version>0.9.0</version>
+<packaging>jar</packaging>
+<name>containerjfr-core</name>
+<url>http://maven.apache.org</url>
+
+<properties>
+  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  <java.version>11</java.version>
+  <maven.compiler.target>${java.version}</maven.compiler.target>
+  <maven.compiler.source>${java.version}</maven.compiler.source>
+  <jmc.version>8.0.0-SNAPSHOT</jmc.version>
+
+  <org.apache.maven.plugins.compiler.version>3.6.1</org.apache.maven.plugins.compiler.version>
+  <org.apache.maven.plugins.surefire.version>3.0.0-M4</org.apache.maven.plugins.surefire.version>
+  <org.apache.maven.plugins.site.version>3.8.2</org.apache.maven.plugins.site.version>
+  <org.apache.maven.plugins.info.reports.version>3.0.0</org.apache.maven.plugins.info.reports.version>
+
+  <org.eclipse.core.runtime.version>3.15.0</org.eclipse.core.runtime.version>
+
+  <org.apache.commons.lang3.version>3.9</org.apache.commons.lang3.version>
+  <org.jsoup.version>1.12.1</org.jsoup.version>
+
+  <com.github.spotbugs.version>4.0.0-RC1</com.github.spotbugs.version>
+  <com.github.spotbugs.plugin.version>3.1.12.1</com.github.spotbugs.plugin.version>
+  <org.junit.jupiter.version>5.6.0</org.junit.jupiter.version>
+  <org.hamcrest.version>2.2</org.hamcrest.version>
+  <org.mockito.version>3.2.4</org.mockito.version>
+  <org.jacoco.maven.plugin.version>0.8.5</org.jacoco.maven.plugin.version>
+  <com.diffplug.spotless.maven.plugin.version>1.27.0</com.diffplug.spotless.maven.plugin.version>
+</properties>
+
+<dependencies>
+  <dependency>
+    <groupId>org.openjdk.jmc</groupId>
+    <artifactId>org.openjdk.jmc.flightrecorder.configuration</artifactId>
+    <version>${jmc.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.openjdk.jmc</groupId>
+    <artifactId>org.openjdk.jmc.rjmx</artifactId>
+    <version>${jmc.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.openjdk.jmc</groupId>
+    <artifactId>org.openjdk.jmc.rjmx.services.jfr</artifactId>
+    <version>${jmc.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.openjdk.jmc</groupId>
+    <artifactId>jdp</artifactId>
+    <version>${jmc.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.openjdk.jmc</groupId>
+    <artifactId>org.openjdk.jmc.ui.common</artifactId>
+    <version>${jmc.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.eclipse.platform</groupId>
+    <artifactId>org.eclipse.core.runtime</artifactId>
+    <version>${org.eclipse.core.runtime.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-lang3</artifactId>
+    <version>${org.apache.commons.lang3.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.jsoup</groupId>
+    <artifactId>jsoup</artifactId>
+    <version>${org.jsoup.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>com.github.spotbugs</groupId>
+    <artifactId>spotbugs-annotations</artifactId>
+    <version>${com.github.spotbugs.version}</version>
+  </dependency>
+
+  <!-- test deps -->
+  <dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter-api</artifactId>
+    <version>${org.junit.jupiter.version}</version>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter-params</artifactId>
+    <version>${org.junit.jupiter.version}</version>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.hamcrest</groupId>
+    <artifactId>hamcrest</artifactId>
+    <version>${org.hamcrest.version}</version>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.mockito</groupId>
+    <artifactId>mockito-junit-jupiter</artifactId>
+    <version>${org.mockito.version}</version>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.mockito</groupId>
+    <artifactId>mockito-inline</artifactId>
+    <version>${org.mockito.version}</version>
+    <scope>test</scope>
+  </dependency>
+</dependencies>
+
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-compiler-plugin</artifactId>
+      <version>${org.apache.maven.plugins.compiler.version}</version>
+    </plugin>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-surefire-plugin</artifactId>
+      <version>${org.apache.maven.plugins.surefire.version}</version>
+      <configuration>
+        <properties>
+          <configurationParameters>
+            junit.jupiter.execution.parallel.enabled=true
+            junit.jupiter.execution.parallel.mode.default=same_thread
+            junit.jupiter.execution.parallel.mode.classes.default=concurrent
+          </configurationParameters>
+        </properties>
+      </configuration>
+    </plugin>
+    <plugin>
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-maven-plugin</artifactId>
+      <version>${com.github.spotbugs.plugin.version}</version>
+      <executions>
+        <execution>
+          <id>spotbugs</id>
+          <phase>verify</phase>
+          <goals>
+            <goal>check</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+    <plugin>
+      <groupId>org.jacoco</groupId>
+      <artifactId>jacoco-maven-plugin</artifactId>
+      <version>${org.jacoco.maven.plugin.version}</version>
+      <executions>
+        <execution>
+          <goals>
+            <goal>prepare-agent</goal>
+          </goals>
+        </execution>
+        <execution>
+          <id>report</id>
+          <phase>verify</phase>
+          <goals>
+            <goal>report</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+    <plugin>
+      <groupId>com.diffplug.spotless</groupId>
+      <artifactId>spotless-maven-plugin</artifactId>
+      <version>${com.diffplug.spotless.maven.plugin.version}</version>
+      <executions>
+        <execution>
+          <id>spotless</id>
+          <phase>verify</phase>
+          <goals>
+            <goal>check</goal>
+          </goals>
+        </execution>
+      </executions>
+      <configuration>
+        <java>
+          <googleJavaFormat>
+            <version>1.7</version>
+            <style>AOSP</style>
+          </googleJavaFormat>
+          <trimTrailingWhitespace/>
+          <endWithNewline/>
+          <importOrder>
+            <order>java,javax,org.openjdk.jmc,com.redhat.rhjmc.containerjfr,</order>
+          </importOrder>
+          <removeUnusedImports/>
+        </java>
+      </configuration>
+    </plugin>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-site-plugin</artifactId>
+      <version>${org.apache.maven.plugins.site.version}</version>
+    </plugin>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-project-info-reports-plugin</artifactId>
+      <version>${org.apache.maven.plugins.info.reports.version}</version>
+    </plugin>
+  </plugins>
+</build>
+
+<reporting>
+  <plugins>
+    <plugin>
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-maven-plugin</artifactId>
+      <version>${com.github.spotbugs.plugin.version}</version>
+    </plugin>
+    <plugin>
+      <groupId>org.jacoco</groupId>
+      <artifactId>jacoco-maven-plugin</artifactId>
+      <version>${org.jacoco.maven.plugin.version}</version>
+      <reportSets>
+        <reportSet>
+          <reports>
+            <report>report</report>
+          </reports>
+        </reportSet>
+      </reportSets>
+    </plugin>
+  </plugins>
+</reporting>
+
+</project>

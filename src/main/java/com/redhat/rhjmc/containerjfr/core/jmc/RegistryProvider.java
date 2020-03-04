@@ -1,14 +1,14 @@
 package com.redhat.rhjmc.containerjfr.core.jmc;
 
-import com.redhat.rhjmc.containerjfr.core.jmc.internal.ServiceFactoryConfig;
-import com.redhat.rhjmc.containerjfr.core.jmc.internal.StubExtensionPoint;
-
 import org.eclipse.core.internal.registry.ExtensionRegistry;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.spi.IRegistryProvider;
 import org.eclipse.core.runtime.spi.RegistryStrategy;
+
+import com.redhat.rhjmc.containerjfr.core.jmc.internal.ServiceFactoryConfig;
+import com.redhat.rhjmc.containerjfr.core.jmc.internal.StubExtensionPoint;
 
 public class RegistryProvider implements IRegistryProvider {
     @Override

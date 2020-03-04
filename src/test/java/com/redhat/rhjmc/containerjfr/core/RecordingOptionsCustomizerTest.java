@@ -6,11 +6,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.openjdk.jmc.flightrecorder.configuration.recording.RecordingOptionsBuilder;
-
-import com.redhat.rhjmc.containerjfr.core.RecordingOptionsCustomizer.OptionKey;
-import com.redhat.rhjmc.containerjfr.core.net.JFRConnection;
-
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
@@ -23,6 +18,11 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import org.openjdk.jmc.flightrecorder.configuration.recording.RecordingOptionsBuilder;
+
+import com.redhat.rhjmc.containerjfr.core.RecordingOptionsCustomizer.OptionKey;
+import com.redhat.rhjmc.containerjfr.core.net.JFRConnection;
 
 @ExtendWith(MockitoExtension.class)
 class RecordingOptionsCustomizerTest {

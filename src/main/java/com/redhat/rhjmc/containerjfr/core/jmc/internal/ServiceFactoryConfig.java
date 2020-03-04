@@ -1,12 +1,12 @@
 package com.redhat.rhjmc.containerjfr.core.jmc.internal;
 
-import org.openjdk.jmc.rjmx.services.internal.CommercialFeaturesServiceFactory;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IContributor;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
+
+import org.openjdk.jmc.rjmx.services.internal.CommercialFeaturesServiceFactory;
 
 public class ServiceFactoryConfig implements IConfigurationElement {
     @Override

@@ -2,11 +2,11 @@ package com.redhat.rhjmc.containerjfr.core;
 
 import java.util.logging.LogManager;
 
-import com.redhat.rhjmc.containerjfr.core.jmc.RegistryProvider;
-import com.redhat.rhjmc.containerjfr.core.jmc.SecurityManager;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.RegistryFactory;
+
+import com.redhat.rhjmc.containerjfr.core.jmc.RegistryProvider;
+import com.redhat.rhjmc.containerjfr.core.jmc.SecurityManager;
 
 public class ContainerJfrCore {
     private ContainerJfrCore() {}
