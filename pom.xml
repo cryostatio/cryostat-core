@@ -222,6 +222,12 @@
       <groupId>org.jacoco</groupId>
       <artifactId>jacoco-maven-plugin</artifactId>
       <version>${org.jacoco.maven.plugin.version}</version>
+      <configuration>
+        <excludes>
+          <exclude>com/redhat/rhjmc/containerjfr/core/jmc/**/*</exclude>
+          <exclude>org/openjdk/jmc/**/*</exclude>
+        </excludes>
+      </configuration>
       <reportSets>
         <reportSet>
           <reports>
