@@ -14,6 +14,8 @@ import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceFactory;
 import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceV2;
 
 import com.redhat.rhjmc.containerjfr.core.sys.Clock;
+import com.redhat.rhjmc.containerjfr.core.templates.RemoteTemplateService;
+import com.redhat.rhjmc.containerjfr.core.templates.TemplateService;
 import com.redhat.rhjmc.containerjfr.core.tui.ClientWriter;
 
 public class JFRConnection implements AutoCloseable {
@@ -40,6 +42,10 @@ public class JFRConnection implements AutoCloseable {
 
     public IFlightRecorderService getService() {
         return this.service;
+    }
+
+    public TemplateService getTemplateService() {
+        return new RemoteTemplateService(this);
     }
 
     public long getApproximateServerTime(Clock clock) {
