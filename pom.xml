@@ -5,7 +5,7 @@
 <modelVersion>4.0.0</modelVersion>
 <groupId>com.redhat.rhjmc</groupId>
 <artifactId>containerjfr-core</artifactId>
-<version>0.10.0</version>
+<version>0.11.0</version>
 <packaging>jar</packaging>
 <name>containerjfr-core</name>
 <url>http://maven.apache.org</url>
@@ -15,7 +15,7 @@
   <java.version>11</java.version>
   <maven.compiler.target>${java.version}</maven.compiler.target>
   <maven.compiler.source>${java.version}</maven.compiler.source>
-  <jmc.version>8.0.0-SNAPSHOT</jmc.version>
+  <jmc.version>7.1.1-SNAPSHOT</jmc.version>
 
   <org.apache.maven.plugins.compiler.version>3.6.1</org.apache.maven.plugins.compiler.version>
   <org.apache.maven.plugins.surefire.version>3.0.0-M4</org.apache.maven.plugins.surefire.version>
@@ -56,7 +56,7 @@
   </dependency>
   <dependency>
     <groupId>org.openjdk.jmc</groupId>
-    <artifactId>jdp</artifactId>
+    <artifactId>org.openjdk.jmc.jdp</artifactId>
     <version>${jmc.version}</version>
   </dependency>
   <dependency>
