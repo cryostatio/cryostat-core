@@ -21,6 +21,7 @@
   <org.apache.maven.plugins.surefire.version>3.0.0-M4</org.apache.maven.plugins.surefire.version>
   <org.apache.maven.plugins.site.version>3.8.2</org.apache.maven.plugins.site.version>
   <org.apache.maven.plugins.info.reports.version>3.0.0</org.apache.maven.plugins.info.reports.version>
+  <org.codehaus.mojo.license.plugin.version>2.0.0</org.codehaus.mojo.license.plugin.version>
 
   <org.eclipse.core.runtime.version>3.15.0</org.eclipse.core.runtime.version>
 
@@ -224,6 +225,32 @@
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-project-info-reports-plugin</artifactId>
       <version>${org.apache.maven.plugins.info.reports.version}</version>
+    </plugin>
+    <plugin>
+      <groupId>org.codehaus.mojo</groupId>
+      <artifactId>license-maven-plugin</artifactId>
+      <version>${org.codehaus.mojo.license.plugin.version}</version>
+      <configuration>
+        <licenseName>upl_v1</licenseName>
+        <licenseResolver>${project.baseUri}/src/license</licenseResolver>
+        <projectName>Container JFR Core</projectName>
+        <organizationName>Red Hat, Inc.</organizationName>
+        <inceptionYear>2020</inceptionYear>
+        <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+        <roots>
+          <root>src/main/java</root>
+          <root>src/test/java</root>
+        </roots>
+      </configuration>
+      <executions>
+        <execution>
+          <id>update-license</id>
+          <goals>
+            <goal>update-file-header</goal>
+          </goals>
+          <phase>process-sources</phase>
+        </execution>
+      </executions>
     </plugin>
   </plugins>
 </build>
