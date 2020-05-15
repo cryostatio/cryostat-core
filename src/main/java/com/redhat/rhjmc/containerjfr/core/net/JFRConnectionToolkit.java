@@ -41,9 +41,12 @@
  */
 package com.redhat.rhjmc.containerjfr.core.net;
 
+import java.util.List;
+
 import javax.management.remote.JMXServiceURL;
 
 import org.openjdk.jmc.rjmx.ConnectionDescriptorBuilder;
+import org.openjdk.jmc.rjmx.IConnectionListener;
 
 import com.redhat.rhjmc.containerjfr.core.tui.ClientWriter;
 
@@ -56,15 +59,25 @@ public class JFRConnectionToolkit {
     }
 
     public JFRConnection connect(JMXServiceURL url) throws Exception {
-        return new JFRConnection(cw, new ConnectionDescriptorBuilder().url(url).build());
+        return connect(url, List.of());
+    }
+
+    public JFRConnection connect(JMXServiceURL url, List<IConnectionListener> listeners)
+            throws Exception {
+        return new JFRConnection(cw, new ConnectionDescriptorBuilder().url(url).build(), listeners);
     }
 
     public JFRConnection connect(String host) throws Exception {
         return connect(host, JFRConnection.DEFAULT_PORT);
     }
 
-    public JFRConnection connect(String host, int port) throws Exception {
+    public JFRConnection connect(String host, int port, List<IConnectionListener> listeners)
+            throws Exception {
         return new JFRConnection(
-                cw, new ConnectionDescriptorBuilder().hostName(host).port(port).build());
+                cw, new ConnectionDescriptorBuilder().hostName(host).port(port).build(), listeners);
+    }
+
+    public JFRConnection connect(String host, int port) throws Exception {
+        return connect(host, port, List.of());
     }
 }
