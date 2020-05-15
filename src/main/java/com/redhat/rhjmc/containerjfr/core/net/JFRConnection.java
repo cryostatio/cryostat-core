@@ -66,10 +66,10 @@ public class JFRConnection implements AutoCloseable {
 
     public static final int DEFAULT_PORT = 9091;
 
-    private final ClientWriter cw;
-    private final RJMXConnection rjmxConnection;
-    private final IConnectionHandle handle;
-    private final IFlightRecorderService service;
+    protected final ClientWriter cw;
+    protected final RJMXConnection rjmxConnection;
+    protected final IConnectionHandle handle;
+    protected final IFlightRecorderService service;
 
     JFRConnection(ClientWriter cw, IConnectionDescriptor cd, List<IConnectionListener> listeners)
             throws Exception {
@@ -144,7 +144,7 @@ public class JFRConnection implements AutoCloseable {
         this.disconnect();
     }
 
-    private RJMXConnection attemptConnect(IConnectionDescriptor cd) throws Exception {
+    protected RJMXConnection attemptConnect(IConnectionDescriptor cd) throws Exception {
         try {
             RJMXConnection conn =
                     new RJMXConnection(cd, new ServerDescriptor(), JFRConnection::failConnection);
@@ -158,7 +158,7 @@ public class JFRConnection implements AutoCloseable {
         }
     }
 
-    private static void failConnection() {
+    protected static void failConnection() {
         throw new RuntimeException("Connection Failed");
     }
 }
