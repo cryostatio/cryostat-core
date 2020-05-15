@@ -148,7 +148,13 @@ public class JFRConnection implements AutoCloseable {
     }
 
     public void disconnect() {
-        this.rjmxConnection.close();
+        try {
+            this.handle.close();
+        } catch (IOException e) {
+            cw.println(e);
+        } finally {
+            this.rjmxConnection.close();
+        }
     }
 
     @Override
