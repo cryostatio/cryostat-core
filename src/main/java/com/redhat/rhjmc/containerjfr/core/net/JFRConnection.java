@@ -43,6 +43,7 @@ package com.redhat.rhjmc.containerjfr.core.net;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.management.remote.JMXServiceURL;
 
@@ -71,7 +72,7 @@ public class JFRConnection implements AutoCloseable {
     protected final IConnectionHandle handle;
     protected final IFlightRecorderService service;
 
-    JFRConnection(ClientWriter cw, IConnectionDescriptor cd, List<IConnectionListener> listeners)
+    JFRConnection(ClientWriter cw, IConnectionDescriptor cd, List<Runnable> listeners)
             throws Exception {
         this.cw = cw;
         this.rjmxConnection = attemptConnect(cd);
@@ -79,7 +80,18 @@ public class JFRConnection implements AutoCloseable {
                 new DefaultConnectionHandle(
                         rjmxConnection,
                         "RJMX Connection",
-                        listeners.toArray(new IConnectionListener[0]));
+                        listeners.stream()
+                                .map(
+                                        l ->
+                                                new IConnectionListener() {
+                                                    @Override
+                                                    public void onConnectionChange(
+                                                            IConnectionHandle arg0) {
+                                                        l.run();
+                                                    }
+                                                })
+                                .collect(Collectors.toList())
+                                .toArray(new IConnectionListener[0]));
         this.service = new FlightRecorderServiceFactory().getServiceInstance(handle);
     }
 
