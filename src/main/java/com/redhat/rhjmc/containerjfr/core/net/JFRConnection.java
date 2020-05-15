@@ -44,6 +44,8 @@ package com.redhat.rhjmc.containerjfr.core.net;
 import java.io.IOException;
 import java.util.List;
 
+import javax.management.remote.JMXServiceURL;
+
 import org.openjdk.jmc.rjmx.ConnectionToolkit;
 import org.openjdk.jmc.rjmx.IConnectionDescriptor;
 import org.openjdk.jmc.rjmx.IConnectionHandle;
@@ -99,6 +101,10 @@ public class JFRConnection implements AutoCloseable {
 
     public long getApproximateServerTime(Clock clock) {
         return this.rjmxConnection.getApproximateServerTime(clock.getWallTime());
+    }
+
+    public JMXServiceURL getJMXURL() throws IOException {
+        return this.rjmxConnection.getConnectionDescriptor().createJMXServiceURL();
     }
 
     public String getHost() {
