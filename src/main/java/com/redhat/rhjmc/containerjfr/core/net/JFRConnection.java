@@ -42,6 +42,9 @@
 package com.redhat.rhjmc.containerjfr.core.net;
 
 import java.io.IOException;
+import java.util.List;
+
+import javax.management.remote.JMXServiceURL;
 
 import org.openjdk.jmc.rjmx.ConnectionToolkit;
 import org.openjdk.jmc.rjmx.IConnectionDescriptor;
@@ -63,18 +66,25 @@ public class JFRConnection implements AutoCloseable {
 
     public static final int DEFAULT_PORT = 9091;
 
-    private final ClientWriter cw;
-    private final RJMXConnection rjmxConnection;
-    private final IConnectionHandle handle;
-    private final IFlightRecorderService service;
+    protected final ClientWriter cw;
+    protected final RJMXConnection rjmxConnection;
+    protected final IConnectionHandle handle;
+    protected final IFlightRecorderService service;
 
-    JFRConnection(ClientWriter cw, IConnectionDescriptor cd) throws Exception {
+    JFRConnection(ClientWriter cw, IConnectionDescriptor cd, List<IConnectionListener> listeners)
+            throws Exception {
         this.cw = cw;
         this.rjmxConnection = attemptConnect(cd);
         this.handle =
                 new DefaultConnectionHandle(
-                        rjmxConnection, "RJMX Connection", new IConnectionListener[0]);
+                        rjmxConnection,
+                        "RJMX Connection",
+                        listeners.toArray(new IConnectionListener[0]));
         this.service = new FlightRecorderServiceFactory().getServiceInstance(handle);
+    }
+
+    JFRConnection(ClientWriter cw, IConnectionDescriptor cd) throws Exception {
+        this(cw, cd, List.of());
     }
 
     public IConnectionHandle getHandle() {
@@ -91,6 +101,10 @@ public class JFRConnection implements AutoCloseable {
 
     public long getApproximateServerTime(Clock clock) {
         return this.rjmxConnection.getApproximateServerTime(clock.getWallTime());
+    }
+
+    public JMXServiceURL getJMXURL() throws IOException {
+        return this.rjmxConnection.getConnectionDescriptor().createJMXServiceURL();
     }
 
     public String getHost() {
@@ -130,7 +144,7 @@ public class JFRConnection implements AutoCloseable {
         this.disconnect();
     }
 
-    private RJMXConnection attemptConnect(IConnectionDescriptor cd) throws Exception {
+    protected RJMXConnection attemptConnect(IConnectionDescriptor cd) throws Exception {
         try {
             RJMXConnection conn =
                     new RJMXConnection(cd, new ServerDescriptor(), JFRConnection::failConnection);
@@ -144,7 +158,7 @@ public class JFRConnection implements AutoCloseable {
         }
     }
 
-    private static void failConnection() {
+    protected static void failConnection() {
         throw new RuntimeException("Connection Failed");
     }
 }
