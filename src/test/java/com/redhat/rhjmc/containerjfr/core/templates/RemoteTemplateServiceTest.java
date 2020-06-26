@@ -46,6 +46,9 @@ import java.util.Collections;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.parser.Parser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -109,5 +112,16 @@ class RemoteTemplateServiceTest {
     void getEventsByNameShouldThrowExceptionForUnknownName() throws Exception {
         Assertions.assertThrows(
                 FlightRecorderException.class, () -> templateSvc.getEventsByTemplateName("foo"));
+    }
+
+    @Test
+    void getXmlShouldReturnModelFromRemote() throws Exception {
+        Document doc = templateSvc.getXml("Profiling");
+        Assertions.assertTrue(doc.hasSameValue(Jsoup.parse(xmlText, "", Parser.xmlParser())));
+    }
+
+    @Test
+    void getXmlShouldThrowExceptionForUnknownName() throws Exception {
+        Assertions.assertThrows(FlightRecorderException.class, () -> templateSvc.getXml("foo"));
     }
 }
