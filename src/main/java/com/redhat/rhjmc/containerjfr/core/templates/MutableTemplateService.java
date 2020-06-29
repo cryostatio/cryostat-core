@@ -41,28 +41,26 @@
  */
 package com.redhat.rhjmc.containerjfr.core.templates;
 
-import java.util.List;
+import java.io.InputStream;
 
-import org.jsoup.nodes.Document;
+public interface MutableTemplateService extends TemplateService {
 
-import org.openjdk.jmc.common.unit.IConstrainedMap;
-import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
+    void addTemplate(InputStream templateStream)
+            throws InvalidXmlException, InvalidEventTemplateException;
 
-import com.redhat.rhjmc.containerjfr.core.FlightRecorderException;
-
-public interface TemplateService {
-
-    List<Template> getTemplates() throws FlightRecorderException;
-
-    Document getXml(String templateName) throws FlightRecorderException;
-
-    IConstrainedMap<EventOptionID> getEventsByTemplateName(String templateName)
-            throws FlightRecorderException;
+    void deleteTemplate(String templateName) throws UnknownEventTemplateException;
 
     @SuppressWarnings("serial")
-    public static class UnknownEventTemplateException extends RuntimeException {
-        public UnknownEventTemplateException(String templateName) {
-            super(String.format("Unknown event template \"%s\"", templateName));
+    public static class InvalidXmlException extends Exception {
+        InvalidXmlException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    @SuppressWarnings("serial")
+    public static class InvalidEventTemplateException extends Exception {
+        InvalidEventTemplateException(String message, Throwable cause) {
+            super(message, cause);
         }
     }
 }

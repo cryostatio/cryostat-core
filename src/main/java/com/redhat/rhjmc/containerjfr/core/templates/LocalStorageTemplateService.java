@@ -42,9 +42,13 @@
 package com.redhat.rhjmc.containerjfr.core.templates;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.jsoup.Jsoup;
@@ -54,50 +58,70 @@ import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 
 import org.openjdk.jmc.common.unit.IConstrainedMap;
+import org.openjdk.jmc.common.unit.SimpleConstrainedMap;
+import org.openjdk.jmc.common.unit.UnitLookup;
 import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLModel;
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.model.EventConfiguration;
 
 import com.redhat.rhjmc.containerjfr.core.FlightRecorderException;
-import com.redhat.rhjmc.containerjfr.core.log.Logger;
-import com.redhat.rhjmc.containerjfr.core.net.JFRConnection;
+import com.redhat.rhjmc.containerjfr.core.sys.Environment;
+import com.redhat.rhjmc.containerjfr.core.sys.FileSystem;
 
-public class RemoteTemplateService extends AbstractTemplateService implements TemplateService {
+public class LocalStorageTemplateService extends AbstractTemplateService
+        implements MutableTemplateService {
 
-    private final JFRConnection conn;
+    public static final String TEMPLATE_DIRECTORY = "CONTAINER_JFR_TEMPLATE_DIRECTORY";
 
-    public RemoteTemplateService(JFRConnection conn) {
-        this.conn = conn;
+    private final FileSystem fs;
+    private final Environment env;
+
+    public LocalStorageTemplateService(FileSystem fs, Environment env) {
+        this.fs = fs;
+        this.env = env;
+    }
+
+    @Override
+    public void addTemplate(InputStream templateStream)
+            throws InvalidXmlException, InvalidEventTemplateException {
+        // TODO
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void deleteTemplate(String templateName) throws UnknownEventTemplateException {
+        // TODO
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Document getXml(String templateName) throws FlightRecorderException {
-        try {
-            return conn.getService().getServerTemplates().stream()
-                    .map(xmlText -> Jsoup.parse(xmlText, "", Parser.xmlParser()))
-                    .filter(
-                            doc -> {
-                                Elements els = doc.getElementsByTag("configuration");
-                                if (els.isEmpty()) {
-                                    throw new MalformedXMLException(
-                                            "Document did not contain \"configuration\" element");
-                                }
-                                if (els.size() > 1) {
-                                    throw new MalformedXMLException(
-                                            "Document contains multiple \"configuration\" elements");
-                                }
-                                Element configuration = els.first();
-                                if (!configuration.hasAttr("label")) {
-                                    throw new MalformedXMLException(
-                                            "Configuration element did not have \"label\" attribute");
-                                }
-                                return configuration.attr("label").equals(templateName);
-                            })
-                    .findFirst()
-                    .orElseThrow(() -> new UnknownEventTemplateException(templateName));
-        } catch (Exception e) {
-            throw new FlightRecorderException(e);
+        for (Path path : getLocalTemplates()) {
+            try (InputStream stream = fs.newInputStream(path)) {
+                Document doc =
+                        Jsoup.parse(stream, StandardCharsets.UTF_8.name(), "", Parser.xmlParser());
+                Elements els = doc.getElementsByTag("configuration");
+                if (els.isEmpty()) {
+                    throw new MalformedXMLException(
+                            "Document did not contain \"configuration\" element");
+                }
+                if (els.size() > 1) {
+                    throw new MalformedXMLException(
+                            "Document contains multiple \"configuration\" elements");
+                }
+                Element configuration = els.first();
+                if (!configuration.hasAttr("label")) {
+                    throw new MalformedXMLException(
+                            "Configuration element did not have \"label\" attribute");
+                }
+                if (configuration.attr("label").equals(templateName)) {
+                    return doc;
+                }
+            } catch (IOException e) {
+                throw new FlightRecorderException(e);
+            }
         }
+        throw new UnknownEventTemplateException(templateName);
     }
 
     @Override
@@ -122,8 +146,27 @@ public class RemoteTemplateService extends AbstractTemplateService implements Te
 
             return new EventConfiguration(model)
                     .getEventOptions(
-                            conn.getService().getDefaultEventOptions().emptyWithSameConstraints());
+                            new SimpleConstrainedMap<>(UnitLookup.PLAIN_TEXT.getPersister()));
         } catch (Exception e) {
+            throw new FlightRecorderException(e);
+        }
+    }
+
+    protected List<Path> getLocalTemplates() throws FlightRecorderException {
+        if (!env.hasEnv(TEMPLATE_DIRECTORY)) {
+            return Collections.emptyList();
+        }
+        String dirName = env.getEnv(TEMPLATE_DIRECTORY);
+        Path dir = fs.pathOf(dirName);
+        if (!fs.isDirectory(dir) || !fs.isReadable(dir)) {
+            throw new FlightRecorderException(
+                    new IOException(String.format("%s is not a readable directory", dirName)));
+        }
+        try {
+            return fs.listDirectoryChildren(dir).stream()
+                    .map(name -> fs.pathOf(dirName, name))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
             throw new FlightRecorderException(e);
         }
     }
@@ -131,19 +174,14 @@ public class RemoteTemplateService extends AbstractTemplateService implements Te
     @Override
     protected List<XMLModel> getTemplateModels() throws FlightRecorderException {
         try {
-            return conn.getService().getServerTemplates().stream()
-                    .map(
-                            xmlText -> {
-                                try {
-                                    return EventConfiguration.createModel(xmlText);
-                                } catch (ParseException | IOException e) {
-                                    Logger.INSTANCE.warn(e);
-                                    return null;
-                                }
-                            })
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
+            List<XMLModel> models = new ArrayList<>();
+            for (Path path : getLocalTemplates()) {
+                try (InputStream stream = fs.newInputStream(path)) {
+                    models.add(EventConfiguration.createModel(stream));
+                }
+            }
+            return models;
+        } catch (IOException | ParseException e) {
             throw new FlightRecorderException(e);
         }
     }

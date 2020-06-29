@@ -41,6 +41,7 @@
  */
 package org.openjdk.jmc.ui;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -54,6 +55,8 @@ public class UIPlugin {
     }
 
     public Logger getLogger() {
-        return Logger.getGlobal();
+        Logger logger = Logger.getGlobal();
+        logger.setLevel(Level.ALL);
+        return logger;
     }
 }
