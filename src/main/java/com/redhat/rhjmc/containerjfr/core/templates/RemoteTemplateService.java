@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.jsoup.Jsoup;
@@ -71,7 +72,7 @@ public class RemoteTemplateService extends AbstractTemplateService implements Te
     }
 
     @Override
-    public Document getXml(String templateName) throws FlightRecorderException {
+    public Optional<Document> getXml(String templateName) throws FlightRecorderException {
         try {
             return conn.getService().getServerTemplates().stream()
                     .map(xmlText -> Jsoup.parse(xmlText, "", Parser.xmlParser()))
@@ -93,39 +94,34 @@ public class RemoteTemplateService extends AbstractTemplateService implements Te
                                 }
                                 return configuration.attr("label").equals(templateName);
                             })
-                    .findFirst()
-                    .orElseThrow(() -> new UnknownEventTemplateException(templateName));
-        } catch (Exception e) {
+                    .findFirst();
+        } catch (org.openjdk.jmc.rjmx.services.jfr.FlightRecorderException e) {
             throw new FlightRecorderException(e);
         }
     }
 
     @Override
-    public IConstrainedMap<EventOptionID> getEventsByTemplateName(String templateName)
+    public Optional<IConstrainedMap<EventOptionID>> getEventsByTemplateName(String templateName)
             throws FlightRecorderException {
-        try {
-            XMLModel model =
-                    getTemplateModels().stream()
-                            .filter(
-                                    m ->
-                                            m.getRoot().getAttributeInstances().stream()
-                                                    .anyMatch(
-                                                            attr ->
-                                                                    attr.getAttribute()
-                                                                                    .getName()
-                                                                                    .equals("label")
-                                                                            && attr.getValue()
-                                                                                    .equals(
-                                                                                            templateName)))
-                            .findFirst()
-                            .orElseThrow(() -> new UnknownEventTemplateException(templateName));
-
-            return new EventConfiguration(model)
-                    .getEventOptions(
-                            conn.getService().getDefaultEventOptions().emptyWithSameConstraints());
-        } catch (Exception e) {
-            throw new FlightRecorderException(e);
-        }
+        return getTemplateModels().stream()
+                .filter(
+                        m ->
+                                m.getRoot().getAttributeInstances().stream()
+                                        .anyMatch(
+                                                attr ->
+                                                        attr.getAttribute()
+                                                                        .getName()
+                                                                        .equals("label")
+                                                                && attr.getValue()
+                                                                        .equals(templateName)))
+                .findFirst()
+                .map(
+                        model ->
+                                new EventConfiguration(model)
+                                        .getEventOptions(
+                                                conn.getService()
+                                                        .getDefaultEventOptions()
+                                                        .emptyWithSameConstraints()));
     }
 
     @Override

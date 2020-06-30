@@ -51,6 +51,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.openjdk.jmc.rjmx.internal.WrappedConnectionException;
 
+import com.redhat.rhjmc.containerjfr.core.sys.Environment;
+import com.redhat.rhjmc.containerjfr.core.sys.FileSystem;
 import com.redhat.rhjmc.containerjfr.core.tui.ClientWriter;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,10 +60,12 @@ class JFRConnectionToolkitTest {
 
     JFRConnectionToolkit toolkit;
     @Mock ClientWriter cw;
+    @Mock FileSystem fs;
+    @Mock Environment env;
 
     @BeforeEach
     void setup() {
-        toolkit = new JFRConnectionToolkit(cw);
+        toolkit = new JFRConnectionToolkit(cw, fs, env);
     }
 
     @Test

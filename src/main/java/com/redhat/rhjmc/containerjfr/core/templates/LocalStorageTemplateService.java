@@ -49,6 +49,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.jsoup.Jsoup;
@@ -95,7 +96,7 @@ public class LocalStorageTemplateService extends AbstractTemplateService
     }
 
     @Override
-    public Document getXml(String templateName) throws FlightRecorderException {
+    public Optional<Document> getXml(String templateName) throws FlightRecorderException {
         for (Path path : getLocalTemplates()) {
             try (InputStream stream = fs.newInputStream(path)) {
                 Document doc =
@@ -115,41 +116,36 @@ public class LocalStorageTemplateService extends AbstractTemplateService
                             "Configuration element did not have \"label\" attribute");
                 }
                 if (configuration.attr("label").equals(templateName)) {
-                    return doc;
+                    return Optional.of(doc);
                 }
             } catch (IOException e) {
                 throw new FlightRecorderException(e);
             }
         }
-        throw new UnknownEventTemplateException(templateName);
+        return Optional.empty();
     }
 
     @Override
-    public IConstrainedMap<EventOptionID> getEventsByTemplateName(String templateName)
+    public Optional<IConstrainedMap<EventOptionID>> getEventsByTemplateName(String templateName)
             throws FlightRecorderException {
-        try {
-            XMLModel model =
-                    getTemplateModels().stream()
-                            .filter(
-                                    m ->
-                                            m.getRoot().getAttributeInstances().stream()
-                                                    .anyMatch(
-                                                            attr ->
-                                                                    attr.getAttribute()
-                                                                                    .getName()
-                                                                                    .equals("label")
-                                                                            && attr.getValue()
-                                                                                    .equals(
-                                                                                            templateName)))
-                            .findFirst()
-                            .orElseThrow(() -> new UnknownEventTemplateException(templateName));
-
-            return new EventConfiguration(model)
-                    .getEventOptions(
-                            new SimpleConstrainedMap<>(UnitLookup.PLAIN_TEXT.getPersister()));
-        } catch (Exception e) {
-            throw new FlightRecorderException(e);
-        }
+        return getTemplateModels().stream()
+                .filter(
+                        m ->
+                                m.getRoot().getAttributeInstances().stream()
+                                        .anyMatch(
+                                                attr ->
+                                                        attr.getAttribute()
+                                                                        .getName()
+                                                                        .equals("label")
+                                                                && attr.getValue()
+                                                                        .equals(templateName)))
+                .findFirst()
+                .map(
+                        model ->
+                                new EventConfiguration(model)
+                                        .getEventOptions(
+                                                new SimpleConstrainedMap<>(
+                                                        UnitLookup.PLAIN_TEXT.getPersister())));
     }
 
     protected List<Path> getLocalTemplates() throws FlightRecorderException {

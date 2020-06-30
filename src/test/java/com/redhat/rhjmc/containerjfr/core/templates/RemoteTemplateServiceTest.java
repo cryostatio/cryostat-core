@@ -42,6 +42,7 @@
 package com.redhat.rhjmc.containerjfr.core.templates;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.MatcherAssert;
@@ -62,7 +63,6 @@ import org.openjdk.jmc.flightrecorder.configuration.internal.EventOptionDescript
 import org.openjdk.jmc.flightrecorder.configuration.internal.EventTypeIDV2;
 import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
 
-import com.redhat.rhjmc.containerjfr.core.FlightRecorderException;
 import com.redhat.rhjmc.containerjfr.core.net.JFRConnection;
 
 @ExtendWith(MockitoExtension.class)
@@ -104,24 +104,24 @@ class RemoteTemplateServiceTest {
                                         EventTypeIDV2.class, Collections.emptyMap(), true)));
         // TODO verify actual contents of the profile.jfc?
         MatcherAssert.assertThat(
-                templateSvc.getEventsByTemplateName("Profiling").keySet(),
+                templateSvc.getEventsByTemplateName("Profiling").get().keySet(),
                 Matchers.hasSize(Matchers.greaterThan(0)));
     }
 
     @Test
     void getEventsByNameShouldThrowExceptionForUnknownName() throws Exception {
-        Assertions.assertThrows(
-                FlightRecorderException.class, () -> templateSvc.getEventsByTemplateName("foo"));
+        Assertions.assertFalse(templateSvc.getEventsByTemplateName("foo").isPresent());
     }
 
     @Test
     void getXmlShouldReturnModelFromRemote() throws Exception {
-        Document doc = templateSvc.getXml("Profiling");
-        Assertions.assertTrue(doc.hasSameValue(Jsoup.parse(xmlText, "", Parser.xmlParser())));
+        Optional<Document> doc = templateSvc.getXml("Profiling");
+        Assertions.assertTrue(doc.isPresent());
+        Assertions.assertTrue(doc.get().hasSameValue(Jsoup.parse(xmlText, "", Parser.xmlParser())));
     }
 
     @Test
-    void getXmlShouldThrowExceptionForUnknownName() throws Exception {
-        Assertions.assertThrows(FlightRecorderException.class, () -> templateSvc.getXml("foo"));
+    void getXmlShouldReturnEmptyForUnknownName() throws Exception {
+        Assertions.assertFalse(templateSvc.getXml("foo").isPresent());
     }
 }

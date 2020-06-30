@@ -42,6 +42,7 @@
 package com.redhat.rhjmc.containerjfr.core.templates;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.jsoup.nodes.Document;
 
@@ -54,9 +55,9 @@ public interface TemplateService {
 
     List<Template> getTemplates() throws FlightRecorderException;
 
-    Document getXml(String templateName) throws FlightRecorderException;
+    Optional<Document> getXml(String templateName) throws FlightRecorderException;
 
-    IConstrainedMap<EventOptionID> getEventsByTemplateName(String templateName)
+    Optional<IConstrainedMap<EventOptionID>> getEventsByTemplateName(String templateName)
             throws FlightRecorderException;
 
     @SuppressWarnings("serial")

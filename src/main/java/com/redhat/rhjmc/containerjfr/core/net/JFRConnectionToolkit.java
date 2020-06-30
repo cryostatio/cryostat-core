@@ -47,14 +47,20 @@ import javax.management.remote.JMXServiceURL;
 
 import org.openjdk.jmc.rjmx.ConnectionDescriptorBuilder;
 
+import com.redhat.rhjmc.containerjfr.core.sys.Environment;
+import com.redhat.rhjmc.containerjfr.core.sys.FileSystem;
 import com.redhat.rhjmc.containerjfr.core.tui.ClientWriter;
 
 public class JFRConnectionToolkit {
 
     private final ClientWriter cw;
+    private final FileSystem fs;
+    private final Environment env;
 
-    public JFRConnectionToolkit(ClientWriter cw) {
+    public JFRConnectionToolkit(ClientWriter cw, FileSystem fs, Environment env) {
         this.cw = cw;
+        this.fs = fs;
+        this.env = env;
     }
 
     public JFRConnection connect(JMXServiceURL url) throws Exception {
@@ -62,7 +68,8 @@ public class JFRConnectionToolkit {
     }
 
     public JFRConnection connect(JMXServiceURL url, List<Runnable> listeners) throws Exception {
-        return new JFRConnection(cw, new ConnectionDescriptorBuilder().url(url).build(), listeners);
+        return new JFRConnection(
+                cw, fs, env, new ConnectionDescriptorBuilder().url(url).build(), listeners);
     }
 
     public JFRConnection connect(String host) throws Exception {
@@ -71,7 +78,11 @@ public class JFRConnectionToolkit {
 
     public JFRConnection connect(String host, int port, List<Runnable> listeners) throws Exception {
         return new JFRConnection(
-                cw, new ConnectionDescriptorBuilder().hostName(host).port(port).build(), listeners);
+                cw,
+                fs,
+                env,
+                new ConnectionDescriptorBuilder().hostName(host).port(port).build(),
+                listeners);
     }
 
     public JFRConnection connect(String host, int port) throws Exception {

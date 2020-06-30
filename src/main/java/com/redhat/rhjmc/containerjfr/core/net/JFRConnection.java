@@ -59,7 +59,9 @@ import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceFactory;
 import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceV2;
 
 import com.redhat.rhjmc.containerjfr.core.sys.Clock;
-import com.redhat.rhjmc.containerjfr.core.templates.RemoteTemplateService;
+import com.redhat.rhjmc.containerjfr.core.sys.Environment;
+import com.redhat.rhjmc.containerjfr.core.sys.FileSystem;
+import com.redhat.rhjmc.containerjfr.core.templates.MergedTemplateService;
 import com.redhat.rhjmc.containerjfr.core.templates.TemplateService;
 import com.redhat.rhjmc.containerjfr.core.tui.ClientWriter;
 
@@ -68,13 +70,22 @@ public class JFRConnection implements AutoCloseable {
     public static final int DEFAULT_PORT = 9091;
 
     protected final ClientWriter cw;
+    protected final FileSystem fs;
+    protected final Environment env;
     protected final RJMXConnection rjmxConnection;
     protected final IConnectionHandle handle;
     protected final IFlightRecorderService service;
 
-    JFRConnection(ClientWriter cw, IConnectionDescriptor cd, List<Runnable> listeners)
+    JFRConnection(
+            ClientWriter cw,
+            FileSystem fs,
+            Environment env,
+            IConnectionDescriptor cd,
+            List<Runnable> listeners)
             throws Exception {
         this.cw = cw;
+        this.fs = fs;
+        this.env = env;
         this.rjmxConnection = attemptConnect(cd);
         this.handle =
                 new DefaultConnectionHandle(
@@ -95,8 +106,9 @@ public class JFRConnection implements AutoCloseable {
         this.service = new FlightRecorderServiceFactory().getServiceInstance(handle);
     }
 
-    JFRConnection(ClientWriter cw, IConnectionDescriptor cd) throws Exception {
-        this(cw, cd, List.of());
+    JFRConnection(ClientWriter cw, FileSystem fs, Environment env, IConnectionDescriptor cd)
+            throws Exception {
+        this(cw, fs, env, cd, List.of());
     }
 
     public IConnectionHandle getHandle() {
@@ -108,7 +120,7 @@ public class JFRConnection implements AutoCloseable {
     }
 
     public TemplateService getTemplateService() {
-        return new RemoteTemplateService(this);
+        return new MergedTemplateService(this, fs, env);
     }
 
     public long getApproximateServerTime(Clock clock) {

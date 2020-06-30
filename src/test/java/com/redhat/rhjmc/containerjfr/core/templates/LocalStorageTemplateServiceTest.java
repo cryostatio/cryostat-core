@@ -46,6 +46,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.MatcherAssert;
@@ -61,10 +62,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.redhat.rhjmc.containerjfr.core.FlightRecorderException;
 import com.redhat.rhjmc.containerjfr.core.sys.Environment;
 import com.redhat.rhjmc.containerjfr.core.sys.FileSystem;
-import com.redhat.rhjmc.containerjfr.core.templates.TemplateService.UnknownEventTemplateException;
 
 @ExtendWith(MockitoExtension.class)
 class LocalStorageTemplateServiceTest {
@@ -130,14 +129,13 @@ class LocalStorageTemplateServiceTest {
 
         // TODO verify actual contents of the profile.jfc?
         MatcherAssert.assertThat(
-                service.getEventsByTemplateName("Profiling").keySet(),
+                service.getEventsByTemplateName("Profiling").get().keySet(),
                 Matchers.hasSize(Matchers.greaterThan(0)));
     }
 
     @Test
     void getEventsByNameShouldThrowExceptionForUnknownName() throws Exception {
-        Assertions.assertThrows(
-                FlightRecorderException.class, () -> service.getEventsByTemplateName("foo"));
+        Assertions.assertFalse(service.getEventsByTemplateName("foo").isPresent());
     }
 
     @Test
@@ -160,8 +158,10 @@ class LocalStorageTemplateServiceTest {
         Mockito.when(fs.isReadable(path)).thenReturn(true);
 
         try {
-            Document doc = service.getXml("Profiling");
-            Assertions.assertTrue(doc.hasSameValue(Jsoup.parse(xmlText, "", Parser.xmlParser())));
+            Optional<Document> doc = service.getXml("Profiling");
+            Assertions.assertTrue(doc.isPresent());
+            Assertions.assertTrue(
+                    doc.get().hasSameValue(Jsoup.parse(xmlText, "", Parser.xmlParser())));
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
@@ -170,6 +170,6 @@ class LocalStorageTemplateServiceTest {
 
     @Test
     void getXmlShouldThrowExceptionForUnknownName() throws Exception {
-        Assertions.assertThrows(UnknownEventTemplateException.class, () -> service.getXml("foo"));
+        Assertions.assertFalse(service.getXml("foo").isPresent());
     }
 }
