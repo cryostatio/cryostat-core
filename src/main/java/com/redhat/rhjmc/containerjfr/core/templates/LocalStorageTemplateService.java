@@ -129,9 +129,21 @@ public class LocalStorageTemplateService extends AbstractTemplateService
     }
 
     @Override
-    public void deleteTemplate(String templateName) throws UnknownEventTemplateException {
-        // TODO
-        throw new UnsupportedOperationException();
+    public void deleteTemplate(String templateName) throws IOException {
+        if (!env.hasEnv(TEMPLATE_PATH)) {
+            throw new IOException(
+                    String.format(
+                            "Template directory does not exist, must be set using environment variable %s",
+                            TEMPLATE_PATH));
+        }
+        Path dir = fs.pathOf(env.getEnv(TEMPLATE_PATH));
+        if (!fs.exists(dir) || !fs.isDirectory(dir) || !fs.isReadable(dir) || !fs.isWritable(dir)) {
+            throw new IOException(
+                    String.format(
+                            "Template directory %s does not exist, is not a directory, or does not have appropriate permissions",
+                            dir.toString()));
+        }
+        fs.deleteIfExists(fs.pathOf(env.getEnv(TEMPLATE_PATH), templateName));
     }
 
     @Override

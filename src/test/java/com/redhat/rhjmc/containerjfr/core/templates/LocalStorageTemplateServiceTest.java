@@ -202,4 +202,24 @@ class LocalStorageTemplateServiceTest {
         // does not have the same value, but it clearly does from an actual inspection.
         MatcherAssert.assertThat(distance, Matchers.is(4550));
     }
+
+    @Test
+    void deleteTemplateShouldDeleteFile() throws Exception {
+        Mockito.when(env.hasEnv(LocalStorageTemplateService.TEMPLATE_PATH)).thenReturn(true);
+        Mockito.when(env.getEnv(LocalStorageTemplateService.TEMPLATE_PATH))
+                .thenReturn("/templates");
+
+        Path path = Mockito.mock(Path.class);
+        Path templatePath = Mockito.mock(Path.class);
+        Mockito.when(fs.pathOf("/templates")).thenReturn(path);
+        Mockito.when(fs.exists(path)).thenReturn(true);
+        Mockito.when(fs.isDirectory(path)).thenReturn(true);
+        Mockito.when(fs.isReadable(path)).thenReturn(true);
+        Mockito.when(fs.isWritable(path)).thenReturn(true);
+        Mockito.when(fs.pathOf("/templates", "Profiling")).thenReturn(templatePath);
+
+        service.deleteTemplate("Profiling");
+
+        Mockito.verify(fs).deleteIfExists(templatePath);
+    }
 }

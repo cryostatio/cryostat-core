@@ -59,11 +59,4 @@ public interface TemplateService {
 
     Optional<IConstrainedMap<EventOptionID>> getEventsByTemplateName(String templateName)
             throws FlightRecorderException;
-
-    @SuppressWarnings("serial")
-    public static class UnknownEventTemplateException extends RuntimeException {
-        public UnknownEventTemplateException(String templateName) {
-            super(String.format("Unknown event template \"%s\"", templateName));
-        }
-    }
 }

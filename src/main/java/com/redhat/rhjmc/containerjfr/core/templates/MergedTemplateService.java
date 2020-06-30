@@ -111,7 +111,7 @@ public class MergedTemplateService implements MutableTemplateService {
     }
 
     @Override
-    public void deleteTemplate(String templateName) throws UnknownEventTemplateException {
+    public void deleteTemplate(String templateName) throws IOException {
         local.deleteTemplate(templateName);
     }
 }
