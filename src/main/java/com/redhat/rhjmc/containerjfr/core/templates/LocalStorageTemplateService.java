@@ -72,7 +72,7 @@ import com.redhat.rhjmc.containerjfr.core.sys.FileSystem;
 public class LocalStorageTemplateService extends AbstractTemplateService
         implements MutableTemplateService {
 
-    public static final String TEMPLATE_DIRECTORY = "CONTAINER_JFR_TEMPLATE_DIRECTORY";
+    public static final String TEMPLATE_PATH = "CONTAINER_JFR_TEMPLATE_PATH";
 
     private final FileSystem fs;
     private final Environment env;
@@ -84,9 +84,48 @@ public class LocalStorageTemplateService extends AbstractTemplateService
 
     @Override
     public void addTemplate(InputStream templateStream)
-            throws InvalidXmlException, InvalidEventTemplateException {
-        // TODO
-        throw new UnsupportedOperationException();
+            throws InvalidXmlException, InvalidEventTemplateException, IOException {
+        if (!env.hasEnv(TEMPLATE_PATH)) {
+            throw new IOException(
+                    String.format(
+                            "Template directory does not exist, must be set using environment variable %s",
+                            TEMPLATE_PATH));
+        }
+        Path dir = fs.pathOf(env.getEnv(TEMPLATE_PATH));
+        if (!fs.exists(dir) || !fs.isDirectory(dir) || !fs.isReadable(dir) || !fs.isWritable(dir)) {
+            throw new IOException(
+                    String.format(
+                            "Template directory %s does not exist, is not a directory, or does not have appropriate permissions",
+                            dir.toString()));
+        }
+        try (templateStream) {
+            Document doc =
+                    Jsoup.parse(
+                            templateStream, StandardCharsets.UTF_8.name(), "", Parser.xmlParser());
+            Elements els = doc.getElementsByTag("configuration");
+            if (els.isEmpty()) {
+                throw new InvalidXmlException("Document did not contain \"configuration\" element");
+            }
+            if (els.size() > 1) {
+                throw new InvalidXmlException(
+                        "Document contains multiple \"configuration\" elements");
+            }
+            Element configuration = els.first();
+            if (!configuration.hasAttr("label")) {
+                throw new InvalidXmlException(
+                        "Configuration element did not have \"label\" attribute");
+            }
+            // side effect of validation, throws ParseException or IllegalArgumentException if
+            // invalid
+            EventConfiguration.createModel(doc.toString());
+
+            String templateName = configuration.attr("label");
+            fs.writeString(fs.pathOf(env.getEnv(TEMPLATE_PATH), templateName), doc.toString());
+        } catch (IOException ioe) {
+            throw new InvalidXmlException("Unable to parse XML stream", ioe);
+        } catch (ParseException | IllegalArgumentException e) {
+            throw new InvalidEventTemplateException("Invalid XML", e);
+        }
     }
 
     @Override
@@ -149,10 +188,10 @@ public class LocalStorageTemplateService extends AbstractTemplateService
     }
 
     protected List<Path> getLocalTemplates() throws FlightRecorderException {
-        if (!env.hasEnv(TEMPLATE_DIRECTORY)) {
+        if (!env.hasEnv(TEMPLATE_PATH)) {
             return Collections.emptyList();
         }
-        String dirName = env.getEnv(TEMPLATE_DIRECTORY);
+        String dirName = env.getEnv(TEMPLATE_PATH);
         Path dir = fs.pathOf(dirName);
         if (!fs.isDirectory(dir) || !fs.isReadable(dir)) {
             throw new FlightRecorderException(

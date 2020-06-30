@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.jsoup.Jsoup;
@@ -58,6 +59,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -81,8 +83,8 @@ class LocalStorageTemplateServiceTest {
 
     @Test
     void getNamesShouldReflectLocalStorageTemplateNames() throws Exception {
-        Mockito.when(env.hasEnv(LocalStorageTemplateService.TEMPLATE_DIRECTORY)).thenReturn(true);
-        Mockito.when(env.getEnv(LocalStorageTemplateService.TEMPLATE_DIRECTORY))
+        Mockito.when(env.hasEnv(LocalStorageTemplateService.TEMPLATE_PATH)).thenReturn(true);
+        Mockito.when(env.getEnv(LocalStorageTemplateService.TEMPLATE_PATH))
                 .thenReturn("/templates");
 
         Path path = Mockito.mock(Path.class);
@@ -110,8 +112,8 @@ class LocalStorageTemplateServiceTest {
 
     @Test
     void getEventsByNameShouldReturnNonEmptyMap() throws Exception {
-        Mockito.when(env.hasEnv(LocalStorageTemplateService.TEMPLATE_DIRECTORY)).thenReturn(true);
-        Mockito.when(env.getEnv(LocalStorageTemplateService.TEMPLATE_DIRECTORY))
+        Mockito.when(env.hasEnv(LocalStorageTemplateService.TEMPLATE_PATH)).thenReturn(true);
+        Mockito.when(env.getEnv(LocalStorageTemplateService.TEMPLATE_PATH))
                 .thenReturn("/templates");
 
         Path path = Mockito.mock(Path.class);
@@ -140,8 +142,8 @@ class LocalStorageTemplateServiceTest {
 
     @Test
     void getXmlShouldReturnModelFromLocalStorage() throws Exception {
-        Mockito.when(env.hasEnv(LocalStorageTemplateService.TEMPLATE_DIRECTORY)).thenReturn(true);
-        Mockito.when(env.getEnv(LocalStorageTemplateService.TEMPLATE_DIRECTORY))
+        Mockito.when(env.hasEnv(LocalStorageTemplateService.TEMPLATE_PATH)).thenReturn(true);
+        Mockito.when(env.getEnv(LocalStorageTemplateService.TEMPLATE_PATH))
                 .thenReturn("/templates");
 
         Path path = Mockito.mock(Path.class);
@@ -171,5 +173,33 @@ class LocalStorageTemplateServiceTest {
     @Test
     void getXmlShouldThrowExceptionForUnknownName() throws Exception {
         Assertions.assertFalse(service.getXml("foo").isPresent());
+    }
+
+    @Test
+    void addTemplateShouldWriteStreamToFile() throws Exception {
+        Mockito.when(env.hasEnv(LocalStorageTemplateService.TEMPLATE_PATH)).thenReturn(true);
+        Mockito.when(env.getEnv(LocalStorageTemplateService.TEMPLATE_PATH))
+                .thenReturn("/templates");
+
+        Path path = Mockito.mock(Path.class);
+        Path templatePath = Mockito.mock(Path.class);
+        Mockito.when(fs.pathOf("/templates")).thenReturn(path);
+        Mockito.when(fs.exists(path)).thenReturn(true);
+        Mockito.when(fs.isDirectory(path)).thenReturn(true);
+        Mockito.when(fs.isReadable(path)).thenReturn(true);
+        Mockito.when(fs.isWritable(path)).thenReturn(true);
+        Mockito.when(fs.pathOf("/templates", "Profiling")).thenReturn(templatePath);
+
+        service.addTemplate(IOUtils.toInputStream(xmlText));
+
+        ArgumentCaptor<String> contentCaptor = ArgumentCaptor.forClass(String.class);
+        Mockito.verify(fs).writeString(Mockito.eq(templatePath), contentCaptor.capture());
+        String after = contentCaptor.getValue();
+        System.out.println(after);
+        int distance = LevenshteinDistance.getDefaultInstance().apply(xmlText, after);
+        // 4550 is just the experimentally determined LD. The XML is transformed somewhat when
+        // parsed and re-serialized. Jsoup somehow determines that the document before and after
+        // does not have the same value, but it clearly does from an actual inspection.
+        MatcherAssert.assertThat(distance, Matchers.is(4550));
     }
 }

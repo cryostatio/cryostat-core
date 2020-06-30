@@ -41,6 +41,7 @@
  */
 package com.redhat.rhjmc.containerjfr.core.templates;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -105,7 +106,7 @@ public class MergedTemplateService implements MutableTemplateService {
 
     @Override
     public void addTemplate(InputStream templateStream)
-            throws InvalidXmlException, InvalidEventTemplateException {
+            throws InvalidXmlException, InvalidEventTemplateException, IOException {
         local.addTemplate(templateStream);
     }
 

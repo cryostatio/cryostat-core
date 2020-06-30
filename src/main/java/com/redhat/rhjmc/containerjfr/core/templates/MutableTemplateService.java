@@ -41,12 +41,13 @@
  */
 package com.redhat.rhjmc.containerjfr.core.templates;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 public interface MutableTemplateService extends TemplateService {
 
     void addTemplate(InputStream templateStream)
-            throws InvalidXmlException, InvalidEventTemplateException;
+            throws InvalidXmlException, InvalidEventTemplateException, IOException;
 
     void deleteTemplate(String templateName) throws UnknownEventTemplateException;
 
@@ -54,6 +55,10 @@ public interface MutableTemplateService extends TemplateService {
     public static class InvalidXmlException extends Exception {
         InvalidXmlException(String message, Throwable cause) {
             super(message, cause);
+        }
+
+        InvalidXmlException(String message) {
+            super(message);
         }
     }
 
