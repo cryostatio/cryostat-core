@@ -195,7 +195,6 @@ class LocalStorageTemplateServiceTest {
         ArgumentCaptor<String> contentCaptor = ArgumentCaptor.forClass(String.class);
         Mockito.verify(fs).writeString(Mockito.eq(templatePath), contentCaptor.capture());
         String after = contentCaptor.getValue();
-        System.out.println(after);
         int distance = LevenshteinDistance.getDefaultInstance().apply(xmlText, after);
         // 4550 is just the experimentally determined LD. The XML is transformed somewhat when
         // parsed and re-serialized. Jsoup somehow determines that the document before and after
