@@ -83,6 +83,11 @@ public class LocalStorageTemplateService extends AbstractTemplateService
     }
 
     @Override
+    protected TemplateType providedTemplateType() {
+        return TemplateType.CUSTOM;
+    }
+
+    @Override
     public void addTemplate(InputStream templateStream)
             throws InvalidXmlException, InvalidEventTemplateException, IOException {
         if (!env.hasEnv(TEMPLATE_PATH)) {

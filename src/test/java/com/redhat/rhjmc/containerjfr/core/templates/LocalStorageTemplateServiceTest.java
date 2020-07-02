@@ -107,7 +107,8 @@ class LocalStorageTemplateServiceTest {
                                 new Template(
                                         "Profiling",
                                         "Low overhead configuration for profiling, typically around 2 % overhead.",
-                                        "Oracle"))));
+                                        "Oracle",
+                                        TemplateType.CUSTOM))));
     }
 
     @Test

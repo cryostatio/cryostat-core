@@ -72,6 +72,11 @@ public class RemoteTemplateService extends AbstractTemplateService implements Te
     }
 
     @Override
+    protected TemplateType providedTemplateType() {
+        return TemplateType.TARGET;
+    }
+
+    @Override
     public Optional<Document> getXml(String templateName) throws FlightRecorderException {
         try {
             return conn.getService().getServerTemplates().stream()

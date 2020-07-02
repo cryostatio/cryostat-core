@@ -77,8 +77,6 @@ public class MergedTemplateService implements MutableTemplateService {
 
     @Override
     public Optional<Document> getXml(String templateName) throws FlightRecorderException {
-        // FIXME what if the remote has a template by the same name as something local? We should
-        // add some way to distinguish them and separate them into namespaces of sorts
         return local.getXml(templateName)
                 .or(
                         () -> {
