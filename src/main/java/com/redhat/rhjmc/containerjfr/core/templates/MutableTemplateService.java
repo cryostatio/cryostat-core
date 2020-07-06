@@ -49,7 +49,7 @@ public interface MutableTemplateService extends TemplateService {
     void addTemplate(InputStream templateStream)
             throws InvalidXmlException, InvalidEventTemplateException, IOException;
 
-    void deleteTemplate(String templateName) throws IOException;
+    void deleteTemplate(String templateName) throws IOException, InvalidEventTemplateException;
 
     @SuppressWarnings("serial")
     public static class InvalidXmlException extends Exception {
@@ -66,6 +66,10 @@ public interface MutableTemplateService extends TemplateService {
     public static class InvalidEventTemplateException extends Exception {
         InvalidEventTemplateException(String message, Throwable cause) {
             super(message, cause);
+        }
+
+        InvalidEventTemplateException(String message) {
+            super(message);
         }
     }
 }

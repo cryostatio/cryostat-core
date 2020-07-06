@@ -217,6 +217,7 @@ class LocalStorageTemplateServiceTest {
         Mockito.when(fs.isReadable(path)).thenReturn(true);
         Mockito.when(fs.isWritable(path)).thenReturn(true);
         Mockito.when(fs.pathOf("/templates", "Profiling")).thenReturn(templatePath);
+        Mockito.when(fs.deleteIfExists(templatePath)).thenReturn(true);
 
         service.deleteTemplate("Profiling");
 

@@ -125,7 +125,14 @@ public class LocalStorageTemplateService extends AbstractTemplateService
             EventConfiguration.createModel(doc.toString());
 
             String templateName = configuration.attr("label");
-            fs.writeString(fs.pathOf(env.getEnv(TEMPLATE_PATH), templateName), doc.toString());
+            Path path = fs.pathOf(env.getEnv(TEMPLATE_PATH), templateName);
+
+            if (fs.exists(path)) {
+                throw new InvalidEventTemplateException(
+                        String.format("Event template \"%s\" already exists", templateName));
+            }
+
+            fs.writeString(path, doc.toString());
         } catch (IOException ioe) {
             throw new InvalidXmlException("Unable to parse XML stream", ioe);
         } catch (ParseException | IllegalArgumentException e) {
@@ -134,7 +141,8 @@ public class LocalStorageTemplateService extends AbstractTemplateService
     }
 
     @Override
-    public void deleteTemplate(String templateName) throws IOException {
+    public void deleteTemplate(String templateName)
+            throws IOException, InvalidEventTemplateException {
         if (!env.hasEnv(TEMPLATE_PATH)) {
             throw new IOException(
                     String.format(
@@ -148,7 +156,10 @@ public class LocalStorageTemplateService extends AbstractTemplateService
                             "Template directory %s does not exist, is not a directory, or does not have appropriate permissions",
                             dir.toString()));
         }
-        fs.deleteIfExists(fs.pathOf(env.getEnv(TEMPLATE_PATH), templateName));
+        if (!fs.deleteIfExists(fs.pathOf(env.getEnv(TEMPLATE_PATH), templateName))) {
+            throw new InvalidEventTemplateException(
+                    String.format("Event template \"%s\" does not exist", templateName));
+        }
     }
 
     @Override
