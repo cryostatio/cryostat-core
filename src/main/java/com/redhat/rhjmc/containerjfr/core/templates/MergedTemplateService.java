@@ -76,30 +76,29 @@ public class MergedTemplateService implements MutableTemplateService {
     }
 
     @Override
-    public Optional<Document> getXml(String templateName) throws FlightRecorderException {
-        return local.getXml(templateName)
-                .or(
-                        () -> {
-                            try {
-                                return remote.getXml(templateName);
-                            } catch (FlightRecorderException e) {
-                                return Optional.empty();
-                            }
-                        });
+    public Optional<Document> getXml(String templateName, TemplateType type)
+            throws FlightRecorderException {
+        switch (type) {
+            case CUSTOM:
+                return local.getXml(templateName, type);
+            case TARGET:
+                return remote.getXml(templateName, type);
+            default:
+                return Optional.empty();
+        }
     }
 
     @Override
-    public Optional<IConstrainedMap<EventOptionID>> getEventsByTemplateName(String templateName)
-            throws FlightRecorderException {
-        return local.getEventsByTemplateName(templateName)
-                .or(
-                        () -> {
-                            try {
-                                return remote.getEventsByTemplateName(templateName);
-                            } catch (FlightRecorderException e) {
-                                return Optional.empty();
-                            }
-                        });
+    public Optional<IConstrainedMap<EventOptionID>> getEvents(
+            String templateName, TemplateType type) throws FlightRecorderException {
+        switch (type) {
+            case CUSTOM:
+                return local.getEvents(templateName, type);
+            case TARGET:
+                return remote.getEvents(templateName, type);
+            default:
+                return Optional.empty();
+        }
     }
 
     @Override

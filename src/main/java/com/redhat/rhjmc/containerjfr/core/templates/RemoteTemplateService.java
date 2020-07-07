@@ -77,7 +77,11 @@ public class RemoteTemplateService extends AbstractTemplateService implements Te
     }
 
     @Override
-    public Optional<Document> getXml(String templateName) throws FlightRecorderException {
+    public Optional<Document> getXml(String templateName, TemplateType type)
+            throws FlightRecorderException {
+        if (!providedTemplateType().equals(type)) {
+            return Optional.empty();
+        }
         try {
             return conn.getService().getServerTemplates().stream()
                     .map(xmlText -> Jsoup.parse(xmlText, "", Parser.xmlParser()))
@@ -106,8 +110,11 @@ public class RemoteTemplateService extends AbstractTemplateService implements Te
     }
 
     @Override
-    public Optional<IConstrainedMap<EventOptionID>> getEventsByTemplateName(String templateName)
-            throws FlightRecorderException {
+    public Optional<IConstrainedMap<EventOptionID>> getEvents(
+            String templateName, TemplateType type) throws FlightRecorderException {
+        if (!providedTemplateType().equals(type)) {
+            return Optional.empty();
+        }
         return getTemplateModels().stream()
                 .filter(
                         m ->

@@ -112,7 +112,7 @@ class LocalStorageTemplateServiceTest {
     }
 
     @Test
-    void getEventsByNameShouldReturnNonEmptyMap() throws Exception {
+    void getEventsShouldReturnNonEmptyMap() throws Exception {
         Mockito.when(env.hasEnv(LocalStorageTemplateService.TEMPLATE_PATH)).thenReturn(true);
         Mockito.when(env.getEnv(LocalStorageTemplateService.TEMPLATE_PATH))
                 .thenReturn("/templates");
@@ -132,13 +132,18 @@ class LocalStorageTemplateServiceTest {
 
         // TODO verify actual contents of the profile.jfc?
         MatcherAssert.assertThat(
-                service.getEventsByTemplateName("Profiling").get().keySet(),
+                service.getEvents("Profiling", TemplateType.CUSTOM).get().keySet(),
                 Matchers.hasSize(Matchers.greaterThan(0)));
     }
 
     @Test
-    void getEventsByNameShouldThrowExceptionForUnknownName() throws Exception {
-        Assertions.assertFalse(service.getEventsByTemplateName("foo").isPresent());
+    void getEventsShouldReturnEmptyForUnknownName() throws Exception {
+        Assertions.assertFalse(service.getEvents("foo", TemplateType.CUSTOM).isPresent());
+    }
+
+    @Test
+    void getEventsShouldReturnEmptyForUnknownType() throws Exception {
+        Assertions.assertFalse(service.getEvents("foo", TemplateType.TARGET).isPresent());
     }
 
     @Test
@@ -161,7 +166,7 @@ class LocalStorageTemplateServiceTest {
         Mockito.when(fs.isReadable(path)).thenReturn(true);
 
         try {
-            Optional<Document> doc = service.getXml("Profiling");
+            Optional<Document> doc = service.getXml("Profiling", TemplateType.CUSTOM);
             Assertions.assertTrue(doc.isPresent());
             Assertions.assertTrue(
                     doc.get().hasSameValue(Jsoup.parse(xmlText, "", Parser.xmlParser())));
@@ -172,8 +177,13 @@ class LocalStorageTemplateServiceTest {
     }
 
     @Test
-    void getXmlShouldThrowExceptionForUnknownName() throws Exception {
-        Assertions.assertFalse(service.getXml("foo").isPresent());
+    void getXmlShouldReturnEmptyForUnknownName() throws Exception {
+        Assertions.assertFalse(service.getXml("foo", TemplateType.CUSTOM).isPresent());
+    }
+
+    @Test
+    void getXmlShouldReturnEmptyForUnknownType() throws Exception {
+        Assertions.assertFalse(service.getXml("foo", TemplateType.TARGET).isPresent());
     }
 
     @Test

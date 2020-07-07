@@ -163,7 +163,11 @@ public class LocalStorageTemplateService extends AbstractTemplateService
     }
 
     @Override
-    public Optional<Document> getXml(String templateName) throws FlightRecorderException {
+    public Optional<Document> getXml(String templateName, TemplateType type)
+            throws FlightRecorderException {
+        if (!providedTemplateType().equals(type)) {
+            return Optional.empty();
+        }
         for (Path path : getLocalTemplates()) {
             try (InputStream stream = fs.newInputStream(path)) {
                 Document doc =
@@ -193,8 +197,11 @@ public class LocalStorageTemplateService extends AbstractTemplateService
     }
 
     @Override
-    public Optional<IConstrainedMap<EventOptionID>> getEventsByTemplateName(String templateName)
-            throws FlightRecorderException {
+    public Optional<IConstrainedMap<EventOptionID>> getEvents(
+            String templateName, TemplateType type) throws FlightRecorderException {
+        if (!providedTemplateType().equals(type)) {
+            return Optional.empty();
+        }
         return getTemplateModels().stream()
                 .filter(
                         m ->

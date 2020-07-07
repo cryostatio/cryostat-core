@@ -55,8 +55,9 @@ public interface TemplateService {
 
     List<Template> getTemplates() throws FlightRecorderException;
 
-    Optional<Document> getXml(String templateName) throws FlightRecorderException;
+    Optional<Document> getXml(String templateName, TemplateType type)
+            throws FlightRecorderException;
 
-    Optional<IConstrainedMap<EventOptionID>> getEventsByTemplateName(String templateName)
+    Optional<IConstrainedMap<EventOptionID>> getEvents(String templateName, TemplateType type)
             throws FlightRecorderException;
 }

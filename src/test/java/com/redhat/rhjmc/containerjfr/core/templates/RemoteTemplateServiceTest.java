@@ -76,15 +76,13 @@ class RemoteTemplateServiceTest {
     @BeforeEach
     void setup() throws Exception {
         xmlText = IOUtils.toString(this.getClass().getResourceAsStream("profile.jfc"));
-
-        Mockito.when(conn.getService()).thenReturn(svc);
-        Mockito.when(svc.getServerTemplates()).thenReturn(Collections.singletonList(xmlText));
-
         templateSvc = new RemoteTemplateService(conn);
     }
 
     @Test
     void getNamesShouldReflectRemoteTemplateNames() throws Exception {
+        Mockito.when(conn.getService()).thenReturn(svc);
+        Mockito.when(svc.getServerTemplates()).thenReturn(Collections.singletonList(xmlText));
         MatcherAssert.assertThat(
                 templateSvc.getTemplates(),
                 Matchers.equalTo(
@@ -97,7 +95,9 @@ class RemoteTemplateServiceTest {
     }
 
     @Test
-    void getEventsByNameShouldReturnNonEmptyMap() throws Exception {
+    void getEventsShouldReturnNonEmptyMap() throws Exception {
+        Mockito.when(conn.getService()).thenReturn(svc);
+        Mockito.when(svc.getServerTemplates()).thenReturn(Collections.singletonList(xmlText));
         Mockito.when(svc.getDefaultEventOptions())
                 .thenReturn(
                         new DefaultValueMap(
@@ -105,24 +105,40 @@ class RemoteTemplateServiceTest {
                                         EventTypeIDV2.class, Collections.emptyMap(), true)));
         // TODO verify actual contents of the profile.jfc?
         MatcherAssert.assertThat(
-                templateSvc.getEventsByTemplateName("Profiling").get().keySet(),
+                templateSvc.getEvents("Profiling", TemplateType.TARGET).get().keySet(),
                 Matchers.hasSize(Matchers.greaterThan(0)));
     }
 
     @Test
-    void getEventsByNameShouldThrowExceptionForUnknownName() throws Exception {
-        Assertions.assertFalse(templateSvc.getEventsByTemplateName("foo").isPresent());
+    void getEventsShouldReturnEmptyForUnknownName() throws Exception {
+        Mockito.when(conn.getService()).thenReturn(svc);
+        Mockito.when(svc.getServerTemplates()).thenReturn(Collections.singletonList(xmlText));
+        Assertions.assertFalse(templateSvc.getEvents("foo", TemplateType.TARGET).isPresent());
+    }
+
+    @Test
+    void getEventsShouldReturnEmptyForUnknownType() throws Exception {
+        Assertions.assertFalse(templateSvc.getEvents("foo", TemplateType.CUSTOM).isPresent());
     }
 
     @Test
     void getXmlShouldReturnModelFromRemote() throws Exception {
-        Optional<Document> doc = templateSvc.getXml("Profiling");
+        Mockito.when(conn.getService()).thenReturn(svc);
+        Mockito.when(svc.getServerTemplates()).thenReturn(Collections.singletonList(xmlText));
+        Optional<Document> doc = templateSvc.getXml("Profiling", TemplateType.TARGET);
         Assertions.assertTrue(doc.isPresent());
         Assertions.assertTrue(doc.get().hasSameValue(Jsoup.parse(xmlText, "", Parser.xmlParser())));
     }
 
     @Test
     void getXmlShouldReturnEmptyForUnknownName() throws Exception {
-        Assertions.assertFalse(templateSvc.getXml("foo").isPresent());
+        Mockito.when(conn.getService()).thenReturn(svc);
+        Mockito.when(svc.getServerTemplates()).thenReturn(Collections.singletonList(xmlText));
+        Assertions.assertFalse(templateSvc.getXml("foo", TemplateType.TARGET).isPresent());
+    }
+
+    @Test
+    void getXmlShouldReturnEmptyForUnknownType() throws Exception {
+        Assertions.assertFalse(templateSvc.getXml("foo", TemplateType.CUSTOM).isPresent());
     }
 }
