@@ -165,15 +165,9 @@ class LocalStorageTemplateServiceTest {
         Mockito.when(fs.isDirectory(path)).thenReturn(true);
         Mockito.when(fs.isReadable(path)).thenReturn(true);
 
-        try {
-            Optional<Document> doc = service.getXml("Profiling", TemplateType.CUSTOM);
-            Assertions.assertTrue(doc.isPresent());
-            Assertions.assertTrue(
-                    doc.get().hasSameValue(Jsoup.parse(xmlText, "", Parser.xmlParser())));
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
+        Optional<Document> doc = service.getXml("Profiling", TemplateType.CUSTOM);
+        Assertions.assertTrue(doc.isPresent());
+        Assertions.assertTrue(doc.get().hasSameValue(Jsoup.parse(xmlText, "", Parser.xmlParser())));
     }
 
     @Test
@@ -207,10 +201,10 @@ class LocalStorageTemplateServiceTest {
         Mockito.verify(fs).writeString(Mockito.eq(templatePath), contentCaptor.capture());
         String after = contentCaptor.getValue();
         int distance = LevenshteinDistance.getDefaultInstance().apply(xmlText, after);
-        // 4550 is just the experimentally determined LD. The XML is transformed somewhat when
+        // 1710 is just the experimentally determined LD. The XML is transformed somewhat when
         // parsed and re-serialized. Jsoup somehow determines that the document before and after
         // does not have the same value, but it clearly does from an actual inspection.
-        MatcherAssert.assertThat(distance, Matchers.is(4550));
+        MatcherAssert.assertThat(distance, Matchers.is(1710));
     }
 
     @Test

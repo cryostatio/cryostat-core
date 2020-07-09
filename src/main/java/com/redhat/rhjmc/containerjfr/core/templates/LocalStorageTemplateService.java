@@ -62,7 +62,10 @@ import org.openjdk.jmc.common.unit.IConstrainedMap;
 import org.openjdk.jmc.common.unit.SimpleConstrainedMap;
 import org.openjdk.jmc.common.unit.UnitLookup;
 import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
+import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLAttributeInstance;
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLModel;
+import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLTagInstance;
+import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLValidationResult;
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.model.EventConfiguration;
 
 import com.redhat.rhjmc.containerjfr.core.FlightRecorderException;
@@ -104,27 +107,30 @@ public class LocalStorageTemplateService extends AbstractTemplateService
                             dir.toString()));
         }
         try (templateStream) {
-            Document doc =
-                    Jsoup.parse(
-                            templateStream, StandardCharsets.UTF_8.name(), "", Parser.xmlParser());
-            Elements els = doc.getElementsByTag("configuration");
-            if (els.isEmpty()) {
-                throw new InvalidXmlException("Document did not contain \"configuration\" element");
-            }
-            if (els.size() > 1) {
-                throw new InvalidXmlException(
-                        "Document contains multiple \"configuration\" elements");
-            }
-            Element configuration = els.first();
-            if (!configuration.hasAttr("label")) {
-                throw new InvalidXmlException(
-                        "Configuration element did not have \"label\" attribute");
-            }
-            // side effect of validation, throws ParseException or IllegalArgumentException if
-            // invalid
-            EventConfiguration.createModel(doc.toString());
+            XMLModel model = EventConfiguration.createModel(templateStream);
+            model.checkErrors();
 
-            String templateName = configuration.attr("label");
+            for (XMLValidationResult result : model.getResults()) {
+                if (result.isError()) {
+                    throw new InvalidEventTemplateException(result.getText());
+                }
+            }
+
+            XMLTagInstance configuration = model.getRoot();
+            XMLAttributeInstance labelAttr = null;
+            for (XMLAttributeInstance attr : configuration.getAttributeInstances()) {
+                if (attr.getAttribute().getName().equals("label")) {
+                    labelAttr = attr;
+                    break;
+                }
+            }
+
+            if (labelAttr == null) {
+                throw new InvalidEventTemplateException(
+                        "Template has no configuration label attribute");
+            }
+
+            String templateName = labelAttr.getExplicitValue();
             Path path = fs.pathOf(env.getEnv(TEMPLATE_PATH), templateName);
 
             if (fs.exists(path)) {
@@ -132,7 +138,7 @@ public class LocalStorageTemplateService extends AbstractTemplateService
                         String.format("Event template \"%s\" already exists", templateName));
             }
 
-            fs.writeString(path, doc.toString());
+            fs.writeString(path, model.toString());
         } catch (IOException ioe) {
             throw new InvalidXmlException("Unable to parse XML stream", ioe);
         } catch (ParseException | IllegalArgumentException e) {
