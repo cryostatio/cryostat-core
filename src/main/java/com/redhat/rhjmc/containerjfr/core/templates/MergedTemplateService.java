@@ -52,7 +52,6 @@ import org.jsoup.nodes.Document;
 import org.openjdk.jmc.common.unit.IConstrainedMap;
 import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
 
-import com.redhat.rhjmc.containerjfr.core.FlightRecorderException;
 import com.redhat.rhjmc.containerjfr.core.net.JFRConnection;
 import com.redhat.rhjmc.containerjfr.core.sys.Environment;
 import com.redhat.rhjmc.containerjfr.core.sys.FileSystem;
@@ -68,7 +67,7 @@ public class MergedTemplateService implements MutableTemplateService {
     }
 
     @Override
-    public List<Template> getTemplates() throws FlightRecorderException {
+    public List<Template> getTemplates() throws Exception {
         List<Template> templates = new ArrayList<>();
         templates.addAll(remote.getTemplates());
         templates.addAll(local.getTemplates());
@@ -76,8 +75,7 @@ public class MergedTemplateService implements MutableTemplateService {
     }
 
     @Override
-    public Optional<Document> getXml(String templateName, TemplateType type)
-            throws FlightRecorderException {
+    public Optional<Document> getXml(String templateName, TemplateType type) throws Exception {
         switch (type) {
             case CUSTOM:
                 return local.getXml(templateName, type);
@@ -90,7 +88,7 @@ public class MergedTemplateService implements MutableTemplateService {
 
     @Override
     public Optional<IConstrainedMap<EventOptionID>> getEvents(
-            String templateName, TemplateType type) throws FlightRecorderException {
+            String templateName, TemplateType type) throws Exception {
         switch (type) {
             case CUSTOM:
                 return local.getEvents(templateName, type);

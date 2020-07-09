@@ -48,31 +48,25 @@ import java.util.stream.Collectors;
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLModel;
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLTagInstance;
 
-import com.redhat.rhjmc.containerjfr.core.FlightRecorderException;
-
 abstract class AbstractTemplateService implements TemplateService {
 
     @Override
-    public List<Template> getTemplates() throws FlightRecorderException {
-        try {
-            return getTemplateModels().stream()
-                    .map(xml -> xml.getRoot())
-                    .map(
-                            root ->
-                                    new Template(
-                                            getAttributeValue(root, "label"),
-                                            getAttributeValue(root, "description"),
-                                            getAttributeValue(root, "provider"),
-                                            providedTemplateType()))
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new FlightRecorderException(e);
-        }
+    public List<Template> getTemplates() throws Exception {
+        return getTemplateModels().stream()
+                .map(xml -> xml.getRoot())
+                .map(
+                        root ->
+                                new Template(
+                                        getAttributeValue(root, "label"),
+                                        getAttributeValue(root, "description"),
+                                        getAttributeValue(root, "provider"),
+                                        providedTemplateType()))
+                .collect(Collectors.toList());
     }
 
     protected abstract TemplateType providedTemplateType();
 
-    protected abstract List<XMLModel> getTemplateModels() throws FlightRecorderException;
+    protected abstract List<XMLModel> getTemplateModels() throws Exception;
 
     protected String getAttributeValue(XMLTagInstance node, String valueKey) {
         return node.getAttributeInstances().stream()

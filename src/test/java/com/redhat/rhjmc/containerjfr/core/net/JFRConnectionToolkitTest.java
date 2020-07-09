@@ -70,11 +70,12 @@ class JFRConnectionToolkitTest {
 
     @Test
     void shouldThrowInTestEnvironment() {
-        assertThrows(WrappedConnectionException.class, () -> toolkit.connect("foo", 9091));
+        assertThrows(
+                WrappedConnectionException.class, () -> toolkit.connect("foo", 9091).connect());
     }
 
     @Test
     void shouldThrowInTestEnvironment2() {
-        assertThrows(WrappedConnectionException.class, () -> toolkit.connect("foo"));
+        assertThrows(WrappedConnectionException.class, () -> toolkit.connect("foo").connect());
     }
 }

@@ -79,7 +79,7 @@ class EventOptionsCustomizerTest {
     EventOptionsCustomizer customizer;
 
     @BeforeEach
-    void setup() {
+    void setup() throws Exception {
         Mockito.when(connection.getService()).thenReturn(service);
         Mockito.when(service.getDefaultEventOptions()).thenReturn(defaultMap);
         Mockito.when(defaultMap.emptyWithSameConstraints()).thenReturn(emptyMap);
