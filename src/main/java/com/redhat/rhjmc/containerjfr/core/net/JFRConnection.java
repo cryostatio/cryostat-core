@@ -215,6 +215,7 @@ public class JFRConnection implements AutoCloseable {
             return conn;
         } catch (Exception e) {
             cw.println("connection attempt failed.");
+            closeListeners.forEach(Runnable::run);
             throw e;
         }
     }
