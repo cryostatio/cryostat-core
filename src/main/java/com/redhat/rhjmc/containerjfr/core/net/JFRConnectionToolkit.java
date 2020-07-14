@@ -64,28 +64,23 @@ public class JFRConnectionToolkit {
     }
 
     public JFRConnection connect(JMXServiceURL url) throws Exception {
-        return connect(url, List.of());
+        return connect(url, null);
     }
 
-    public JFRConnection connect(JMXServiceURL url, List<Runnable> listeners) throws Exception {
-        return new JFRConnection(
-                cw, fs, env, new ConnectionDescriptorBuilder().url(url).build(), listeners);
+    public JFRConnection connect(JMXServiceURL url, Credentials credentials) throws Exception {
+        return connect(url, credentials, List.of());
     }
 
-    public JFRConnection connect(String host) throws Exception {
-        return connect(host, JFRConnection.DEFAULT_PORT);
-    }
-
-    public JFRConnection connect(String host, int port, List<Runnable> listeners) throws Exception {
-        return new JFRConnection(
-                cw,
-                fs,
-                env,
-                new ConnectionDescriptorBuilder().hostName(host).port(port).build(),
-                listeners);
-    }
-
-    public JFRConnection connect(String host, int port) throws Exception {
-        return connect(host, port, List.of());
+    public JFRConnection connect(
+            JMXServiceURL url, Credentials credentials, List<Runnable> listeners) throws Exception {
+        ConnectionDescriptorBuilder connectionDescriptorBuilder = new ConnectionDescriptorBuilder();
+        connectionDescriptorBuilder = connectionDescriptorBuilder.url(url);
+        if (credentials != null) {
+            connectionDescriptorBuilder =
+                    connectionDescriptorBuilder
+                            .username(credentials.getUsername())
+                            .password(credentials.getPassword());
+        }
+        return new JFRConnection(cw, fs, env, connectionDescriptorBuilder.build(), listeners);
     }
 }
