@@ -42,22 +42,43 @@
 package com.redhat.rhjmc.containerjfr.core.templates;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
-import org.jsoup.nodes.Document;
-
-import org.openjdk.jmc.common.unit.IConstrainedMap;
-import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
+import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLModel;
+import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLTagInstance;
 
 import com.redhat.rhjmc.containerjfr.core.FlightRecorderException;
 
-public interface TemplateService {
+abstract class AbstractTemplateService implements TemplateService {
 
-    List<Template> getTemplates() throws FlightRecorderException;
+    @Override
+    public List<Template> getTemplates() throws FlightRecorderException {
+        try {
+            return getTemplateModels().stream()
+                    .map(xml -> xml.getRoot())
+                    .map(
+                            root ->
+                                    new Template(
+                                            getAttributeValue(root, "label"),
+                                            getAttributeValue(root, "description"),
+                                            getAttributeValue(root, "provider"),
+                                            providedTemplateType()))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new FlightRecorderException(e);
+        }
+    }
 
-    Optional<Document> getXml(String templateName, TemplateType type)
-            throws FlightRecorderException;
+    protected abstract TemplateType providedTemplateType();
 
-    Optional<IConstrainedMap<EventOptionID>> getEvents(String templateName, TemplateType type)
-            throws FlightRecorderException;
+    protected abstract List<XMLModel> getTemplateModels() throws FlightRecorderException;
+
+    protected String getAttributeValue(XMLTagInstance node, String valueKey) {
+        return node.getAttributeInstances().stream()
+                .filter(i -> Objects.equals(valueKey, i.getAttribute().getName()))
+                .map(i -> i.getValue())
+                .findFirst()
+                .get();
+    }
 }

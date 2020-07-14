@@ -66,12 +66,29 @@ public class FileSystem {
         return Files.isReadable(path);
     }
 
+    public boolean isWritable(Path path) {
+        return Files.isWritable(path);
+    }
+
+    public boolean isExecutable(Path path) {
+        return Files.isExecutable(path);
+    }
+
     public InputStream newInputStream(Path path, OpenOption... openOptions) throws IOException {
         return Files.newInputStream(path, openOptions);
     }
 
+    public Path writeString(Path path, CharSequence content, OpenOption... openOptions)
+            throws IOException {
+        return Files.writeString(path, content, openOptions);
+    }
+
     public BufferedReader readFile(Path path) throws IOException {
         return Files.newBufferedReader(path);
+    }
+
+    public String readString(Path path) throws IOException {
+        return Files.readString(path);
     }
 
     public long copy(InputStream in, Path out, CopyOption... copyOptions) throws IOException {
@@ -92,5 +109,9 @@ public class FileSystem {
 
     public Path pathOf(String first, String... more) {
         return Path.of(first, more);
+    }
+
+    public long size(Path path) throws IOException {
+        return Files.size(path);
     }
 }

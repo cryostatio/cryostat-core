@@ -39,25 +39,6 @@
  * SOFTWARE.
  * #L%
  */
-package com.redhat.rhjmc.containerjfr.core.templates;
+package org.openjdk.jmc.ui;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.jsoup.nodes.Document;
-
-import org.openjdk.jmc.common.unit.IConstrainedMap;
-import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
-
-import com.redhat.rhjmc.containerjfr.core.FlightRecorderException;
-
-public interface TemplateService {
-
-    List<Template> getTemplates() throws FlightRecorderException;
-
-    Optional<Document> getXml(String templateName, TemplateType type)
-            throws FlightRecorderException;
-
-    Optional<IConstrainedMap<EventOptionID>> getEvents(String templateName, TemplateType type)
-            throws FlightRecorderException;
-}
+public class MCAbstractUIPlugin {}

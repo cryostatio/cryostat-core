@@ -41,6 +41,9 @@
  */
 package com.redhat.rhjmc.containerjfr.core.templates;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,14 +53,63 @@ import org.openjdk.jmc.common.unit.IConstrainedMap;
 import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
 
 import com.redhat.rhjmc.containerjfr.core.FlightRecorderException;
+import com.redhat.rhjmc.containerjfr.core.net.JFRConnection;
+import com.redhat.rhjmc.containerjfr.core.sys.Environment;
+import com.redhat.rhjmc.containerjfr.core.sys.FileSystem;
 
-public interface TemplateService {
+public class MergedTemplateService implements MutableTemplateService {
 
-    List<Template> getTemplates() throws FlightRecorderException;
+    protected final RemoteTemplateService remote;
+    protected final LocalStorageTemplateService local;
 
-    Optional<Document> getXml(String templateName, TemplateType type)
-            throws FlightRecorderException;
+    public MergedTemplateService(JFRConnection conn, FileSystem fs, Environment env) {
+        this.remote = new RemoteTemplateService(conn);
+        this.local = new LocalStorageTemplateService(fs, env);
+    }
 
-    Optional<IConstrainedMap<EventOptionID>> getEvents(String templateName, TemplateType type)
-            throws FlightRecorderException;
+    @Override
+    public List<Template> getTemplates() throws FlightRecorderException {
+        List<Template> templates = new ArrayList<>();
+        templates.addAll(remote.getTemplates());
+        templates.addAll(local.getTemplates());
+        return templates;
+    }
+
+    @Override
+    public Optional<Document> getXml(String templateName, TemplateType type)
+            throws FlightRecorderException {
+        switch (type) {
+            case CUSTOM:
+                return local.getXml(templateName, type);
+            case TARGET:
+                return remote.getXml(templateName, type);
+            default:
+                return Optional.empty();
+        }
+    }
+
+    @Override
+    public Optional<IConstrainedMap<EventOptionID>> getEvents(
+            String templateName, TemplateType type) throws FlightRecorderException {
+        switch (type) {
+            case CUSTOM:
+                return local.getEvents(templateName, type);
+            case TARGET:
+                return remote.getEvents(templateName, type);
+            default:
+                return Optional.empty();
+        }
+    }
+
+    @Override
+    public void addTemplate(InputStream templateStream)
+            throws InvalidXmlException, InvalidEventTemplateException, IOException {
+        local.addTemplate(templateStream);
+    }
+
+    @Override
+    public void deleteTemplate(String templateName)
+            throws IOException, InvalidEventTemplateException {
+        local.deleteTemplate(templateName);
+    }
 }

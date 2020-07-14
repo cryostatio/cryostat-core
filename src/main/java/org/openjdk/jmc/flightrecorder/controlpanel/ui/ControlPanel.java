@@ -39,25 +39,20 @@
  * SOFTWARE.
  * #L%
  */
-package com.redhat.rhjmc.containerjfr.core.templates;
+package org.openjdk.jmc.flightrecorder.controlpanel.ui;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import org.jsoup.nodes.Document;
+public class ControlPanel {
 
-import org.openjdk.jmc.common.unit.IConstrainedMap;
-import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
+    public static ControlPanel getDefault() {
+        return new ControlPanel();
+    }
 
-import com.redhat.rhjmc.containerjfr.core.FlightRecorderException;
-
-public interface TemplateService {
-
-    List<Template> getTemplates() throws FlightRecorderException;
-
-    Optional<Document> getXml(String templateName, TemplateType type)
-            throws FlightRecorderException;
-
-    Optional<IConstrainedMap<EventOptionID>> getEvents(String templateName, TemplateType type)
-            throws FlightRecorderException;
+    public Logger getLogger() {
+        Logger logger = Logger.getGlobal();
+        logger.setLevel(Level.ALL);
+        return logger;
+    }
 }

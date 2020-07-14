@@ -50,11 +50,13 @@ public class Template {
     private final String name;
     private final String description;
     private final String provider;
+    private final TemplateType type;
 
-    public Template(String name, String description, String provider) {
+    public Template(String name, String description, String provider, TemplateType type) {
         this.name = name;
         this.description = description;
         this.provider = provider;
+        this.type = type;
     }
 
     public String getName() {
@@ -69,12 +71,17 @@ public class Template {
         return provider;
     }
 
+    public TemplateType getType() {
+        return type;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .append("name", name)
                 .append("description", description)
                 .append("provider", provider)
+                .append("type", type)
                 .toString();
     }
 
@@ -92,11 +99,12 @@ public class Template {
         Template other = (Template) o;
         return Objects.equals(getName(), other.getName())
                 && Objects.equals(getDescription(), other.getDescription())
-                && Objects.equals(getProvider(), other.getProvider());
+                && Objects.equals(getProvider(), other.getProvider())
+                && Objects.equals(getType(), other.getType());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, description, provider);
+        return Objects.hash(name, description, provider, type);
     }
 }
