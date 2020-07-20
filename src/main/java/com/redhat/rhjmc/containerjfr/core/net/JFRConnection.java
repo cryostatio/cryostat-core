@@ -42,11 +42,13 @@
 package com.redhat.rhjmc.containerjfr.core.net;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.management.remote.JMXServiceURL;
 
+import org.openjdk.jmc.rjmx.ConnectionException;
 import org.openjdk.jmc.rjmx.ConnectionToolkit;
 import org.openjdk.jmc.rjmx.IConnectionDescriptor;
 import org.openjdk.jmc.rjmx.IConnectionHandle;
@@ -72,9 +74,11 @@ public class JFRConnection implements AutoCloseable {
     protected final ClientWriter cw;
     protected final FileSystem fs;
     protected final Environment env;
-    protected final RJMXConnection rjmxConnection;
-    protected final IConnectionHandle handle;
-    protected final IFlightRecorderService service;
+    protected final FlightRecorderServiceFactory serviceFactory;
+    protected final List<Runnable> closeListeners;
+    protected RJMXConnection rjmxConnection;
+    protected IConnectionHandle handle;
+    protected IConnectionDescriptor connectionDescriptor;
 
     JFRConnection(
             ClientWriter cw,
@@ -86,12 +90,88 @@ public class JFRConnection implements AutoCloseable {
         this.cw = cw;
         this.fs = fs;
         this.env = env;
-        this.rjmxConnection = attemptConnect(cd);
+        this.connectionDescriptor = cd;
+        this.closeListeners = new ArrayList<>(listeners);
+        this.serviceFactory = new FlightRecorderServiceFactory();
+    }
+
+    JFRConnection(ClientWriter cw, FileSystem fs, Environment env, IConnectionDescriptor cd)
+            throws Exception {
+        this(cw, fs, env, cd, List.of());
+    }
+
+    public synchronized IConnectionHandle getHandle() {
+        return this.handle;
+    }
+
+    public synchronized IFlightRecorderService getService() throws Exception {
+        if (!isConnected()) {
+            connect();
+        }
+        IFlightRecorderService service = serviceFactory.getServiceInstance(handle);
+        if (service == null || !isConnected()) {
+            throw new ConnectionException(
+                    String.format(
+                            "Could not connect to remote target %s",
+                            this.connectionDescriptor.createJMXServiceURL().toString()));
+        }
+        return service;
+    }
+
+    public TemplateService getTemplateService() {
+        return new MergedTemplateService(this, fs, env);
+    }
+
+    public synchronized long getApproximateServerTime(Clock clock) {
+        return this.rjmxConnection.getApproximateServerTime(clock.getWallTime());
+    }
+
+    public synchronized JMXServiceURL getJMXURL() throws IOException {
+        return this.connectionDescriptor.createJMXServiceURL();
+    }
+
+    public synchronized String getHost() {
+        try {
+            return ConnectionToolkit.getHostName(
+                    this.rjmxConnection.getConnectionDescriptor().createJMXServiceURL());
+        } catch (IOException e) {
+            cw.println(e);
+            return "unknown";
+        }
+    }
+
+    public synchronized int getPort() {
+        try {
+            return ConnectionToolkit.getPort(
+                    this.rjmxConnection.getConnectionDescriptor().createJMXServiceURL());
+        } catch (IOException e) {
+            cw.println(e);
+            return 0;
+        }
+    }
+
+    public synchronized boolean isV1() {
+        return !isV2();
+    }
+
+    public synchronized boolean isV2() {
+        return FlightRecorderServiceV2.isAvailable(this.handle);
+    }
+
+    public synchronized boolean isConnected() {
+        return this.rjmxConnection != null && this.rjmxConnection.isConnected();
+    }
+
+    public synchronized void connect() throws Exception {
+        if (isConnected()) {
+            return;
+        }
+        this.rjmxConnection = attemptConnect(connectionDescriptor);
         this.handle =
                 new DefaultConnectionHandle(
                         rjmxConnection,
                         "RJMX Connection",
-                        listeners.stream()
+                        closeListeners.stream()
                                 .map(
                                         l ->
                                                 new IConnectionListener() {
@@ -103,78 +183,29 @@ public class JFRConnection implements AutoCloseable {
                                                 })
                                 .collect(Collectors.toList())
                                 .toArray(new IConnectionListener[0]));
-        this.service = new FlightRecorderServiceFactory().getServiceInstance(handle);
     }
 
-    JFRConnection(ClientWriter cw, FileSystem fs, Environment env, IConnectionDescriptor cd)
-            throws Exception {
-        this(cw, fs, env, cd, List.of());
-    }
-
-    public IConnectionHandle getHandle() {
-        return this.handle;
-    }
-
-    public IFlightRecorderService getService() {
-        return this.service;
-    }
-
-    public TemplateService getTemplateService() {
-        return new MergedTemplateService(this, fs, env);
-    }
-
-    public long getApproximateServerTime(Clock clock) {
-        return this.rjmxConnection.getApproximateServerTime(clock.getWallTime());
-    }
-
-    public JMXServiceURL getJMXURL() throws IOException {
-        return this.rjmxConnection.getConnectionDescriptor().createJMXServiceURL();
-    }
-
-    public String getHost() {
+    public synchronized void disconnect() {
         try {
-            return ConnectionToolkit.getHostName(
-                    this.rjmxConnection.getConnectionDescriptor().createJMXServiceURL());
-        } catch (IOException e) {
-            cw.println(e);
-            return "unknown";
-        }
-    }
-
-    public int getPort() {
-        try {
-            return ConnectionToolkit.getPort(
-                    this.rjmxConnection.getConnectionDescriptor().createJMXServiceURL());
-        } catch (IOException e) {
-            cw.println(e);
-            return 0;
-        }
-    }
-
-    public boolean isV1() {
-        return !isV2();
-    }
-
-    public boolean isV2() {
-        return FlightRecorderServiceV2.isAvailable(this.handle);
-    }
-
-    public void disconnect() {
-        try {
-            this.handle.close();
+            if (this.handle != null) {
+                this.handle.close();
+            }
         } catch (IOException e) {
             cw.println(e);
         } finally {
-            this.rjmxConnection.close();
+            if (this.rjmxConnection != null) {
+                this.rjmxConnection.close();
+            }
         }
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         this.disconnect();
     }
 
-    protected RJMXConnection attemptConnect(IConnectionDescriptor cd) throws Exception {
+    protected synchronized RJMXConnection attemptConnect(IConnectionDescriptor cd)
+            throws Exception {
         try {
             RJMXConnection conn =
                     new RJMXConnection(cd, new ServerDescriptor(), JFRConnection::failConnection);
@@ -184,6 +215,7 @@ public class JFRConnection implements AutoCloseable {
             return conn;
         } catch (Exception e) {
             cw.println("connection attempt failed.");
+            closeListeners.forEach(Runnable::run);
             throw e;
         }
     }

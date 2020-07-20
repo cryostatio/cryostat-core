@@ -58,8 +58,8 @@ import org.openjdk.jmc.common.unit.IConstrainedMap;
 import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLModel;
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.model.EventConfiguration;
+import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
 
-import com.redhat.rhjmc.containerjfr.core.FlightRecorderException;
 import com.redhat.rhjmc.containerjfr.core.log.Logger;
 import com.redhat.rhjmc.containerjfr.core.net.JFRConnection;
 
@@ -77,44 +77,40 @@ public class RemoteTemplateService extends AbstractTemplateService implements Te
     }
 
     @Override
-    public Optional<Document> getXml(String templateName, TemplateType type)
-            throws FlightRecorderException {
+    public Optional<Document> getXml(String templateName, TemplateType type) throws Exception {
         if (!providedTemplateType().equals(type)) {
             return Optional.empty();
         }
-        try {
-            return conn.getService().getServerTemplates().stream()
-                    .map(xmlText -> Jsoup.parse(xmlText, "", Parser.xmlParser()))
-                    .filter(
-                            doc -> {
-                                Elements els = doc.getElementsByTag("configuration");
-                                if (els.isEmpty()) {
-                                    throw new MalformedXMLException(
-                                            "Document did not contain \"configuration\" element");
-                                }
-                                if (els.size() > 1) {
-                                    throw new MalformedXMLException(
-                                            "Document contains multiple \"configuration\" elements");
-                                }
-                                Element configuration = els.first();
-                                if (!configuration.hasAttr("label")) {
-                                    throw new MalformedXMLException(
-                                            "Configuration element did not have \"label\" attribute");
-                                }
-                                return configuration.attr("label").equals(templateName);
-                            })
-                    .findFirst();
-        } catch (org.openjdk.jmc.rjmx.services.jfr.FlightRecorderException e) {
-            throw new FlightRecorderException(e);
-        }
+        return conn.getService().getServerTemplates().stream()
+                .map(xmlText -> Jsoup.parse(xmlText, "", Parser.xmlParser()))
+                .filter(
+                        doc -> {
+                            Elements els = doc.getElementsByTag("configuration");
+                            if (els.isEmpty()) {
+                                throw new MalformedXMLException(
+                                        "Document did not contain \"configuration\" element");
+                            }
+                            if (els.size() > 1) {
+                                throw new MalformedXMLException(
+                                        "Document contains multiple \"configuration\" elements");
+                            }
+                            Element configuration = els.first();
+                            if (!configuration.hasAttr("label")) {
+                                throw new MalformedXMLException(
+                                        "Configuration element did not have \"label\" attribute");
+                            }
+                            return configuration.attr("label").equals(templateName);
+                        })
+                .findFirst();
     }
 
     @Override
     public Optional<IConstrainedMap<EventOptionID>> getEvents(
-            String templateName, TemplateType type) throws FlightRecorderException {
+            String templateName, TemplateType type) throws Exception {
         if (!providedTemplateType().equals(type)) {
             return Optional.empty();
         }
+        IFlightRecorderService service = conn.getService();
         return getTemplateModels().stream()
                 .filter(
                         m ->
@@ -131,28 +127,23 @@ public class RemoteTemplateService extends AbstractTemplateService implements Te
                         model ->
                                 new EventConfiguration(model)
                                         .getEventOptions(
-                                                conn.getService()
-                                                        .getDefaultEventOptions()
+                                                service.getDefaultEventOptions()
                                                         .emptyWithSameConstraints()));
     }
 
     @Override
-    protected List<XMLModel> getTemplateModels() throws FlightRecorderException {
-        try {
-            return conn.getService().getServerTemplates().stream()
-                    .map(
-                            xmlText -> {
-                                try {
-                                    return EventConfiguration.createModel(xmlText);
-                                } catch (ParseException | IOException e) {
-                                    Logger.INSTANCE.warn(e);
-                                    return null;
-                                }
-                            })
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new FlightRecorderException(e);
-        }
+    protected List<XMLModel> getTemplateModels() throws Exception {
+        return conn.getService().getServerTemplates().stream()
+                .map(
+                        xmlText -> {
+                            try {
+                                return EventConfiguration.createModel(xmlText);
+                            } catch (ParseException | IOException e) {
+                                Logger.INSTANCE.warn(e);
+                                return null;
+                            }
+                        })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 }

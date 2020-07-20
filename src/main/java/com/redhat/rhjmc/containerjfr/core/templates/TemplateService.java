@@ -49,15 +49,12 @@ import org.jsoup.nodes.Document;
 import org.openjdk.jmc.common.unit.IConstrainedMap;
 import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
 
-import com.redhat.rhjmc.containerjfr.core.FlightRecorderException;
-
 public interface TemplateService {
 
-    List<Template> getTemplates() throws FlightRecorderException;
+    List<Template> getTemplates() throws Exception;
 
-    Optional<Document> getXml(String templateName, TemplateType type)
-            throws FlightRecorderException;
+    Optional<Document> getXml(String templateName, TemplateType type) throws Exception;
 
     Optional<IConstrainedMap<EventOptionID>> getEvents(String templateName, TemplateType type)
-            throws FlightRecorderException;
+            throws Exception;
 }

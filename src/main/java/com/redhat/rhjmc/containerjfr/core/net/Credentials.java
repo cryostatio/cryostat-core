@@ -41,45 +41,28 @@
  */
 package com.redhat.rhjmc.containerjfr.core.net;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+public class Credentials {
 
-import javax.management.remote.JMXServiceURL;
+    private final String username;
+    private final String password;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import org.openjdk.jmc.rjmx.internal.WrappedConnectionException;
-
-import com.redhat.rhjmc.containerjfr.core.sys.Environment;
-import com.redhat.rhjmc.containerjfr.core.sys.FileSystem;
-import com.redhat.rhjmc.containerjfr.core.tui.ClientWriter;
-
-@ExtendWith(MockitoExtension.class)
-class JFRConnectionToolkitTest {
-
-    JFRConnectionToolkit toolkit;
-    @Mock ClientWriter cw;
-    @Mock FileSystem fs;
-    @Mock Environment env;
-
-    @BeforeEach
-    void setup() {
-        toolkit = new JFRConnectionToolkit(cw, fs, env);
+    public Credentials(String username, String password) {
+        this.username = username;
+        this.password = password;
     }
 
-    @ParameterizedTest
-    @ValueSource(
-            strings = {
-                "service:jmx:rmi:///jndi/rmi://container-jfr:9091/jmxrmi",
-                "service:jmx:rmi:///jndi/rmi://localhost/jmxrmi"
-            })
-    void shouldThrowInTestEnvironment(String s) {
-        assertThrows(
-                WrappedConnectionException.class,
-                () -> toolkit.connect(new JMXServiceURL(s)).connect());
+    String getUsername() {
+        return username;
+    }
+
+    String getPassword() {
+        return password;
+    }
+
+    @Override
+    public final String toString() {
+        // Don't override or modify this to include actual contents. This should be kept in-memory
+        // for as short a time as possible and never logged
+        return super.toString();
     }
 }

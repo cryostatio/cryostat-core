@@ -58,13 +58,12 @@ import com.redhat.rhjmc.containerjfr.core.net.JFRConnection;
 public class EventOptionsCustomizer {
 
     private final JFRConnection connection;
-    private final IMutableConstrainedMap<EventOptionID> map;
+    private IMutableConstrainedMap<EventOptionID> map;
     private Map<IEventTypeID, Map<String, IOptionDescriptor<?>>> knownTypes;
     private Map<String, IEventTypeID> eventIds;
 
     public EventOptionsCustomizer(JFRConnection connection) {
         this.connection = connection;
-        this.map = connection.getService().getDefaultEventOptions().emptyWithSameConstraints();
     }
 
     public EventOptionsCustomizer set(String typeId, String option, String value)
@@ -93,7 +92,10 @@ public class EventOptionsCustomizer {
         return this;
     }
 
-    public IConstrainedMap<EventOptionID> asMap() {
+    public IConstrainedMap<EventOptionID> asMap() throws FlightRecorderException {
+        if (!isInitialized()) {
+            initialize();
+        }
         return map.mutableCopy();
     }
 
@@ -102,9 +104,14 @@ public class EventOptionsCustomizer {
     }
 
     private void initialize() throws FlightRecorderException {
-        knownTypes = new HashMap<>();
-        eventIds = new HashMap<>();
         try {
+            this.map =
+                    this.connection
+                            .getService()
+                            .getDefaultEventOptions()
+                            .emptyWithSameConstraints();
+            this.knownTypes = new HashMap<>();
+            this.eventIds = new HashMap<>();
             for (IEventTypeInfo eventTypeInfo : connection.getService().getAvailableEventTypes()) {
                 eventIds.put(
                         eventTypeInfo.getEventTypeID().getFullKey(),
@@ -113,7 +120,7 @@ public class EventOptionsCustomizer {
                         eventTypeInfo.getEventTypeID(),
                         new HashMap<>(eventTypeInfo.getOptionDescriptors()));
             }
-        } catch (org.openjdk.jmc.rjmx.services.jfr.FlightRecorderException e) {
+        } catch (Exception e) {
             throw new FlightRecorderException(e);
         }
     }
