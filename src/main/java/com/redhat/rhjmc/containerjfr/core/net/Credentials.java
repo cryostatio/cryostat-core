@@ -41,6 +41,9 @@
  */
 package com.redhat.rhjmc.containerjfr.core.net;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 public class Credentials {
 
     private final String username;
@@ -64,5 +67,28 @@ public class Credentials {
         // Don't override or modify this to include actual contents. This should be kept in-memory
         // for as short a time as possible and never logged
         return super.toString();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+        }
+        if (other == this) {
+            return true;
+        }
+        if (!(other instanceof Credentials)) {
+            return false;
+        }
+        Credentials c = (Credentials) other;
+        return new EqualsBuilder()
+                .append(username, c.username)
+                .append(password, c.password)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder().append(username).append(password).hashCode();
     }
 }
