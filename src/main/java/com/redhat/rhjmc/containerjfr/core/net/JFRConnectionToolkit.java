@@ -41,11 +41,13 @@
  */
 package com.redhat.rhjmc.containerjfr.core.net;
 
+import java.net.MalformedURLException;
 import java.util.List;
 
 import javax.management.remote.JMXServiceURL;
 
 import org.openjdk.jmc.rjmx.ConnectionDescriptorBuilder;
+import org.openjdk.jmc.rjmx.ConnectionToolkit;
 
 import com.redhat.rhjmc.containerjfr.core.sys.Environment;
 import com.redhat.rhjmc.containerjfr.core.sys.FileSystem;
@@ -82,5 +84,21 @@ public class JFRConnectionToolkit {
                             .password(credentials.getPassword());
         }
         return new JFRConnection(cw, fs, env, connectionDescriptorBuilder.build(), listeners);
+    }
+
+    public String getHostName(JMXServiceURL url) {
+        return ConnectionToolkit.getHostName(url);
+    }
+
+    public static int getPort(JMXServiceURL url) {
+        return ConnectionToolkit.getPort(url);
+    }
+
+    public JMXServiceURL createServiceURL(String host, int port) throws MalformedURLException {
+        return ConnectionToolkit.createServiceURL(host, port);
+    }
+
+    public static int getDefaultPort() {
+        return ConnectionToolkit.getDefaultPort();
     }
 }
