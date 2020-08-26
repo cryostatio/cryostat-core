@@ -90,7 +90,7 @@ public class JFRConnectionToolkit {
         return ConnectionToolkit.getHostName(url);
     }
 
-    public static int getPort(JMXServiceURL url) {
+    public int getPort(JMXServiceURL url) {
         return ConnectionToolkit.getPort(url);
     }
 
@@ -98,7 +98,7 @@ public class JFRConnectionToolkit {
         return ConnectionToolkit.createServiceURL(host, port);
     }
 
-    public static int getDefaultPort() {
+    public int getDefaultPort() {
         return ConnectionToolkit.getDefaultPort();
     }
 }
