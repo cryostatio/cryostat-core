@@ -41,11 +41,19 @@
  */
 package com.redhat.rhjmc.containerjfr.core.net;
 
+import java.io.IOException;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.OperatingSystemMXBean;
+import java.lang.management.RuntimeMXBean;
+import java.lang.management.ThreadMXBean;
+import java.net.MalformedURLException;
 import java.util.List;
 
+import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXServiceURL;
 
 import org.openjdk.jmc.rjmx.ConnectionDescriptorBuilder;
+import org.openjdk.jmc.rjmx.ConnectionToolkit;
 
 import com.redhat.rhjmc.containerjfr.core.sys.Environment;
 import com.redhat.rhjmc.containerjfr.core.sys.FileSystem;
@@ -82,5 +90,38 @@ public class JFRConnectionToolkit {
                             .password(credentials.getPassword());
         }
         return new JFRConnection(cw, fs, env, connectionDescriptorBuilder.build(), listeners);
+    }
+
+    public String getHostName(JMXServiceURL url) {
+        return ConnectionToolkit.getHostName(url);
+    }
+
+    public int getPort(JMXServiceURL url) {
+        return ConnectionToolkit.getPort(url);
+    }
+
+    public JMXServiceURL createServiceURL(String host, int port) throws MalformedURLException {
+        return ConnectionToolkit.createServiceURL(host, port);
+    }
+
+    public int getDefaultPort() {
+        return ConnectionToolkit.getDefaultPort();
+    }
+
+    public MemoryMXBean getMemoryBean(MBeanServerConnection server) throws IOException {
+        return ConnectionToolkit.getMemoryBean(server);
+    }
+
+    public RuntimeMXBean getRuntimeBean(MBeanServerConnection server) throws IOException {
+        return ConnectionToolkit.getRuntimeBean(server);
+    }
+
+    public ThreadMXBean getThreadBean(MBeanServerConnection server) throws IOException {
+        return ConnectionToolkit.getThreadBean(server);
+    }
+
+    public OperatingSystemMXBean getOperatingSystemBean(MBeanServerConnection server)
+            throws IOException {
+        return ConnectionToolkit.getOperatingSystemBean(server);
     }
 }

@@ -41,11 +41,14 @@
  */
 package com.redhat.rhjmc.containerjfr.core.net;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import javax.management.remote.JMXServiceURL;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -81,5 +84,29 @@ class JFRConnectionToolkitTest {
         assertThrows(
                 WrappedConnectionException.class,
                 () -> toolkit.connect(new JMXServiceURL(s)).connect());
+    }
+
+    @Test
+    void shouldGetHostName() throws Exception {
+        JMXServiceURL jmxServiceUrl = new JMXServiceURL("rmi", "localhost", 8080);
+        assertEquals(toolkit.getHostName(jmxServiceUrl), "localhost");
+    }
+
+    @Test
+    void shouldGetPort() throws Exception {
+        JMXServiceURL jmxServiceUrl = new JMXServiceURL("rmi", "localhost", 8080);
+        assertEquals(toolkit.getPort(jmxServiceUrl), 8080);
+    }
+
+    @Test
+    void shouldCreateServiceURL() throws Exception {
+        JMXServiceURL jmxServiceUrl =
+                new JMXServiceURL("rmi", "", 0, "/jndi/rmi://localhost:8080/jmxrmi");
+        assertTrue(toolkit.createServiceURL("localhost", 8080).equals(jmxServiceUrl));
+    }
+
+    @Test
+    void shouldGetDefaultPort() {
+        assertEquals(toolkit.getDefaultPort(), 7091);
     }
 }
