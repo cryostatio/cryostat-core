@@ -41,9 +41,15 @@
  */
 package com.redhat.rhjmc.containerjfr.core.net;
 
+import java.io.IOException;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.OperatingSystemMXBean;
+import java.lang.management.RuntimeMXBean;
+import java.lang.management.ThreadMXBean;
 import java.net.MalformedURLException;
 import java.util.List;
 
+import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXServiceURL;
 
 import org.openjdk.jmc.rjmx.ConnectionDescriptorBuilder;
@@ -100,5 +106,22 @@ public class JFRConnectionToolkit {
 
     public int getDefaultPort() {
         return ConnectionToolkit.getDefaultPort();
+    }
+
+    public MemoryMXBean getMemoryBean(MBeanServerConnection server) throws IOException {
+        return ConnectionToolkit.getMemoryBean(server);
+    }
+
+    public RuntimeMXBean getRuntimeBean(MBeanServerConnection server) throws IOException {
+        return ConnectionToolkit.getRuntimeBean(server);
+    }
+
+    public ThreadMXBean getThreadBean(MBeanServerConnection server) throws IOException {
+        return ConnectionToolkit.getThreadBean(server);
+    }
+
+    public OperatingSystemMXBean getOperatingSystemBean(MBeanServerConnection server)
+            throws IOException {
+        return ConnectionToolkit.getOperatingSystemBean(server);
     }
 }
