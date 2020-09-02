@@ -5,7 +5,7 @@
 <modelVersion>4.0.0</modelVersion>
 <groupId>com.redhat.rhjmc</groupId>
 <artifactId>containerjfr-core</artifactId>
-<version>0.14.1</version>
+<version>0.15.0</version>
 <packaging>jar</packaging>
 <name>containerjfr-core</name>
 <url>http://maven.apache.org</url>
