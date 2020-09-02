@@ -1,6 +1,6 @@
 /*-
  * #%L
- * Container JFR
+ * Container JFR Core
  * %%
  * Copyright (C) 2020 Red Hat, Inc.
  * %%
