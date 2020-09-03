@@ -44,66 +44,76 @@ package com.redhat.rhjmc.containerjfr.core;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Callable;
+import java.util.function.Function;
 
-import org.openjdk.jmc.common.unit.IConstrainedMap;
 import org.openjdk.jmc.flightrecorder.configuration.recording.RecordingOptionsBuilder;
 
-import com.redhat.rhjmc.containerjfr.core.net.JFRConnection;
+import com.redhat.rhjmc.containerjfr.core.tui.ClientWriter;
+import com.redhat.rhjmc.containerjfr.core.util.CheckedConsumer;
 
-public class RecordingOptionsCustomizer {
+public class RecordingOptionsCustomizer
+        implements Function<RecordingOptionsBuilder, RecordingOptionsBuilder> {
 
-    private final Map<OptionKey, String> customizers;
-    private final Callable<RecordingOptionsBuilder> builderProvider;
+    private final Map<OptionKey, CustomizerConsumer> customizers;
+    private final ClientWriter cw;
 
-    public RecordingOptionsCustomizer(JFRConnection connection) {
-        this(() -> new RecordingOptionsBuilder(connection.getService()));
-    }
-
-    // testing-only constructor
-    RecordingOptionsCustomizer(Callable<RecordingOptionsBuilder> builderProvider) {
+    public RecordingOptionsCustomizer(ClientWriter cw) {
         this.customizers = new HashMap<>();
-        this.builderProvider = builderProvider;
+        this.cw = cw;
     }
 
-    public RecordingOptionsCustomizer set(OptionKey key, String value) {
-        customizers.put(key, value);
-        return this;
+    @Override
+    public RecordingOptionsBuilder apply(RecordingOptionsBuilder builder) {
+        this.customizers.values().forEach(c -> c.accept(builder));
+        return builder;
     }
 
-    public RecordingOptionsCustomizer unset(OptionKey key) {
+    public void set(OptionKey key, String value) {
+        CustomizerConsumer consumer = key.mapper.apply(value);
+        consumer.setClientWriter(cw);
+        customizers.put(key, consumer);
+    }
+
+    public void unset(OptionKey key) {
         customizers.remove(key);
-        return this;
-    }
-
-    public IConstrainedMap<String> asMap() throws FlightRecorderException {
-        try {
-            RecordingOptionsBuilder builder = builderProvider.call();
-            for (Map.Entry<OptionKey, String> entry : customizers.entrySet()) {
-                builder.addByKey(entry.getKey().getOptionName(), entry.getValue());
-            }
-            return builder.build();
-        } catch (Exception e) {
-            throw new FlightRecorderException(e);
-        }
     }
 
     public enum OptionKey {
-        NAME("name"),
-        DURATION("duration"),
-        MAX_AGE("maxAge"),
-        MAX_SIZE("maxSize"),
-        TO_DISK("toDisk"),
+        MAX_AGE(
+                "maxAge",
+                v ->
+                        new CustomizerConsumer() {
+                            @Override
+                            public void acceptThrows(RecordingOptionsBuilder t) throws Exception {
+                                t.maxAge(Long.parseLong(v));
+                            }
+                        }),
+        MAX_SIZE(
+                "maxSize",
+                v ->
+                        new CustomizerConsumer() {
+                            @Override
+                            public void acceptThrows(RecordingOptionsBuilder t) throws Exception {
+                                t.maxSize(Long.parseLong(v));
+                            }
+                        }),
+        TO_DISK(
+                "toDisk",
+                v ->
+                        new CustomizerConsumer() {
+                            @Override
+                            public void acceptThrows(RecordingOptionsBuilder t) throws Exception {
+                                t.toDisk(Boolean.parseBoolean(v));
+                            }
+                        }),
         ;
 
         private final String name;
+        private final Function<String, CustomizerConsumer> mapper;
 
-        OptionKey(String name) {
+        OptionKey(String name, Function<String, CustomizerConsumer> mapper) {
             this.name = name;
-        }
-
-        public String getOptionName() {
-            return this.name;
+            this.mapper = mapper;
         }
 
         public static Optional<OptionKey> fromOptionName(String optionName) {
@@ -114,6 +124,20 @@ public class RecordingOptionsCustomizer {
                 }
             }
             return Optional.ofNullable(key);
+        }
+    }
+
+    private abstract static class CustomizerConsumer
+            implements CheckedConsumer<RecordingOptionsBuilder> {
+        private Optional<ClientWriter> cw = Optional.empty();
+
+        void setClientWriter(ClientWriter cw) {
+            this.cw = Optional.of(cw);
+        }
+
+        @Override
+        public void handleException(Exception e) {
+            cw.ifPresent(w -> w.println(e));
         }
     }
 }
