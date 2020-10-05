@@ -5,7 +5,7 @@
 <modelVersion>4.0.0</modelVersion>
 <groupId>com.redhat.rhjmc</groupId>
 <artifactId>containerjfr-core</artifactId>
-<version>0.15.0</version>
+<version>0.15.1</version>
 <packaging>jar</packaging>
 <name>containerjfr-core</name>
 <url>http://maven.apache.org</url>
@@ -37,6 +37,7 @@
   <org.mockito.version>3.2.4</org.mockito.version>
   <org.jacoco.maven.plugin.version>0.8.5</org.jacoco.maven.plugin.version>
   <com.diffplug.spotless.maven.plugin.version>1.27.0</com.diffplug.spotless.maven.plugin.version>
+  <org.slf4j.version>1.7.30</org.slf4j.version>
 </properties>
 
 <dependencies>
@@ -94,6 +95,11 @@
     <groupId>com.github.spotbugs</groupId>
     <artifactId>spotbugs-annotations</artifactId>
     <version>${com.github.spotbugs.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-jdk14</artifactId>
+    <version>${org.slf4j.version}</version>
   </dependency>
 
   <!-- test deps -->
