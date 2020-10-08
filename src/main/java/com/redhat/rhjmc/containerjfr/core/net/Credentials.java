@@ -46,8 +46,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class Credentials {
 
-    private final String username;
-    private final String password;
+    private final transient String username;
+    private final transient String password;
 
     public Credentials(String username, String password) {
         this.username = username;
