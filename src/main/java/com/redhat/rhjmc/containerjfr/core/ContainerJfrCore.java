@@ -66,11 +66,11 @@ public class ContainerJfrCore {
         String vertxLoggerLevelProperty = "io.vertx.level=" + Level.OFF.getName();
 
         String config = jmcLoggerLevelProperty + "\n" + vertxLoggerLevelProperty;
-
-        LogManager.getLogManager()
-                .updateConfiguration(
-                        new ByteArrayInputStream(config.getBytes(StandardCharsets.US_ASCII)),
-                        k -> ((o, n) -> n != null ? n : o));
+        try (ByteArrayInputStream configStream =
+                new ByteArrayInputStream(config.getBytes(StandardCharsets.US_ASCII))) {
+            LogManager.getLogManager()
+                    .updateConfiguration(configStream, k -> ((o, n) -> n != null ? n : o));
+        }
 
         RegistryFactory.setDefaultRegistryProvider(new RegistryProvider());
     }
