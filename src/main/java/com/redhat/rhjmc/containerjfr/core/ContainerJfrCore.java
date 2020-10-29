@@ -41,10 +41,8 @@
  */
 package com.redhat.rhjmc.containerjfr.core;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.logging.Level;
+import java.io.InputStream;
 import java.util.logging.LogManager;
 
 import org.eclipse.core.runtime.CoreException;
@@ -62,14 +60,10 @@ public class ContainerJfrCore {
                 "org.openjdk.jmc.common.security.manager",
                 SecurityManager.class.getCanonicalName());
 
-        String jmcLoggerLevelProperty = "org.openjdk.jmc.level=" + Level.OFF.getName();
-        String vertxLoggerLevelProperty = "io.vertx.level=" + Level.OFF.getName();
-
-        String config = jmcLoggerLevelProperty + "\n" + vertxLoggerLevelProperty;
-        try (ByteArrayInputStream configStream =
-                new ByteArrayInputStream(config.getBytes(StandardCharsets.US_ASCII))) {
+        try (InputStream config =
+                ContainerJfrCore.class.getResourceAsStream("/config/logging.properties")) {
             LogManager.getLogManager()
-                    .updateConfiguration(configStream, k -> ((o, n) -> n != null ? n : o));
+                    .updateConfiguration(config, k -> ((o, n) -> o != null ? o : n));
         }
 
         RegistryFactory.setDefaultRegistryProvider(new RegistryProvider());
