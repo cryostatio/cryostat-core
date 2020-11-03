@@ -54,8 +54,7 @@ import com.redhat.rhjmc.containerjfr.core.jmc.SecurityManager;
 public class ContainerJfrCore {
     private ContainerJfrCore() {}
 
-    public static void initialize()
-            throws CoreException, SecurityException, NullPointerException, IOException {
+    public static void initialize() throws CoreException, IOException {
         System.setProperty(
                 "org.openjdk.jmc.common.security.manager",
                 SecurityManager.class.getCanonicalName());
