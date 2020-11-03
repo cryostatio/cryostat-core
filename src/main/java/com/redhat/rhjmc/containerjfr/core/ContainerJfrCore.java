@@ -41,6 +41,8 @@
  */
 package com.redhat.rhjmc.containerjfr.core;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.logging.LogManager;
 
 import org.eclipse.core.runtime.CoreException;
@@ -52,11 +54,17 @@ import com.redhat.rhjmc.containerjfr.core.jmc.SecurityManager;
 public class ContainerJfrCore {
     private ContainerJfrCore() {}
 
-    public static void initialize() throws CoreException {
+    public static void initialize() throws CoreException, IOException {
         System.setProperty(
                 "org.openjdk.jmc.common.security.manager",
                 SecurityManager.class.getCanonicalName());
-        LogManager.getLogManager().reset();
+
+        try (InputStream config =
+                ContainerJfrCore.class.getResourceAsStream("/config/logging.properties")) {
+            LogManager.getLogManager()
+                    .updateConfiguration(config, k -> ((o, n) -> o != null ? o : n));
+        }
+
         RegistryFactory.setDefaultRegistryProvider(new RegistryProvider());
     }
 }
