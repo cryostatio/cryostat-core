@@ -42,9 +42,13 @@
 package com.redhat.rhjmc.containerjfr.core.net.discovery;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.openjdk.jmc.jdp.client.DiscoveryEvent.Kind;
 import org.openjdk.jmc.jdp.client.JDPClient;
 
 import com.redhat.rhjmc.containerjfr.core.log.Logger;
@@ -53,10 +57,21 @@ public class JvmDiscoveryClient {
 
     private final Logger logger;
     private final JDPClient jdp;
+    private final Set<Consumer<JvmDiscoveryEvent>> eventListeners;
 
     public JvmDiscoveryClient(Logger logger) {
         this.logger = logger;
         this.jdp = new JDPClient();
+        this.eventListeners = new HashSet<>();
+
+        this.jdp.addDiscoveryListener(
+                evt -> {
+                    DiscoveredJvmDescriptor desc =
+                            new DiscoveredJvmDescriptor(evt.getDiscoverable().getPayload());
+                    JvmDiscoveryEvent jde =
+                            new JvmDiscoveryEvent(EventKind.fromJmcKind(evt.getKind()), desc);
+                    eventListeners.forEach(c -> c.accept(jde));
+                });
     }
 
     public void start() throws IOException {
@@ -69,9 +84,55 @@ public class JvmDiscoveryClient {
         this.jdp.stop();
     }
 
+    public void addListener(Consumer<JvmDiscoveryEvent> listener) {
+        this.eventListeners.add(listener);
+    }
+
+    public boolean removeListener(Consumer<JvmDiscoveryEvent> listener) {
+        return this.eventListeners.remove(listener);
+    }
+
     public List<DiscoveredJvmDescriptor> getDiscoveredJvmDescriptors() {
         return this.jdp.getDiscoverables().stream()
                 .map(d -> new DiscoveredJvmDescriptor(d.getPayload()))
                 .collect(Collectors.toList());
+    }
+
+    public static class JvmDiscoveryEvent {
+        private final EventKind eventKind;
+        private final DiscoveredJvmDescriptor discoveredJvmDescriptor;
+
+        JvmDiscoveryEvent(EventKind eventKind, DiscoveredJvmDescriptor discoveredJvmDescriptor) {
+            this.eventKind = eventKind;
+            this.discoveredJvmDescriptor = discoveredJvmDescriptor;
+        }
+
+        public EventKind getEventKind() {
+            return eventKind;
+        }
+
+        public DiscoveredJvmDescriptor getJvmDescriptor() {
+            return discoveredJvmDescriptor;
+        }
+    }
+
+    public enum EventKind {
+        CHANGED,
+        FOUND,
+        LOST,
+        ;
+
+        private static EventKind fromJmcKind(Kind kind) {
+            switch (kind) {
+                case CHANGED:
+                    return EventKind.CHANGED;
+                case FOUND:
+                    return EventKind.FOUND;
+                case LOST:
+                    return EventKind.LOST;
+                default:
+                    throw new IllegalArgumentException(kind.toString());
+            }
+        }
     }
 }
