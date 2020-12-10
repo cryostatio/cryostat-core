@@ -67,16 +67,6 @@
     <version>${jmc.version}</version>
   </dependency>
   <dependency>
-    <groupId>org.openjdk.jmc</groupId>
-    <artifactId>org.openjdk.jmc.flightrecorder.controlpanel.ui</artifactId>
-    <version>${jmc.version}</version>
-  </dependency>
-  <dependency>
-    <groupId>org.openjdk.jmc</groupId>
-    <artifactId>org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration</artifactId>
-    <version>${jmc.version}</version>
-  </dependency>
-  <dependency>
     <groupId>org.eclipse.platform</groupId>
     <artifactId>org.eclipse.core.runtime</artifactId>
     <version>${org.eclipse.core.runtime.version}</version>
@@ -254,6 +244,9 @@
           <root>src/main/java</root>
           <root>src/test/java</root>
         </roots>
+        <excludes>
+          <exclude>**/org/openjdk/jmc/**</exclude>
+        </excludes>
       </configuration>
       <executions>
         <execution>
