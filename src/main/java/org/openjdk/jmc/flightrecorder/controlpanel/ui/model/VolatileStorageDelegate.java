@@ -35,7 +35,6 @@ package org.openjdk.jmc.flightrecorder.controlpanel.ui.model;
 import java.io.InputStream;
 
 import org.openjdk.jmc.flightrecorder.configuration.spi.IConfigurationStorageDelegate;
-import org.openjdk.jmc.flightrecorder.controlpanel.ui.messages.internal.Messages;
 
 /**
  * Storage delegate for templates that cannot be saved back to where they came from. In other words,
@@ -43,13 +42,13 @@ import org.openjdk.jmc.flightrecorder.controlpanel.ui.messages.internal.Messages
  */
 public class VolatileStorageDelegate implements IConfigurationStorageDelegate {
 	private static VolatileStorageDelegate LAST_STARTED = new VolatileStorageDelegate(
-			Messages.VOLATILE_CONFIGURATION_LAST_STARTED, false);
+			"last started", false);
 	private static VolatileStorageDelegate ON_SERVER = new VolatileStorageDelegate(
-			Messages.VOLATILE_CONFIGURATION_ON_SERVER, false);
+			"on server", false);
 	private static VolatileStorageDelegate RUNNING_RECORDING = new VolatileStorageDelegate(
-			Messages.VOLATILE_CONFIGURATION_RUNNING_RECORDING, false);
+			"running recording", false);
 	private static VolatileStorageDelegate WORKING_COPY = new VolatileStorageDelegate(
-			Messages.VOLATILE_CONFIGURATION_WORKING_COPY, true);
+			"working copy", true);
 
 	private final String locationInfo;
 	private final boolean deleteable;
