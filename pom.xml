@@ -15,7 +15,7 @@
   <java.version>11</java.version>
   <maven.compiler.target>${java.version}</maven.compiler.target>
   <maven.compiler.source>${java.version}</maven.compiler.source>
-  <jmc.version>7.1.1-SNAPSHOT</jmc.version>
+  <jmc.version>7.1.1</jmc.version>
 
   <org.apache.maven.plugins.compiler.version>3.6.1</org.apache.maven.plugins.compiler.version>
   <org.apache.maven.plugins.surefire.version>3.0.0-M4</org.apache.maven.plugins.surefire.version>
@@ -42,11 +42,6 @@
 
 <dependencies>
   <dependency>
-    <groupId>org.openjdk.jmc</groupId>
-    <artifactId>org.openjdk.jmc.jdp</artifactId>
-    <version>${jmc.version}</version>
-  </dependency>
-  <dependency>
     <groupId>org.eclipse.platform</groupId>
     <artifactId>org.eclipse.core.runtime</artifactId>
     <version>${org.eclipse.core.runtime.version}</version>
@@ -54,7 +49,17 @@
   <dependency>
     <groupId>org.openjdk.jmc</groupId>
     <artifactId>common</artifactId>
-    <version>7.1.1</version> <!-- FIXME -->
+    <version>${jmc.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.openjdk.jmc</groupId>
+    <artifactId>flightrecorder</artifactId>
+    <version>${jmc.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.openjdk.jmc</groupId>
+    <artifactId>flightrecorder.rules</artifactId>
+    <version>${jmc.version}</version>
   </dependency>
   <dependency>
     <groupId>org.apache.commons</groupId>
