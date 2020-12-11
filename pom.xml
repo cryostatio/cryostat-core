@@ -43,11 +43,6 @@
 <dependencies>
   <dependency>
     <groupId>org.openjdk.jmc</groupId>
-    <artifactId>org.openjdk.jmc.flightrecorder.configuration</artifactId>
-    <version>${jmc.version}</version>
-  </dependency>
-  <dependency>
-    <groupId>org.openjdk.jmc</groupId>
     <artifactId>org.openjdk.jmc.jdp</artifactId>
     <version>${jmc.version}</version>
   </dependency>
@@ -60,6 +55,11 @@
     <groupId>org.eclipse.platform</groupId>
     <artifactId>org.eclipse.core.runtime</artifactId>
     <version>${org.eclipse.core.runtime.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.openjdk.jmc</groupId>
+    <artifactId>common</artifactId>
+    <version>7.1.1</version> <!-- FIXME -->
   </dependency>
   <dependency>
     <groupId>org.apache.commons</groupId>
