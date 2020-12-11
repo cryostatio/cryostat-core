@@ -48,16 +48,6 @@
   </dependency>
   <dependency>
     <groupId>org.openjdk.jmc</groupId>
-    <artifactId>org.openjdk.jmc.rjmx</artifactId>
-    <version>${jmc.version}</version>
-  </dependency>
-  <dependency>
-    <groupId>org.openjdk.jmc</groupId>
-    <artifactId>org.openjdk.jmc.rjmx.services.jfr</artifactId>
-    <version>${jmc.version}</version>
-  </dependency>
-  <dependency>
-    <groupId>org.openjdk.jmc</groupId>
     <artifactId>org.openjdk.jmc.jdp</artifactId>
     <version>${jmc.version}</version>
   </dependency>

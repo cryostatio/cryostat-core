@@ -91,6 +91,7 @@ import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XM
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLModel;
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLTag;
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLTagInstance;
+import org.openjdk.jmc.flightrecorder.controlpanel.ui.messages.internal.Messages;
 import org.openjdk.jmc.rjmx.services.jfr.IEventTypeInfo;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -131,7 +132,7 @@ public final class EventConfiguration implements IEventConfiguration {
 				version.attributeValue());
 		XMLModel model = XMLModel.createEmpty(JFCXMLValidator.getValidator(), attributes);
 		IEventConfiguration config = new EventConfiguration(model, delegate, null);
-		config.setName("New Template");
+		config.setName(Messages.RECORDING_TEMPLATE_NEW_NAME);
 		return config;
 	}
 
