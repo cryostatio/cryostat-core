@@ -43,10 +43,10 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.Platform;
+//import org.eclipse.core.runtime.CoreException;
+//import org.eclipse.core.runtime.IConfigurationElement;
+//import org.eclipse.core.runtime.IExtensionRegistry;
+//import org.eclipse.core.runtime.Platform;
 import org.openjdk.jmc.rjmx.IConnectionHandle;
 import org.openjdk.jmc.rjmx.RJMXPlugin;
 import org.openjdk.jmc.rjmx.services.IDummyService;
@@ -175,18 +175,20 @@ public class ServiceFactoryManager {
 //	}
 
 	private void initializeFromExtensions() {
-		IExtensionRegistry registry = Platform.getExtensionRegistry();
-		for (IConfigurationElement config : registry.getConfigurationElementsFor(EXTENSION_POINT)) {
-			if (config.getName().equals(EXTENSION_ELEMENT_SERVICE)) {
-				try {
-					IServiceFactory<?> factory = (IServiceFactory<?>) config
-							.createExecutableExtension(EXTENSION_ATTRIBUTE_FACTORY);
-					registerService(createServiceEntry(factory, config));
-				} catch (CoreException e) {
-					getLogger().log(Level.SEVERE, "Could not instantiate service factory!", e);
-				}
-			}
-		}
+//		IExtensionRegistry registry = Platform.getExtensionRegistry();
+//		for (IConfigurationElement config : registry.getConfigurationElementsFor(EXTENSION_POINT)) {
+//			if (config.getName().equals(EXTENSION_ELEMENT_SERVICE)) {
+//				try {
+//					IServiceFactory<?> factory = (IServiceFactory<?>) config
+//							.createExecutableExtension(EXTENSION_ATTRIBUTE_FACTORY);
+                    IServiceFactory<?> factory = new CommercialFeaturesServiceFactory();
+					//registerService(createServiceEntry(factory, config));
+                    registerService(createServiceEntry(factory));
+//				} catch (CoreException e) {
+//				    getLogger().log(Level.SEVERE, "Could not instantiate service factory!", e);
+//				}
+//			}
+//		}
 	}
 
 	private <T> void registerService(ServiceEntry<T> entry) {
@@ -202,9 +204,12 @@ public class ServiceFactoryManager {
 		factories.add(entry);
 	}
 
-	private <T> ServiceEntry<T> createServiceEntry(IServiceFactory<T> factory, IConfigurationElement config) {
-		String name = config.getAttribute(EXTENSION_ATTRIBUTE_NAME);
-		String description = config.getAttribute(EXTENSION_ATTRIBUTE_DESCRIPTION);
+//	private <T> ServiceEntry<T> createServiceEntry(IServiceFactory<T> factory, IConfigurationElement config) {
+	private <T> ServiceEntry<T> createServiceEntry(IServiceFactory<T> factory) {
+		//String name = config.getAttribute(EXTENSION_ATTRIBUTE_NAME);
+		String name = null;
+		//String description = config.getAttribute(EXTENSION_ATTRIBUTE_DESCRIPTION);
+		String description = null;
 		return new ServiceEntry<>(factory, name, description);
 	}
 }
