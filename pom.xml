@@ -47,11 +47,6 @@
     <version>${jmc.version}</version>
   </dependency>
   <dependency>
-    <groupId>org.openjdk.jmc</groupId>
-    <artifactId>org.openjdk.jmc.ui.common</artifactId>
-    <version>${jmc.version}</version>
-  </dependency>
-  <dependency>
     <groupId>org.eclipse.platform</groupId>
     <artifactId>org.eclipse.core.runtime</artifactId>
     <version>${org.eclipse.core.runtime.version}</version>
