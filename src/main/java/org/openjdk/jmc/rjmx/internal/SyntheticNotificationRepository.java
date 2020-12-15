@@ -57,16 +57,10 @@ import javax.management.ObjectName;
 import javax.management.QueryExp;
 import javax.management.ReflectionException;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.Platform;
-
 import org.openjdk.jmc.rjmx.ISyntheticNotification;
 import org.openjdk.jmc.rjmx.RJMXPlugin;
 import org.openjdk.jmc.rjmx.subscription.MRI;
+import org.openjdk.jmc.rjmx.subscription.internal.HotSpotGcNotification;
 
 public class SyntheticNotificationRepository {
 	private final Map<ObjectName, Set<SyntheticNotificationEntry>> mbeans = new HashMap<>();
@@ -146,21 +140,14 @@ public class SyntheticNotificationRepository {
 	}
 
 	void initializeFromExtensions() {
-		IExtensionRegistry er = Platform.getExtensionRegistry();
-		IExtensionPoint ep = er.getExtensionPoint("org.openjdk.jmc.rjmx.syntheticnotification"); //$NON-NLS-1$
-		IExtension[] extensions = ep.getExtensions();
 		List<SyntheticNotificationEntry> notificationCandidates = new ArrayList<>();
-		for (IExtension extension : extensions) {
-			IConfigurationElement[] configs = extension.getConfigurationElements();
-			for (IConfigurationElement config : configs) {
-				if (config.getName().equals("syntheticNotification")) { //$NON-NLS-1$
-					SyntheticNotificationEntry candidate = createEntry(config);
-					if (candidate != null) {
-						notificationCandidates.add(candidate);
-					}
-				}
-			}
-		}
+		
+		ISyntheticNotification notification = new HotSpotGcNotification();
+        MRI descriptor = MRI.createFromQualifiedName("notification://com.sun.management:type=GarbageCollectionAggregator/com.sun.management.gc.notification");
+        String description = "Sends an event every time a garbage collection has taken place.";
+        String type = "javax.management.openmbean.CompositeData";
+        notificationCandidates.add(new SyntheticNotificationEntry(notification, descriptor, description, type, ""));
+        
 		boolean hasResolved = true;
 		while (!notificationCandidates.isEmpty() && hasResolved) {
 			hasResolved = false;
@@ -211,22 +198,6 @@ public class SyntheticNotificationRepository {
 			mbeans.put(entry.getNotificationDescriptor().getObjectName(), notificationEntries);
 		}
 		notificationEntries.add(entry);
-	}
-
-	private SyntheticNotificationEntry createEntry(IConfigurationElement config) {
-		String notificationName = config.getAttribute("notificationName"); //$NON-NLS-1$
-		try {
-			ISyntheticNotification notification = (ISyntheticNotification) config.createExecutableExtension("class"); //$NON-NLS-1$
-			String description = config.getAttribute("description"); //$NON-NLS-1$
-			String type = config.getAttribute("type"); //$NON-NLS-1$
-			String message = config.getAttribute("message"); //$NON-NLS-1$
-			MRI descriptor = MRI.createFromQualifiedName(notificationName);
-			return new SyntheticNotificationEntry(notification, descriptor, description, type, message);
-		} catch (CoreException e) {
-			RJMXPlugin.getDefault().getLogger().log(Level.SEVERE,
-					"Could not create synthetic notification for " + notificationName, e); //$NON-NLS-1$
-			return null;
-		}
 	}
 
 	public boolean isInstanceOf(ObjectName name, String className) throws InstanceNotFoundException {

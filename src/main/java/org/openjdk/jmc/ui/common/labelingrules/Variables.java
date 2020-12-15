@@ -68,15 +68,15 @@ class Variables {
 
 			private String getLocalizedTypeStr(JVMType type) {
 				if (type == JVMType.JROCKIT) {
-					return Messages.NameConverter_JVM_TYPE_JROCKIT;
+					return "JRockit";
 				}
 				if (type == JVMType.HOTSPOT) {
-					return Messages.NameConverter_JVM_TYPE_HOTSPOT;
+					return "HotSpot";
 				}
 				if (type == JVMType.OTHER) {
-					return Messages.NameConverter_JVM_TYPE_OTHER;
+					return "Other";
 				}
-				return Messages.NameConverter_JVM_TYPE_UNKNOWN;
+				return "Unknown";
 			}
 		});
 		variables.put("UnsupportedStrJVMType", new IVariableEvaluator() { //$NON-NLS-1$
@@ -92,7 +92,7 @@ class Variables {
 
 			private String getLocalizedTypeStr(JVMType type) {
 				if (type == JVMType.JROCKIT) {
-					return Messages.NameConverter_JVM_TYPE_JROCKIT;
+					return "JRockit";
 				}
 				if (type == JVMType.HOTSPOT) {
 					return null;
@@ -100,7 +100,7 @@ class Variables {
 				if (type == JVMType.OTHER) {
 					return null;
 				}
-				return Messages.NameConverter_JVM_TYPE_UNKNOWN;
+				return "Unknown";
 			}
 		});
 		variables.put("StrJVMArch", new IVariableEvaluator() { //$NON-NLS-1$
@@ -116,15 +116,15 @@ class Variables {
 
 			private String getLocalizedArchStr(JVMArch arch) {
 				if (arch == JVMArch.BIT32) {
-					return Messages.NameConverter_JVM_ARCH_32BIT;
+					return "32-bit";
 				}
 				if (arch == JVMArch.BIT64) {
-					return Messages.NameConverter_JVM_ARCH_64BIT;
+					return "64-bit";
 				}
 				if (arch == JVMArch.OTHER) {
-					return Messages.NameConverter_JVM_ARCH_OTHER;
+					return "Other arch";
 				}
-				return Messages.NameConverter_JVM_ARCH_UNKNOWN;
+				return "Unknown";
 			}
 		});
 		variables.put("UnsupportedStrJVMArch", new IVariableEvaluator() { //$NON-NLS-1$
@@ -145,22 +145,22 @@ class Variables {
 					return null;
 				}
 				if (arch == JVMArch.BIT32) {
-					return Messages.NameConverter_JVM_ARCH_32BIT;
+					return "32-bit";
 				}
 				if (arch == JVMArch.BIT64) {
-					return Messages.NameConverter_JVM_ARCH_64BIT;
+					return "64-bit";
 				}
 				if (arch == JVMArch.OTHER) {
 					return null;
 				}
 				// Avoid showing double [Unknown]
-				return type == JVMType.UNKNOWN ? null : Messages.NameConverter_JVM_ARCH_UNKNOWN;
+				return type == JVMType.UNKNOWN ? null : "Unknown";
 			}
 		});
 		variables.put("StrDebug", new IVariableEvaluator() { //$NON-NLS-1$
 			@Override
 			public String evaluate(Object[] input) {
-				return "true".equals(input[ValueArrayInfo.DEBUG.getIndex()]) ? "[" + Messages.NameConverter_DEBUG + "]" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				return "true".equals(input[ValueArrayInfo.DEBUG.getIndex()]) ? "[Debug]" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						: ""; //$NON-NLS-1$
 			}
 		});

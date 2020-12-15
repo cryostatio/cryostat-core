@@ -37,14 +37,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.logging.Level;
 
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.Platform;
-import org.openjdk.jmc.ui.common.CorePlugin;
 import org.openjdk.jmc.ui.common.idesupport.IDESupportFactory;
 import org.openjdk.jmc.ui.common.jvm.JVMCommandLineToolkit;
 import org.openjdk.jmc.ui.common.jvm.JVMDescriptor;
@@ -132,7 +125,7 @@ public final class NameConverter {
 			return rule.format(values);
 		}
 		// Should always be a catch all rule, but if someone messes up, we will use the LOCAL_NAME_TEMPLATE.
-		return MessageFormat.format(Messages.NameConverter_LOCAL_NAME_TEMPLATE, descriptor);
+		return MessageFormat.format(" ({0}) {1}{2} ({3})", descriptor);
 	}
 
 	public Resource getImageResource(JVMDescriptor descriptor) {
@@ -175,45 +168,7 @@ public final class NameConverter {
 	}
 
 	private void initializeRulesFromExtensions() {
-		IExtensionRegistry er = Platform.getExtensionRegistry();
-		IExtensionPoint ep = er.getExtensionPoint(LABELING_RULES_EXTENSION_POINT);
-		IExtension[] extensions = ep.getExtensions();
-		for (IExtension extension : extensions) {
-			IConfigurationElement[] configs = extension.getConfigurationElements();
-			for (IConfigurationElement config : configs) {
-				if (config.getName().equals("rule")) { //$NON-NLS-1$
-					try {
-						rules.add(createRule(config));
-					} catch (Exception e) {
-						CorePlugin.getDefault().getLogger().log(Level.SEVERE, e.getMessage(), e);
-					}
-				}
-			}
-		}
-		Collections.sort(rules, COMPARATOR);
-	}
-
-	private NamingRule createRule(IConfigurationElement config) throws Exception {
-		String name = config.getAttribute("name"); //$NON-NLS-1$
-		// Try/Catch here to at least have a chance of providing the user with a hint
-		// should something go wrong.
-		try {
-			int priority = Integer.parseInt(config.getAttribute("priority")); //$NON-NLS-1$
-			String matchingPart = config.getAttribute("match"); //$NON-NLS-1$
-			String formattingPart = config.getAttribute("format"); //$NON-NLS-1$
-			return new NamingRule(name, matchingPart, formattingPart, priority, getIcon(config));
-		} catch (Exception e) {
-			throw new Exception("Problem instantiating naming rule named " + name); //$NON-NLS-1$
-		}
-	}
-
-	private Resource getIcon(IConfigurationElement configElement) {
-		String iconName = configElement.getAttribute(ATTRIBUTE_ICON);
-		if (iconName != null) {
-			String extendingPluginId = configElement.getDeclaringExtension().getContributor().getName();
-			return new Resource(extendingPluginId, iconName);
-		}
-		return null;
+		// None registered
 	}
 
 	private Object[] prepareValues(JVMDescriptor descriptor) {
@@ -232,6 +187,6 @@ public final class NameConverter {
 		if (name != null && name.length() > 0) {
 			return name;
 		}
-		return Messages.NameConverter_UNKNOWN_LOCAL_JVM;
+		return "Local";
 	}
 }

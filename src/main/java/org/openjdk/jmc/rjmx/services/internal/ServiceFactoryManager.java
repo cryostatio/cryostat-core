@@ -43,14 +43,9 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-//import org.eclipse.core.runtime.CoreException;
-//import org.eclipse.core.runtime.IConfigurationElement;
-//import org.eclipse.core.runtime.IExtensionRegistry;
-//import org.eclipse.core.runtime.Platform;
 import org.openjdk.jmc.rjmx.IConnectionHandle;
 import org.openjdk.jmc.rjmx.RJMXPlugin;
 import org.openjdk.jmc.rjmx.services.IDummyService;
-import org.openjdk.jmc.rjmx.services.IServiceFactory;
 
 /**
  * Manager for service factories.
@@ -175,20 +170,22 @@ public class ServiceFactoryManager {
 //	}
 
 	private void initializeFromExtensions() {
-//		IExtensionRegistry registry = Platform.getExtensionRegistry();
-//		for (IConfigurationElement config : registry.getConfigurationElementsFor(EXTENSION_POINT)) {
-//			if (config.getName().equals(EXTENSION_ELEMENT_SERVICE)) {
-//				try {
-//					IServiceFactory<?> factory = (IServiceFactory<?>) config
-//							.createExecutableExtension(EXTENSION_ATTRIBUTE_FACTORY);
-                    IServiceFactory<?> factory = new CommercialFeaturesServiceFactory();
-					//registerService(createServiceEntry(factory, config));
-                    registerService(createServiceEntry(factory));
-//				} catch (CoreException e) {
-//				    getLogger().log(Level.SEVERE, "Could not instantiate service factory!", e);
-//				}
-//			}
-//		}
+	    registerService(new ServiceEntry<>(new DiagnosticCommandServiceFactory(), // FIXME are all of these needed?
+	            "Diagnostic Commands",
+	            "Diagnostic Commands"));
+	    registerService(new ServiceEntry<>(new SubscriptionServiceFactory(),
+	            "Subscription Engine",
+	            "Service for controlling the client side attribute subscription engine"));
+	    registerService(new ServiceEntry<>(new MRIMetadataServiceFactory(),
+	            "Attribute Info",
+	            "Service for getting attribute subscription related information and metadata"));
+	    registerService(new ServiceEntry<>(new AttributeStorageServiceFactory(),
+	            "Attribute Storage",
+	            "Service for storing attribute values"));
+	    registerService(new ServiceEntry<>(new CommercialFeaturesServiceFactory(),
+	            "Commercial Features",
+	            "Service for checking and enabling the state of the commercial features in hotspot."));
+	    // Skipping PersistenceServiceFactory
 	}
 
 	private <T> void registerService(ServiceEntry<T> entry) {
@@ -204,12 +201,4 @@ public class ServiceFactoryManager {
 		factories.add(entry);
 	}
 
-//	private <T> ServiceEntry<T> createServiceEntry(IServiceFactory<T> factory, IConfigurationElement config) {
-	private <T> ServiceEntry<T> createServiceEntry(IServiceFactory<T> factory) {
-		//String name = config.getAttribute(EXTENSION_ATTRIBUTE_NAME);
-		String name = null;
-		//String description = config.getAttribute(EXTENSION_ATTRIBUTE_DESCRIPTION);
-		String description = null;
-		return new ServiceEntry<>(factory, name, description);
-	}
 }

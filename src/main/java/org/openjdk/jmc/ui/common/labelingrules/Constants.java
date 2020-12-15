@@ -57,9 +57,9 @@ final class Constants {
 		for (ValueArrayInfo info : ValueArrayInfo.values()) {
 			setConstant(info.getValueName(), info.getMatchExpression());
 		}
-		setConstant("StrConstDebug", Messages.NameConverter_DEBUG); //$NON-NLS-1$
-		setConstant("StrConstJVMJRockit", Messages.NameConverter_JVM_TYPE_JROCKIT); //$NON-NLS-1$
-		setConstant("StrConstJVMUnknown", Messages.NameConverter_JVM_TYPE_UNKNOWN); //$NON-NLS-1$
+		setConstant("StrConstDebug", "Debug"); //$NON-NLS-1$
+		setConstant("StrConstJVMJRockit", "JRockit"); //$NON-NLS-1$
+		setConstant("StrConstJVMUnknown", "Unknown"); //$NON-NLS-1$
 	}
 
 	/**

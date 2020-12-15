@@ -53,7 +53,6 @@ import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 
-import org.eclipse.osgi.util.NLS;
 import org.openjdk.jmc.common.unit.IConstrainedMap;
 import org.openjdk.jmc.common.unit.IConstraint;
 import org.openjdk.jmc.common.unit.IDescribedMap;
@@ -420,7 +419,7 @@ public class FlightRecorderServiceV2 implements IFlightRecorderService {
 					descriptor.getId(), Boolean.TRUE);
 			IMutableConstrainedMap<String> options = getEmptyRecordingOptions();
 			options.put(RecordingOptionsBuilder.KEY_NAME,
-					NLS.bind(Messages.FlightRecorderServiceV2_CLONE_OF_RECORDING_NAME, descriptor.getName()));
+					String.format("Clone of %s", descriptor.getName()));
 			helper.invokeOperation("setRecordingOptions", id, toTabularData(options)); //$NON-NLS-1$
 			return getUpdatedRecordingDescriptor(id);
 		} catch (Exception e) {

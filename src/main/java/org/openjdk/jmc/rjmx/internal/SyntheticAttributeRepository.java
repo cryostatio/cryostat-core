@@ -34,7 +34,6 @@ package org.openjdk.jmc.rjmx.internal;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -58,18 +57,17 @@ import javax.management.ObjectName;
 import javax.management.QueryExp;
 import javax.management.ReflectionException;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.Platform;
-
 import org.openjdk.jmc.rjmx.IPropertySyntheticAttribute;
 import org.openjdk.jmc.rjmx.ISyntheticAttribute;
 import org.openjdk.jmc.rjmx.RJMXPlugin;
 import org.openjdk.jmc.rjmx.subscription.MRI;
 import org.openjdk.jmc.rjmx.subscription.internal.AttributeValueToolkit;
+import org.openjdk.jmc.rjmx.subscription.internal.DeadlockedThreadCountAttribute;
+import org.openjdk.jmc.rjmx.subscription.internal.DivisionAttribute;
+import org.openjdk.jmc.rjmx.subscription.internal.HotSpotLastGcAttribute;
+import org.openjdk.jmc.rjmx.subscription.internal.HotSpotLiveSetAttribute;
+import org.openjdk.jmc.rjmx.subscription.internal.LongDifferenceAttribute;
+import org.openjdk.jmc.rjmx.subscription.internal.MonitoredDeadlockedThreadCountAttribute;
 
 /**
  * Contains all the synthetic attributes.
@@ -85,25 +83,75 @@ public final class SyntheticAttributeRepository {
 	}
 
 	void initializeFromExtensions() {
-		IExtensionRegistry er = Platform.getExtensionRegistry();
-		IExtensionPoint ep = er.getExtensionPoint("org.openjdk.jmc.rjmx.syntheticattribute"); //$NON-NLS-1$
-		IExtension[] extensions = ep.getExtensions();
+	    
 		List<SyntheticAttributeEntry> attributeCandidates = new ArrayList<>();
-		for (IExtension extension : extensions) {
-			IConfigurationElement[] configs = extension.getConfigurationElements();
-			for (IConfigurationElement config : configs) {
-				if (config.getName().equals("syntheticAttribute")) { //$NON-NLS-1$
-					try {
-						ISyntheticAttribute attribute = (ISyntheticAttribute) config.createExecutableExtension("class"); //$NON-NLS-1$
-						SyntheticAttributeEntry candidate = createEntry(attribute, config);
-						attributeCandidates.add(candidate);
-					} catch (CoreException e) {
-						RJMXPlugin.getDefault().getLogger().log(Level.SEVERE,
-								"Could not instantiate synthetic attribute!", e); //$NON-NLS-1$
-					}
-				}
-			}
-		}
+		
+        ISyntheticAttribute attribute = new LongDifferenceAttribute();
+        MRI descriptor = MRI.createFromQualifiedName("attribute://java.lang:type=Memory/FreeHeapMemory");
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("minuend", "attribute://java.lang:type=Memory/HeapMemoryUsage/committed");
+        properties.put("subtrahend", "attribute://java.lang:type=Memory/HeapMemoryUsage/used");
+        ((IPropertySyntheticAttribute) attribute).setProperties(properties);
+        attributeCandidates.add(new SyntheticAttributeEntry(attribute, descriptor, null, "long", true, false, false));
+
+        attribute = new LongDifferenceAttribute();
+        descriptor = MRI.createFromQualifiedName("attribute://java.lang:type=Memory/FreeNonHeapMemory");
+        properties = new HashMap<>();
+        properties.put("minuend", "attribute://java.lang:type=Memory/NonHeapMemoryUsage/committed");
+        properties.put("subtrahend", "attribute://java.lang:type=Memory/NonHeapMemoryUsage/used");
+        ((IPropertySyntheticAttribute) attribute).setProperties(properties);
+        attributeCandidates.add(new SyntheticAttributeEntry(attribute, descriptor, null, "long", true, false, false));
+               
+        attribute = new DivisionAttribute();
+        descriptor = MRI.createFromQualifiedName("attribute://java.lang:type=Memory/HeapMemoryUsagePercent");
+        properties = new HashMap<>();
+        properties.put("dividend", "attribute://java.lang:type=Memory/HeapMemoryUsage/used");
+        properties.put("divisor", "attribute://java.lang:type=Memory/HeapMemoryUsage/committed");
+        ((IPropertySyntheticAttribute) attribute).setProperties(properties);
+        attributeCandidates.add(new SyntheticAttributeEntry(attribute, descriptor, null, "double", true, false, false));
+        
+        attribute = new DivisionAttribute();
+        descriptor = MRI.createFromQualifiedName("attribute://java.lang:type=OperatingSystem/PhysicalMemoryUsagePercent");
+        properties = new HashMap<>();
+        properties.put("dividend", "attribute://java.lang:type=OperatingSystem/UsedPhysicalMemorySize");
+        properties.put("divisor", "attribute://java.lang:type=OperatingSystem/TotalPhysicalMemorySize");
+        ((IPropertySyntheticAttribute) attribute).setProperties(properties);
+        attributeCandidates.add(new SyntheticAttributeEntry(attribute, descriptor, null, "double", true, false, false));
+        
+        attribute = new LongDifferenceAttribute();
+        descriptor = MRI.createFromQualifiedName("attribute://java.lang:type=OperatingSystem/UsedPhysicalMemorySize");
+        properties = new HashMap<>();
+        properties.put("minuend", "attribute://java.lang:type=OperatingSystem/TotalPhysicalMemorySize");
+        properties.put("subtrahend", "attribute://java.lang:type=OperatingSystem/FreePhysicalMemorySize");
+        ((IPropertySyntheticAttribute) attribute).setProperties(properties);
+        attributeCandidates.add(new SyntheticAttributeEntry(attribute, descriptor, null, "long", true, false, false));
+        
+        attribute = new LongDifferenceAttribute();
+        descriptor = MRI.createFromQualifiedName("attribute://java.lang:type=OperatingSystem/UsedSwapSpaceSize");
+        properties = new HashMap<>();
+        properties.put("minuend", "attribute://java.lang:type=OperatingSystem/TotalSwapSpaceSize");
+        properties.put("subtrahend", "attribute://java.lang:type=OperatingSystem/FreeSwapSpaceSize");
+        ((IPropertySyntheticAttribute) attribute).setProperties(properties);
+        attributeCandidates.add(new SyntheticAttributeEntry(attribute, descriptor, null, "long", true, false, false));
+        
+        attribute = new DeadlockedThreadCountAttribute();
+        descriptor = MRI.createFromQualifiedName("attribute://java.lang:type=Threading/DeadlockedThreadCount");
+        attributeCandidates.add(new SyntheticAttributeEntry(attribute, descriptor, null, "int", true, false, false));
+        
+        attribute = new MonitoredDeadlockedThreadCountAttribute();
+        descriptor = MRI.createFromQualifiedName("attribute://java.lang:type=Threading/MonitoredDeadlockedThreadCount");
+        attributeCandidates.add(new SyntheticAttributeEntry(attribute, descriptor, null, "int", true, false, false));
+        
+        attribute = new HotSpotLiveSetAttribute();
+        descriptor = MRI.createFromQualifiedName("attribute://com.sun.management:type=GarbageCollectionAggregator/HeapLiveSet");
+        String description = "The remaining heap memory after the last major GC, measured in percent of committed heap.";
+        attributeCandidates.add(new SyntheticAttributeEntry(attribute, descriptor, description, "double", true, false, false));
+		
+        attribute = new HotSpotLastGcAttribute();
+        descriptor = MRI.createFromQualifiedName("attribute://com.sun.management:type=GarbageCollectionAggregator/LastGcInfo");
+        description = "Information from the last time a garbage collection took place.";
+        attributeCandidates.add(new SyntheticAttributeEntry(attribute, descriptor, description, "javax.management.openmbean.CompositeData", true, false, false));
+        
 		boolean hasResolved = true;
 		while (!attributeCandidates.isEmpty() && hasResolved) {
 			hasResolved = false;
@@ -134,49 +182,6 @@ public final class SyntheticAttributeRepository {
 			}
 		}
 		entry.addSyntheticAttribute(attributeEntry);
-	}
-
-	private SyntheticAttributeEntry createEntry(ISyntheticAttribute attribute, IConfigurationElement config) {
-		String attributeName = config.getAttribute("attributeName"); //$NON-NLS-1$
-		String description = config.getAttribute("description"); //$NON-NLS-1$
-		String type = config.getAttribute("type"); //$NON-NLS-1$
-		boolean readable = Boolean.valueOf(config.getAttribute("readable")); //$NON-NLS-1$
-		boolean writeable = Boolean.valueOf(config.getAttribute("writeable")); //$NON-NLS-1$
-		boolean isIs = Boolean.valueOf(config.getAttribute("isIs")); //$NON-NLS-1$
-		if (attribute instanceof IPropertySyntheticAttribute) {
-			Map<String, Object> properties = parseProperties(config.getChildren("properties")); //$NON-NLS-1$
-			((IPropertySyntheticAttribute) attribute).setProperties(properties);
-		}
-		MRI descriptor = MRI.createFromQualifiedName(attributeName);
-		return new SyntheticAttributeEntry(attribute, descriptor, description, type, readable, writeable, isIs);
-	}
-
-	private Map<String, Object> parseProperties(IConfigurationElement[] children) {
-		if (children == null || children.length == 0) {
-			return Collections.emptyMap();
-		}
-		Map<String, Object> properties = new HashMap<>();
-		for (IConfigurationElement child : children[0].getChildren()) {
-			parseProperty(child, properties);
-		}
-		return properties;
-	}
-
-	private void parseProperty(IConfigurationElement child, Map<String, Object> properties) {
-		String key = child.getAttribute("key"); //$NON-NLS-1$
-		try {
-			if ("string".equals(child.getName())) { //$NON-NLS-1$
-				properties.put(key, child.getAttribute("value")); //$NON-NLS-1$
-			} else if ("boolean".equals(child.getName())) { //$NON-NLS-1$
-				properties.put(key, Boolean.valueOf(child.getAttribute("value"))); //$NON-NLS-1$
-			} else if ("integer".equals(child.getName())) { //$NON-NLS-1$
-				properties.put(key, Integer.parseInt(child.getAttribute("value"))); //$NON-NLS-1$
-			} else if ("float".equals(child.getName())) { //$NON-NLS-1$
-				properties.put(key, Float.parseFloat(child.getAttribute("value"))); //$NON-NLS-1$
-			}
-		} catch (NumberFormatException e) {
-			properties.put(key, e.getMessage());
-		}
 	}
 
 	public String[] getDomains() {

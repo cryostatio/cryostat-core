@@ -34,8 +34,6 @@ package org.openjdk.jmc.rjmx.subscription;
 
 import java.util.Objects;
 
-import org.openjdk.jmc.rjmx.messages.internal.Messages;
-
 /**
  * Event mainly used by the subscription engine. Contains information on what attribute was
  * retrieved, the value of the attribute and the time when the data was collected.
@@ -45,7 +43,7 @@ public class MRIValueEvent {
 	private static class UnavailableValue {
 		@Override
 		public String toString() {
-			return '[' + Messages.LABEL_NOT_AVAILABLE + ']';
+			return "[N/A]";
 		}
 	}
 

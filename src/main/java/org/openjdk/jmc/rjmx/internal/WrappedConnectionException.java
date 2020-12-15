@@ -43,8 +43,6 @@ import javax.management.remote.JMXServiceURL;
 import javax.naming.NameNotFoundException;
 import javax.naming.NoInitialContextException;
 
-import org.eclipse.osgi.util.NLS;
-
 import org.openjdk.jmc.rjmx.ConnectionException;
 import org.openjdk.jmc.rjmx.ConnectionToolkit;
 import org.openjdk.jmc.rjmx.messages.internal.Messages;
@@ -74,30 +72,30 @@ public class WrappedConnectionException extends ConnectionException {
 		String protocol = url != null ? url.getProtocol() : Messages.ConnectionException_UNRESOLVED;
 
 		if (rootCause instanceof UnknownHostException) {
-			return NLS.bind(Messages.ConnectionException_COULD_NOT_DETERMINE_IP_MSG, hostName);
+			return String.format("Could not determine IP address for %s", hostName);
 		}
 		if (rootCause instanceof NameNotFoundException) {
-			return NLS.bind(Messages.ConnectionException_NAME_NOT_FOUND_MSG, serverName, url);
+			return String.format("Name cannot be found for %s. Please check the Service URL (%s).", serverName, url);
 		}
 		if (rootCause instanceof MalformedURLException) {
-			return NLS.bind(Messages.ConnectionException_MALFORMED_URL_MSG, serverName, url);
+			return String.format("The URL for %s is not in a valid format. Please check the Service URL (%s).", serverName, url);
 		}
 		if (rootCause instanceof NoInitialContextException) {
-			return NLS.bind(Messages.ConnectionException_UNABLE_TO_CREATE_INITIAL_CONTEXT, serverName, url);
+			return String.format("Unable to create initial context for %s. Please check the Service URL (%s).", serverName, url);
 		}
 		if (protocol.equals("msarmi")) { //$NON-NLS-1$
-			return NLS.bind(Messages.ConnectionException_MSARMI_CHECK_PASSWORD, serverName, url);
+			return String.format("Unable to connect with msarmi protocol for %s, using Service URL %s. Verify that you have entered the correct password.", serverName, url);
 		}
 		if (rootCause instanceof SecurityException || rootCause instanceof GeneralSecurityException) {
-			return NLS.bind(Messages.ConnectionException_UNABLE_TO_RESOLVE_CREDENTIALS, serverName,
+			return String.format("Unable to resolve the connection credentials for %s. Problem was: %s", serverName,
 					rootCause.getLocalizedMessage());
 		}
 		if ("com.sun.tools.attach.AttachNotSupportedException".equals(rootCause //$NON-NLS-1$
 				.getClass().getName())) {
-			return NLS.bind(Messages.ConnectionException_ATTACH_NOT_SUPPORTED, serverName,
+			return String.format("Attaching to the local JVM %s is not supported: %s", serverName,
 					rootCause.getLocalizedMessage());
 		}
-		return NLS.bind(Messages.ConnectionException_COULD_NOT_CONNECT_MSG, serverName, url);
+		return String.format("Could not connect to %s. Make sure the JVM is running and that you are using the correct protocol in the Service URL (%s).", serverName, url);
 	}
 
 	@Override

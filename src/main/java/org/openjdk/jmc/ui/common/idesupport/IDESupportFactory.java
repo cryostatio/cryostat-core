@@ -32,17 +32,6 @@
  */
 package org.openjdk.jmc.ui.common.idesupport;
 
-import java.util.TreeMap;
-import java.util.logging.Level;
-
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.Platform;
-
-import org.openjdk.jmc.ui.common.CorePlugin;
-
 /**
  * Factory for creating an IDESupport interface
  */
@@ -57,29 +46,7 @@ public class IDESupportFactory {
 		static {
 			IIDESupport support = null;
 			try {
-				IExtensionRegistry registry = Platform.getExtensionRegistry();
-				IExtensionPoint exPoint = registry.getExtensionPoint(IDE_SUPPORT_EXTENSION_POINT_NAME);
-				if (exPoint != null) {
-					/**
-					 * Choose the extension alphabetically from amongst all extensions. Uses a
-					 * TreeMap to sort the items.
-					 */
-					IExtension[] ext = exPoint.getExtensions();
-					TreeMap<String, IConfigurationElement> extensionMap = new TreeMap<>();
-					for (IExtension element : ext) {
-						IConfigurationElement[] elements = element.getConfigurationElements();
-						for (IConfigurationElement element2 : elements) {
-							extensionMap.put(element2.getAttribute("id"), element2); //$NON-NLS-1$
-						}
-					}
-					IConfigurationElement firstElement = extensionMap.get(extensionMap.firstKey());
-					if (firstElement != null) {
-						support = (IIDESupport) firstElement.createExecutableExtension("class"); //$NON-NLS-1$
-					}
-				}
-			} catch (Exception e) {
-				CorePlugin.getDefault().getLogger().log(Level.SEVERE,
-						"Problem when looking for IDE support. Mission Control may not work."); //$NON-NLS-1$
+				// None registered
 			} finally {
 				// FIXME: Support may be null. Do we need a default IIDESupport?
 				INSTANCE = support;
