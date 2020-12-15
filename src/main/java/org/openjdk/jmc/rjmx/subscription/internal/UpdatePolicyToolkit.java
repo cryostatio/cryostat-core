@@ -53,8 +53,6 @@ public final class UpdatePolicyToolkit {
 	}
 
 	public static int getDefaultUpdateInterval() {
-//		return RJMXPlugin.getDefault().getRJMXPreferences().getInt(PreferencesKeys.PROPERTY_UPDATE_INTERVAL,
-//				PreferencesKeys.DEFAULT_UPDATE_INTERVAL);
 	    return PreferencesKeys.DEFAULT_UPDATE_INTERVAL;
 	}
 

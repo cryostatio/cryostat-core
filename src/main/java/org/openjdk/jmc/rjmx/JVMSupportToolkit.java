@@ -37,7 +37,6 @@ import javax.management.MBeanServerConnection;
 import org.openjdk.jmc.common.version.JavaVersion;
 import org.openjdk.jmc.common.version.JavaVersionSupport;
 import org.openjdk.jmc.rjmx.internal.ServerToolkit;
-import org.openjdk.jmc.rjmx.messages.internal.Messages;
 import org.openjdk.jmc.rjmx.services.internal.HotspotManagementToolkit;
 import org.openjdk.jmc.ui.common.jvm.JVMDescriptor;
 import org.openjdk.jmc.ui.common.jvm.JVMType;
@@ -64,15 +63,15 @@ public final class JVMSupportToolkit {
 		String title = null;
 		String message = null;
 		if (ConnectionToolkit.isJRockit(connection)) {
-			title = Messages.JVMSupport_TITLE_JROCKIT_NOT_SUPPORTED;
-			message = Messages.JVMSupport_MESSAGE_JROCKIT_NOT_SUPPORTED;
+			title = "JRockit Not Supported";
+			message = "You are attempting to connect to a JRockit JVM. To connect to a JRockit JVM, please use JRockit Mission Control 4.1 for JRockit R28, and JRockit Mission Control 3.1 for JRockit R27. \nIf you connect to a JRockit, functionality will be limited. \n\nAre you sure you want to continue?";
 		} else if (!ConnectionToolkit.isHotSpot(connection)) {
-			title = Messages.JVMSupport_TITLE_UNKNOWN_JVM;
-			message = Messages.JVMSupport_MESSAGE_UNKNOWN_JVM;
+			title = "Not a Known JVM";
+			message = "You are attempting to connect to an unknown JVM. This will most likely not succeed unless you're running the JMX Console, and even then functionality will be limited. \n\nAre you sure you want to continue?";
 		} else if (!ConnectionToolkit.isJavaVersionAboveOrEqual(connection,
 				JavaVersionSupport.DIAGNOSTIC_COMMANDS_SUPPORTED)) {
-			title = Messages.JVMSupport_TITLE_LEGACY_JVM_CONSOLE;
-			message = Messages.JVMSupport_MESSAGE_LEGACY_JVM_CONSOLE;
+			title = "Too Old JVM";
+			message = "The JVM you are connecting to is not recent enough for full functionality in the JMX Console. For full functionality you need to connect to an Oracle JDK 7u40 or later JVM or an OpenJDK 11+ JVM. Do you still want to connect?";
 		}
 
 		if (title != null) {
@@ -177,32 +176,32 @@ public final class JVMSupportToolkit {
 	}
 
 	private static String getJfrNotEnabled(boolean shortMessage) {
-		return shortMessage ? Messages.JVMSupport_FLIGHT_RECORDER_NOT_ENABLED_SHORT
-				: Messages.JVMSupport_FLIGHT_RECORDER_NOT_ENABLED;
+		return shortMessage ? "Flight Recorder features are not enabled"
+				: "Flight Recorder features are not enabled. To enable this you need to use an Oracle JDK 7u4 or later JVM started with -XX:+UnlockCommercialFeatures -XX:+FlightRecorder or an OpenJDK 11+ JVM.";
 	}
 
 	private static String getJfrDisabled(boolean shortMessage) {
-		return shortMessage ? Messages.JVMSupport_FLIGHT_RECORDER_DISABLED_SHORT
-				: Messages.JVMSupport_FLIGHT_RECORDER_DISABLED;
+		return shortMessage ? "Flight Recorder is explicitly disabled"
+				: "Flight Recorder is explicitly disabled. To enable the Flight Recorder, remove -XX:-FlightRecorder from the command line.";
 	}
 
 	private static String getJfrOldHotSpotNotSupported(boolean shortMessage) {
-		return shortMessage ? Messages.JVMSupport_FLIGHT_RECORDER_NOT_SUPPORTED_OLD_HOTSPOT_SHORT
-				: Messages.JVMSupport_FLIGHT_RECORDER_NOT_SUPPORTED_OLD_HOTSPOT;
+		return shortMessage ? "Flight Recorder is not supported for JVMs with Java versions below 7u4"
+				: "Flight Recorder is not supported for JVMs with Java versions below 7u4";
 	}
 
 	private static String getJfrOldHotSpotNotFullySupported(boolean shortMessage) {
-		return shortMessage ? Messages.JVMSupport_FLIGHT_RECORDER_NOT_FULLY_SUPPORTED_OLD_HOTSPOT_SHORT
-				: Messages.JVMSupport_FLIGHT_RECORDER_NOT_FULLY_SUPPORTED_OLD_HOTSPOT;
+		return shortMessage ? "Flight Recorder is not fully supported for JVMs with Java versions below 7u40"
+				: "Flight Recorder is not fully supported for JVMs with Java versions below 7u40";
 	}
 
 	private static String getJfrNonHotSpotNotSupported(boolean shortMessage) {
-		return shortMessage ? Messages.JVMSupport_FLIGHT_RECORDER_NOT_SUPPORTED_NOT_HOTSPOT_SHORT
-				: Messages.JVMSupport_FLIGHT_RECORDER_NOT_SUPPORTED_NOT_HOTSPOT;
+		return shortMessage ? "Flight Recorder is not supported for non HotSpot JVMs"
+				: "Flight Recorder is not supported for non HotSpot JVMs";
 	}
 
 	private static String getJfrJRockitNotSupported(boolean shortMessage) {
-		return shortMessage ? Messages.JVMSupport_JROCKIT_NO_LONGER_SUPPORTED_SHORT
-				: Messages.JVMSupport_JROCKIT_NO_LONGER_SUPPORTED;
+		return shortMessage ? "JRockit is no longer supported"
+				: "JRockit is no longer supported";
 	}
 }

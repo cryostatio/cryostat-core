@@ -34,14 +34,7 @@ package org.openjdk.jmc.rjmx;
 
 import java.util.logging.Logger;
 
-import org.eclipse.core.runtime.Plugin;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.prefs.Preferences;
-
 import org.openjdk.jmc.rjmx.internal.RJMXSingleton;
-import org.openjdk.jmc.rjmx.triggers.internal.NotificationRegistry;
 
 /**
  * There is one instance of the RJMX plugin available from {@link RJMXPlugin#getDefault()}. The
@@ -71,33 +64,12 @@ public final class RJMXPlugin {
 	// The shared instance
 	private static RJMXPlugin plugin;
 
-	private IEclipsePreferences rjmxPreferences;
-
 	/**
 	 * The default constructor.
 	 */
 	public RJMXPlugin() {
 	}
 
-	@Override
-	public void start(BundleContext context) throws Exception {
-		super.start(context);
-		plugin = this;
-	}
-
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		// Avoid getPreferenceStore() so as not to create a store just for
-		// saving it.
-		synchronized (this) {
-			if (rjmxPreferences != null) {
-				RJMXSingleton.getDefault().storeAllSettings();
-				rjmxPreferences.flush();
-			}
-		}
-		plugin = null;
-		super.stop(context);
-	}
 
 	/**
 	 * Returns the shared instance.
@@ -106,37 +78,6 @@ public final class RJMXPlugin {
 	 */
 	public static RJMXPlugin getDefault() {
 		return plugin;
-	}
-
-	/**
-	 * Returns the plugin preferences for this plugin.
-	 * <p>
-	 * This {@link IEclipsePreferences} is used to hold persistent settings for this plugin in the
-	 * context of a workbench. Some of these settings will be user controlled, whereas others may be
-	 * internal setting that are never exposed to the user.
-	 * <p>
-	 * If an error occurs reading these settings, an empty settings container is quietly created,
-	 * initialized with defaults, and returned.
-	 *
-	 * @return the preference store
-	 */
-	public synchronized IEclipsePreferences getRJMXPreferences() {
-		// Create the preference store lazily.
-		if (rjmxPreferences == null) {
-			rjmxPreferences = InstanceScope.INSTANCE.getNode(PLUGIN_ID);
-		}
-		return rjmxPreferences;
-	}
-
-	/**
-	 * Looks up the server preferences for given server.
-	 *
-	 * @param serverUid
-	 *            the identifier of the server
-	 * @return the preferences available for given server.
-	 */
-	public synchronized Preferences getServerPreferences(String serverUid) {
-		return getRJMXPreferences().node(SERVER_CONFIG_ID).node(serverUid);
 	}
 
 	/**
@@ -161,7 +102,4 @@ public final class RJMXPlugin {
 		return RJMXSingleton.getDefault().getService(clazz);
 	}
 
-	public NotificationRegistry getNotificationRegistry() {
-		return RJMXSingleton.getDefault().getNotificationRegistry();
-	}
 }

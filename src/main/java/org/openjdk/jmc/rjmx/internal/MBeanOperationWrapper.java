@@ -48,7 +48,6 @@ import org.openjdk.jmc.common.util.TypeHandling;
 import org.openjdk.jmc.rjmx.services.IOperation;
 import org.openjdk.jmc.rjmx.services.IllegalOperandException;
 import org.openjdk.jmc.rjmx.services.internal.AbstractOperation;
-import org.openjdk.jmc.rjmx.services.internal.Messages;
 import org.openjdk.jmc.rjmx.util.internal.SimpleAttributeInfo;
 
 final class MBeanOperationWrapper extends AbstractOperation<SimpleAttributeInfo> {
@@ -178,7 +177,7 @@ final class MBeanOperationWrapper extends AbstractOperation<SimpleAttributeInfo>
 			String[] fields = info.getDescriptor().getFields();
 			if (fields.length > 0) {
 				// TODO: This is a workaround to get the descriptors to UI-layer. Should be handled using some adaptive mechanism.
-				sb.append(Messages.MBeanOperationsWrapper_DESCRIPTOR).append(":\n "); //$NON-NLS-1$
+				sb.append("Descriptor").append(":\n "); //$NON-NLS-1$
 				for (int i = 0; i < Math.min(fields.length, MAX_DESCRIPTORS); i++) {
 					String str = fields[i];
 					int cur = 0;

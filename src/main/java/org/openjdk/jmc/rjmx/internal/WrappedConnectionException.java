@@ -45,7 +45,6 @@ import javax.naming.NoInitialContextException;
 
 import org.openjdk.jmc.rjmx.ConnectionException;
 import org.openjdk.jmc.rjmx.ConnectionToolkit;
-import org.openjdk.jmc.rjmx.messages.internal.Messages;
 
 public class WrappedConnectionException extends ConnectionException {
 
@@ -68,8 +67,8 @@ public class WrappedConnectionException extends ConnectionException {
 			rootCause = rootCause.getCause();
 		}
 
-		String hostName = url != null ? ConnectionToolkit.getHostName(url) : Messages.ConnectionException_UNRESOLVED;
-		String protocol = url != null ? url.getProtocol() : Messages.ConnectionException_UNRESOLVED;
+		String hostName = url != null ? ConnectionToolkit.getHostName(url) : "Unresolved";
+		String protocol = url != null ? url.getProtocol() : "Unresolved";
 
 		if (rootCause instanceof UnknownHostException) {
 			return String.format("Could not determine IP address for %s", hostName);

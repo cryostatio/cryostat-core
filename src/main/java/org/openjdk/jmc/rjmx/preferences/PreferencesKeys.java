@@ -59,13 +59,4 @@ public class PreferencesKeys {
 	public static final String DEFAULT_MAIL_SERVER_PASSWORD = ""; //$NON-NLS-1$
 	public static final String DEFAULT_MAIL_SERVER_CREDENTIALS = ""; //$NON-NLS-1$
 
-	// Persistence
-	public static final String PROPERTY_PERSISTENCE_LOG_ROTATION_LIMIT_KB = "rjmx.services.persistence.log.rotation.limit"; //$NON-NLS-1$
-	public static final long DEFAULT_PERSISTENCE_LOG_ROTATION_LIMIT_KB = 100;
-	public static final String PROPERTY_PERSISTENCE_DIRECTORY = "rjmx.services.persistence.directory"; //$NON-NLS-1$
-	public static final String DEFAULT_PERSISTENCE_DIRECTORY = CorePlugin.getDefault().getWorkspaceDirectory().getPath()
-			+ File.separator + "persisted_jmx_data" + File.separator; //$NON-NLS-1$
-
-	public static final String PROPERTY_LIST_AGGREGATE_SIZE = "rjmx.internal.listAggregateSize"; //$NON-NLS-1$
-	public static final int DEFAULT_LIST_AGGREGATE_SIZE = 40;
 }

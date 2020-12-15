@@ -32,28 +32,16 @@
  */
 package org.openjdk.jmc.ui.common;
 
-import java.io.File;
 import java.util.logging.Logger;
-
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-
-import org.openjdk.jmc.ui.common.idesupport.IDESupportFactory;
-import org.openjdk.jmc.ui.common.idesupport.IIDESupport;
 
 /**
  * The Core Plug-in class for Mission Control
  */
-public class CorePlugin implements BundleActivator {
+public class CorePlugin {
 
 	public static final String PLUGIN_ID = "org.openjdk.jmc.ui.common"; //$NON-NLS-1$
 
 	private static CorePlugin plugin;
-	private IEclipsePreferences preferences;
 	private final Logger m_logger;
 
 	public CorePlugin() {
@@ -69,35 +57,4 @@ public class CorePlugin implements BundleActivator {
 		return m_logger;
 	}
 
-	/**
-	 * @return The Eclipse workspace directory. If that is not a usable directory, then returns the
-	 *         user's home directory.
-	 */
-	public File getWorkspaceDirectory() {
-		IPath workspaceDir = Platform.getLocation();
-		if (workspaceDir != null && workspaceDir.toFile().isDirectory()) {
-			return workspaceDir.toFile();
-		}
-		return new File(System.getProperty("user.home", ".")); //$NON-NLS-1$ //$NON-NLS-2$
-	}
-
-	public IIDESupport getIDESupport() {
-		return IDESupportFactory.getIDESupport();
-	}
-
-	public IEclipsePreferences getPreferences() {
-		// Create the preference store lazily.
-		if (preferences == null) {
-			preferences = InstanceScope.INSTANCE.getNode(PLUGIN_ID);
-		}
-		return preferences;
-	}
-
-	@Override
-	public void start(BundleContext context) throws Exception {
-	}
-
-	@Override
-	public void stop(BundleContext context) throws Exception {
-	}
 }

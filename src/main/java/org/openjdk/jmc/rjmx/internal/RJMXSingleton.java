@@ -32,25 +32,13 @@
  */
 package org.openjdk.jmc.rjmx.internal;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.Level;
-
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.openjdk.jmc.common.util.StateToolkit;
-import org.openjdk.jmc.common.util.XmlToolkit;
 import org.openjdk.jmc.rjmx.RJMXPlugin;
-import org.openjdk.jmc.rjmx.servermodel.IServer;
 import org.openjdk.jmc.rjmx.servermodel.IServerModel;
 import org.openjdk.jmc.rjmx.servermodel.internal.ServerModel;
 import org.openjdk.jmc.rjmx.subscription.IMRIMetadataProviderService;
 import org.openjdk.jmc.rjmx.subscription.IMRIMetadataService;
 import org.openjdk.jmc.rjmx.subscription.internal.ExtensionMetadataProviderService;
 import org.openjdk.jmc.rjmx.subscription.internal.FileMRIMetadataDB;
-import org.openjdk.jmc.rjmx.triggers.extension.internal.TriggerFactory;
-import org.openjdk.jmc.rjmx.triggers.internal.NotificationRegistry;
-import org.osgi.service.prefs.BackingStoreException;
-import org.osgi.service.prefs.Preferences;
 
 /**
  * This class contains the service lookup pieces of {@link RJMXPlugin} which likely does not belong
@@ -74,78 +62,17 @@ public final class RJMXSingleton {
 	private static final RJMXSingleton INSTANCE = new RJMXSingleton();
 
 	private final FileMRIMetadataDB metadataManager = buildMetadataManager();
-	private final NotificationRegistry notificationModel = new NotificationRegistry();
 	private final ServerModel serverModel = new ServerModel();
 
 	/**
 	 * The default constructor.
 	 */
 	private RJMXSingleton() {
-		TriggerFactory tf = new TriggerFactory(notificationModel);
-		tf.initializeFactory();
-		notificationModel.setFactory(tf);
-		initAllSettings();
-		try {
-			cleanServerPreferences();
-		} catch (BackingStoreException e) {
-			RJMXPlugin.getDefault().getLogger().log(Level.WARNING, "Failed to clean server preferences", e); //$NON-NLS-1$
-		}
 	}
 
 	private static FileMRIMetadataDB buildMetadataManager() {
 		IMRIMetadataProviderService subService = new ExtensionMetadataProviderService();
-		String attributeMetadata = RJMXPlugin.getDefault().getRJMXPreferences()
-				.get(PREFERENCE_ATTRIBUTE_METADATA_MANAGER, null);
-		if (attributeMetadata != null) {
-			try {
-				return FileMRIMetadataDB.buildFromState(StateToolkit.fromXMLString(attributeMetadata), subService);
-			} catch (Exception e) {
-				RJMXPlugin.getDefault().getLogger().log(Level.WARNING, "Failed to load stored attribute metadata", e); //$NON-NLS-1$
-			}
-		}
 		return FileMRIMetadataDB.buildDefault(subService);
-	}
-
-	private void initAllSettings() {
-		try {
-			String serverModelState = getRJMXPreferences().get(SERVER_MODEL_PREF, null);
-			if (serverModelState != null) {
-				serverModel.importServers(XmlToolkit.loadDocumentFromString(serverModelState));
-			}
-		} catch (Exception e) {
-			RJMXPlugin.getDefault().getLogger().log(Level.WARNING, "Could not load server model from preferences", e); //$NON-NLS-1$
-		}
-		try {
-			String triggersState = getRJMXPreferences().get(TRIGGERS_MODEL_PREF, null);
-			if (triggersState != null) {
-				notificationModel.importFromXML(XmlToolkit.loadDocumentFromString(triggersState).getDocumentElement());
-			}
-		} catch (Exception e) {
-			RJMXPlugin.getDefault().getLogger().log(Level.WARNING, "Could not load notification model from preferences", //$NON-NLS-1$
-					e);
-		}
-	}
-
-	public void storeAllSettings() throws Exception {
-		RJMXPlugin.getDefault().getRJMXPreferences().put(PREFERENCE_ATTRIBUTE_METADATA_MANAGER,
-				StateToolkit.toXMLString(metadataManager));
-		getRJMXPreferences().put(SERVER_MODEL_PREF, XmlToolkit.storeDocumentToString(serverModel.exportServers()));
-		getRJMXPreferences().put(TRIGGERS_MODEL_PREF,
-				XmlToolkit.storeDocumentToString(notificationModel.exportToXml(null, true)));
-		getRJMXPreferences().flush();
-	}
-
-	private void cleanServerPreferences() throws BackingStoreException {
-		Set<String> serverIds = new HashSet<>();
-		for (IServer server : serverModel.elements()) {
-			serverIds.add(server.getServerHandle().getServerDescriptor().getGUID());
-		}
-		Preferences serverPrefs = getRJMXPreferences().node(RJMXPlugin.SERVER_CONFIG_ID);
-		for (String serverId : serverPrefs.childrenNames()) {
-			if (!serverIds.contains(serverId)) {
-				serverPrefs.node(serverId).removeNode();
-			}
-		}
 	}
 
 	/**
@@ -155,14 +82,6 @@ public final class RJMXSingleton {
 	 */
 	public static RJMXSingleton getDefault() {
 		return INSTANCE;
-	}
-
-	private IEclipsePreferences getRJMXPreferences() {
-		return RJMXPlugin.getDefault().getRJMXPreferences();
-	}
-
-	public NotificationRegistry getNotificationRegistry() {
-		return notificationModel;
 	}
 
 	/**
