@@ -145,6 +145,9 @@
       <groupId>com.github.spotbugs</groupId>
       <artifactId>spotbugs-maven-plugin</artifactId>
       <version>${com.github.spotbugs.plugin.version}</version>
+      <configuration>
+        <onlyAnalyze>com.redhat.rhjmc.-</onlyAnalyze>
+      </configuration>
       <executions>
         <execution>
           <id>spotbugs</id>
@@ -189,6 +192,9 @@
       </executions>
       <configuration>
         <java>
+          <excludes>
+            <exclude>src/main/java/org/openjdk/jmc/**</exclude>
+          </excludes>
           <googleJavaFormat>
             <version>1.7</version>
             <style>AOSP</style>
