@@ -56,6 +56,8 @@ copyBundle () {
 copyResource() {
     local bundle_name="$1"
     local resource_path="$2"
+
+    mkdir -p "$(dirname "${ROOT_DIR}/src/main/resources/${resource_path}")"
     cp -rv "${JMC_DIR}/application/${bundle_name}/src/main/resources/${resource_path}" "${ROOT_DIR}/src/main/resources/${resource_path}"
 }
 # src/main/resources/org/openjdk/jmc/rjmx/subscription/internal/mrimetadata.xml
