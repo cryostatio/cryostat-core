@@ -68,31 +68,53 @@ public class KnownRecordingOptions {
 
 	private final static String KEY_TO_DISK_V2 = "disk"; //$NON-NLS-1$
 
+	private static final String RECORDING_NAME_LABEL = "Name";
+	private static final String RECORDING_NAME_DESC = "Recording name";
+	private static final String TO_DISK_LABEL = "To disk";
+	private static final String TO_DISK_DESC = "Record to disk";
+	private static final String DURATION_LABEL = "Duration";
+	private static final String DURATION_DESC = "Duration of recording";
+	private static final String MAXIMUM_SIZE_LABEL = "Max Size";
+	private static final String MAXIMUM_SIZE_DESC = "Maximum size of recording";
+	private static final String MAXIMUM_AGE_LABEL = "Max Age";
+	private static final String MAXIMUM_AGE_DESC = "Maximum age of the events in the recording";
+	// Options unique to JFR V1
+	private static final String DESTINATION_FILE_LABEL = "File Name";
+	private static final String DESTINATION_FILE_DESC = "Target file for resulting recording";
+	private static final String START_TIME_LABEL = "Start Time";
+	private static final String START_TIME_DESC = "Start time of recording";
+	private static final String DESTINATION_COMPRESSED_LABEL = "File Compression";
+	private static final String DESTINATION_COMPRESSED_DESC = "Should destination file be compressed";
+	// Option unique to JFR V2
+	private static final String DUMP_ON_EXIT_LABEL = "Dump on Exit";
+	private static final String DUMP_ON_EXIT_DESC = "Dump recording data to disk on JVM exit";
+
+
 	static {
 		Map<String, IOptionDescriptor<?>> recOptionsV1 = new LinkedHashMap<>();
 		// Options common to JFR V1 and V2
 		recOptionsV1.put(KEY_NAME, option("RECORDING_NAME", PLAIN_TEXT.getPersister(), //$NON-NLS-1$
-				Messages.getString(Messages.RecordingOption_DEFAULT_RECORDING_NAME)));
-		recOptionsV1.put(KEY_DURATION, option("DURATION", POSITIVE_TIMESPAN, SECOND.quantity(30))); //$NON-NLS-1$
-		recOptionsV1.put(KEY_MAX_SIZE, option("MAXIMUM_SIZE", POSITIVE_MEMORY, BYTE.quantity(0))); //$NON-NLS-1$
-		recOptionsV1.put(KEY_MAX_AGE, option("MAXIMUM_AGE", POSITIVE_TIMESPAN, SECOND.quantity(0))); //$NON-NLS-1$
+				"Recording", RECORDING_NAME_LABEL, RECORDING_NAME_DESC));
+		recOptionsV1.put(KEY_DURATION, option("DURATION", POSITIVE_TIMESPAN, SECOND.quantity(30), DURATION_LABEL, DURATION_DESC)); //$NON-NLS-1$
+		recOptionsV1.put(KEY_MAX_SIZE, option("MAXIMUM_SIZE", POSITIVE_MEMORY, BYTE.quantity(0), MAXIMUM_SIZE_LABEL, MAXIMUM_SIZE_DESC)); //$NON-NLS-1$
+		recOptionsV1.put(KEY_MAX_AGE, option("MAXIMUM_AGE", POSITIVE_TIMESPAN, SECOND.quantity(0), MAXIMUM_AGE_LABEL, MAXIMUM_AGE_DESC)); //$NON-NLS-1$
 
 		// Initialize V2 options from V1 options so far
 		Map<String, IOptionDescriptor<?>> recOptionsV2 = new LinkedHashMap<>(recOptionsV1);
 
 		// Options unique to JFR V1
 		recOptionsV1.put(KEY_DESTINATION_FILE,
-				option("DESTINATION_FILE", UnitLookup.PLAIN_TEXT.getPersister(), "recording.jfr")); //$NON-NLS-1$ //$NON-NLS-2$
-		recOptionsV1.put(KEY_START_TIME, option("START_TIME", POINT_IN_TIME, null)); //$NON-NLS-1$
+				option("DESTINATION_FILE", UnitLookup.PLAIN_TEXT.getPersister(), "recording.jfr", DESTINATION_FILE_LABEL, DESTINATION_FILE_DESC)); //$NON-NLS-1$ //$NON-NLS-2$
+		recOptionsV1.put(KEY_START_TIME, option("START_TIME", POINT_IN_TIME, null, START_TIME_LABEL, START_TIME_DESC)); //$NON-NLS-1$
 		recOptionsV1.put(KEY_DESTINATION_COMPRESSED,
-				option("DESTINATION_COMPRESSED", FLAG.getPersister(), Boolean.FALSE)); //$NON-NLS-1$
+				option("DESTINATION_COMPRESSED", FLAG.getPersister(), Boolean.FALSE, DESTINATION_COMPRESSED_LABEL, DESTINATION_COMPRESSED_DESC)); //$NON-NLS-1$
 		// Option renamed from JFR V1 to V2
-		OptionInfo<Boolean> diskOption = option("TO_DISK", FLAG.getPersister(), Boolean.FALSE); //$NON-NLS-1$
+		OptionInfo<Boolean> diskOption = option("TO_DISK", FLAG.getPersister(), Boolean.FALSE, TO_DISK_LABEL, TO_DISK_DESC); //$NON-NLS-1$
 		recOptionsV1.put(KEY_TO_DISK, diskOption);
 		recOptionsV2.put(KEY_TO_DISK_V2, diskOption);
 
 		// Option unique to JFR V2
-		recOptionsV2.put(KEY_DUMP_ON_EXIT, option("DUMP_ON_EXIT", FLAG.getPersister(), Boolean.FALSE)); //$NON-NLS-1$
+		recOptionsV2.put(KEY_DUMP_ON_EXIT, option("DUMP_ON_EXIT", FLAG.getPersister(), Boolean.FALSE, DUMP_ON_EXIT_LABEL, DUMP_ON_EXIT_DESC)); //$NON-NLS-1$
 
 		DESCRIPTORS_BY_KEY_V1 = Collections.unmodifiableMap(recOptionsV1);
 		DESCRIPTORS_BY_KEY_V2 = Collections.unmodifiableMap(recOptionsV2);
@@ -102,11 +124,8 @@ public class KnownRecordingOptions {
 				Collections.singletonMap(KEY_TO_DISK, KEY_TO_DISK_V2));
 	}
 
-	private static <T> OptionInfo<T> option(String optionName, IConstraint<T> constraint, T defaultValue) {
-		// Generate keys for translation lookup
-		String baseName = "RecordingOption_" + optionName.toUpperCase(); //$NON-NLS-1$
-		String label = Messages.getString(baseName + "_LABEL"); //$NON-NLS-1$
-		String desc = Messages.getString(baseName + "_DESC"); //$NON-NLS-1$
+	private static <T> OptionInfo<T> option(String optionName, IConstraint<T> constraint, T defaultValue,
+	        String label, String desc) {
 		return new OptionInfo<>(label, desc, constraint, defaultValue);
 	}
 }

@@ -48,8 +48,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 import java.util.logging.Level;
-
-import org.openjdk.jmc.ui.UIPlugin;
+import java.util.logging.Logger;
 
 /**
  * A stateless validator of {@link XMLModel}s used for Flight Recording Configurations. Should
@@ -57,6 +56,8 @@ import org.openjdk.jmc.ui.UIPlugin;
  */
 public final class JFCXMLValidator implements IXMLValidator {
 	private static final JFCXMLValidator SHARED = new JFCXMLValidator();
+
+	private static final Logger LOGGER = Logger.getLogger("org.openjdk.jmc.ui");
 
 	interface IXMLNodeValidator {
 		XMLValidationResult validate(Object parentNode, Object node);
@@ -176,7 +177,7 @@ public final class JFCXMLValidator implements IXMLValidator {
 		} else {
 			label = model.getRoot().getValue(ATTRIBUTE_LABEL_MANDATORY);
 		}
-		UIPlugin.getDefault().getLogger().log(Level.FINE, "Running JFC validation on " + label); //$NON-NLS-1$
+		LOGGER.log(Level.FINE, "Running JFC validation on " + label); //$NON-NLS-1$
 		List<XMLValidationResult> errors = new ArrayList<>();
 		XMLTagInstance configuration = model.getRoot();
 		List<XMLTagInstance> producers = configuration.getTagsInstances(JFCGrammar.TAG_PRODUCER);
@@ -262,4 +263,5 @@ public final class JFCXMLValidator implements IXMLValidator {
 		}
 		return URI.create(uri + '/');
 	}
+
 }

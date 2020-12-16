@@ -36,11 +36,10 @@ import java.io.InputStream;
 
 import org.openjdk.jmc.common.version.JavaVersion;
 import org.openjdk.jmc.common.version.JavaVersionSupport;
-import org.openjdk.jmc.flightrecorder.configuration.internal.Messages;
 
 public enum SchemaVersion {
-	V1("1.0", "jfc_v1.xsd", Messages.getString(Messages.SchemaVersion_JDK_7_OR_8)), //$NON-NLS-1$ //$NON-NLS-2$
-	V2("2.0", "jfc_v2.xsd", Messages.getString(Messages.SchemaVersion_JDK_9_AND_ABOVE)); //$NON-NLS-1$ //$NON-NLS-2$
+	V1("1.0", "jfc_v1.xsd", "JDK 7/8"), //$NON-NLS-1$ //$NON-NLS-2$
+	V2("2.0", "jfc_v2.xsd", "JDK 9+"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	public static SchemaVersion fromBeanVersion(String beanVersion) {
 		for (SchemaVersion version : values()) {

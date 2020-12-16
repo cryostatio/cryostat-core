@@ -177,7 +177,7 @@ public class CommonConstraints {
 		public String format(IQuantity value) {
 			// FIXME: Migrate localized value from configuration GUI.
 			return (value == EVERY_CHUNK_MAGIC_INSTANCE)
-					? Messages.getString(Messages.CommonConstraints_ONCE_EVERY_CHUNK) : super.interactiveFormat(value);
+					? "Once every chunk" : super.interactiveFormat(value);
 		}
 	}
 
@@ -236,11 +236,11 @@ public class CommonConstraints {
 		public String format(IQuantity value) {
 			// FIXME: Migrate localized value from configuration GUI.
 			if (value == EVERY_CHUNK_MAGIC_INSTANCE) {
-				return Messages.getString(Messages.CommonConstraints_ONCE_EVERY_CHUNK);
+				return "Once every chunk";
 			} else if (value == BEGIN_CHUNK_MAGIC_INSTANCE) {
-				return Messages.getString(Messages.CommonConstraints_BEGINNING_OF_EVERY_CHUNK);
+				return "Beginning of every chunk";
 			} else if (value == END_CHUNK_MAGIC_INSTANCE) {
-				return Messages.getString(Messages.CommonConstraints_END_OF_EVERY_CHUNK);
+				return "End of every chunk";
 			}
 			return super.interactiveFormat(value);
 		}

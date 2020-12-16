@@ -34,11 +34,10 @@ package org.openjdk.jmc.flightrecorder.configuration;
 
 import org.openjdk.jmc.common.unit.IConstraint;
 import org.openjdk.jmc.common.unit.IOptionDescriptor;
-import org.openjdk.jmc.flightrecorder.configuration.internal.Messages;
 
 public class OptionInfo<T> implements IOptionDescriptor<T> {
 	public static final IOptionDescriptor<?> DISALLOWED_OPTION = new OptionInfo<>(null,
-			Messages.getString(Messages.OptionInfo_DISALLOWED_OPTION), null, null);
+			"Disallowed option", null, null);
 
 	private final String label;
 	private final String description;

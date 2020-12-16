@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.openjdk.jmc.common.unit.IConstraint;
 import org.openjdk.jmc.common.unit.IDescribedMap;
@@ -55,14 +56,13 @@ public class DefaultValueMap<K> implements IDescribedMap<K> {
 	// NOTE: This should ideally be a (JDK 8) Function. May be null.
 	private final IMapper<K, IOptionDescriptor<?>> fallbacks;
 
+	private static final Logger LOGGER = Logger.getLogger("org.openjdk.jmc.flightrecorder.configuration");
+
 	public DefaultValueMap(Map<K, ? extends IOptionDescriptor<?>> knownOptions) {
 		this(knownOptions, null);
 	}
 
-	@SuppressWarnings("unchecked")
 	public DefaultValueMap(IMapper<K, IOptionDescriptor<?>> fallbacks) {
-		// NOTE: Cast is just to circumvent issue in Eclipse 4.5.2 with JDK 7 compiler/libs.
-		//this((Map<K, ? extends IOptionDescriptor<?>>) Collections.emptyMap(), fallbacks);
 	    this(Collections.emptyMap(), fallbacks);
 	}
 
@@ -149,7 +149,7 @@ public class DefaultValueMap<K> implements IDescribedMap<K> {
 				V value = desc.getDefault();
 				return (value == null) ? null : desc.getConstraint().persistableString(value);
 			} catch (QuantityConversionException e) {
-				Messages.LOGGER.log(Level.WARNING, "Problem parsing option default", e); //$NON-NLS-1$
+				LOGGER.log(Level.WARNING, "Problem parsing option default", e); //$NON-NLS-1$
 			}
 		}
 		return null;

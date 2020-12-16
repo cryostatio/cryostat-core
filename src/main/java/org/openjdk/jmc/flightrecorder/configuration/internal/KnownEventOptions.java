@@ -54,6 +54,15 @@ public class KnownEventOptions {
 	public final static String KEY_PERIOD = "period"; //$NON-NLS-1$
 	public final static String KEY_ENABLED = "enabled"; //$NON-NLS-1$
 
+	private static final String ENABLED_LABEL = "Enabled";
+	private static final String ENABLED_DESC = "Whether or not events of this type will be included.";
+	private static final String PERIOD_LABEL = "Period";
+	private static final String PERIOD_DESC = "The request period.";
+	private static final String STACKTRACE_LABEL = "Stack Trace";
+	private static final String STACKTRACE_DESC = "Whether or not to include stack traces in the events.";
+	private static final String THRESHOLD_LABEL = "Threshold";
+	private static final String THRESHOLD_DESC = "Only include events with at least this duration.";
+
 	public final static Map<String, IOptionDescriptor<?>> EVENT_OPTIONS_BY_KEY_V1;
 	public final static Map<String, IOptionDescriptor<?>> EVENT_OPTIONS_BY_KEY_V2;
 
@@ -63,16 +72,16 @@ public class KnownEventOptions {
 	static {
 		Map<String, IOptionDescriptor<?>> eventOptionsV1 = new LinkedHashMap<>();
 		// Options identical between JFR V1 and V2
-		eventOptionsV1.put(KEY_THRESHOLD, option(KEY_THRESHOLD, POSITIVE_TIMESPAN, NANOSECOND.quantity(20)));
-		eventOptionsV1.put(KEY_STACKTRACE, option(KEY_STACKTRACE, UnitLookup.FLAG.getPersister(), Boolean.TRUE));
-		eventOptionsV1.put(KEY_ENABLED, option(KEY_ENABLED, UnitLookup.FLAG.getPersister(), Boolean.TRUE));
+		eventOptionsV1.put(KEY_THRESHOLD, option(KEY_THRESHOLD, POSITIVE_TIMESPAN, NANOSECOND.quantity(20), THRESHOLD_LABEL, THRESHOLD_DESC));
+		eventOptionsV1.put(KEY_STACKTRACE, option(KEY_STACKTRACE, UnitLookup.FLAG.getPersister(), Boolean.TRUE, STACKTRACE_LABEL, STACKTRACE_DESC));
+		eventOptionsV1.put(KEY_ENABLED, option(KEY_ENABLED, UnitLookup.FLAG.getPersister(), Boolean.TRUE, ENABLED_LABEL, ENABLED_DESC));
 
 		// Initialize V2 options from V1 options so far
 		Map<String, IOptionDescriptor<?>> eventOptionsV2 = new LinkedHashMap<>(eventOptionsV1);
 
 		// Option differing between JFR V1 and V2
-		eventOptionsV1.put(KEY_PERIOD, option(KEY_PERIOD, PERIOD_V1, UnitLookup.MILLISECOND.quantity(20)));
-		eventOptionsV2.put(KEY_PERIOD, option(KEY_PERIOD, PERIOD_V2, UnitLookup.MILLISECOND.quantity(20)));
+		eventOptionsV1.put(KEY_PERIOD, option(KEY_PERIOD, PERIOD_V1, UnitLookup.MILLISECOND.quantity(20), PERIOD_LABEL, PERIOD_DESC));
+		eventOptionsV2.put(KEY_PERIOD, option(KEY_PERIOD, PERIOD_V2, UnitLookup.MILLISECOND.quantity(20), PERIOD_LABEL, PERIOD_DESC));
 
 		EVENT_OPTIONS_BY_KEY_V1 = Collections.unmodifiableMap(eventOptionsV1);
 		EVENT_OPTIONS_BY_KEY_V2 = Collections.unmodifiableMap(eventOptionsV2);
@@ -83,15 +92,13 @@ public class KnownEventOptions {
 				new EventOptionDescriptorMapper(EventTypeIDV2.class, eventOptionsV2, true));
 	}
 
-	private static <T> OptionInfo<T> option(String optionName, IConstraint<T> constraint, T defaultValue) {
-		// Generate keys for translation lookup
-		String baseName = "EventOption_" + optionName.toUpperCase(); //$NON-NLS-1$
-		String label = Messages.getString(baseName + "_LABEL"); //$NON-NLS-1$
-		String desc = Messages.getString(baseName + "_DESC"); //$NON-NLS-1$
+	private static <T> OptionInfo<T> option(String optionName, IConstraint<T> constraint, T defaultValue,
+	        String label, String desc) {
 		return new OptionInfo<>(label, desc, constraint, defaultValue);
 	}
 
 	private KnownEventOptions() {
 		throw new AssertionError("Not to be instantiated!"); //$NON-NLS-1$
 	}
+
 }
