@@ -46,7 +46,7 @@ if [ $# -ne 1 ]; then
 fi
 
 JMC_DIR=$1
-ROOT_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+ROOT_DIR="$(readlink -f "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/..")"
 
 diffBundle () {
     local bundle_name="$1"
