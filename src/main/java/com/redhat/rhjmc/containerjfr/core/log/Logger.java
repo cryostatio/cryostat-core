@@ -60,12 +60,24 @@ public enum Logger {
         logger.warn(message);
     }
 
+    public void warn(String message, Object object) {
+        logger.warn(message, object);
+    }
+
     public void warn(Exception exception) {
         logger.warn("Exception thrown", exception);
     }
 
     public void info(String message) {
         logger.info(message);
+    }
+
+    public void info(String message, Object object) {
+        logger.info(message, object);
+    }
+
+    public void info(String message, Object first, Object second) {
+        logger.info(message, first, second);
     }
 
     public void info(Exception exception) {
@@ -82,6 +94,10 @@ public enum Logger {
 
     public void trace(String message) {
         logger.trace(message);
+    }
+
+    public void trace(String message, Object object) {
+        logger.trace(message, object);
     }
 
     public void trace(Exception exception) {
