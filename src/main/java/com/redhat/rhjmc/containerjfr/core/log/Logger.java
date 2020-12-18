@@ -52,6 +52,18 @@ public enum Logger {
         logger.error(message);
     }
 
+    public void error(String message, Object a) {
+        logger.error(message, a);
+    }
+
+    public void error(String message, Object a, Object b) {
+        logger.error(message, a, b);
+    }
+
+    public void error(String message, Object... args) {
+        logger.error(message, args);
+    }
+
     public void error(Exception exception) {
         logger.error("Exception thrown", exception);
     }
@@ -60,8 +72,16 @@ public enum Logger {
         logger.warn(message);
     }
 
-    public void warn(String message, Object object) {
-        logger.warn(message, object);
+    public void warn(String message, Object a) {
+        logger.warn(message, a);
+    }
+
+    public void warn(String message, Object a, Object b) {
+        logger.warn(message, a, b);
+    }
+
+    public void warn(String message, Object... args) {
+        logger.warn(message, args);
     }
 
     public void warn(Exception exception) {
@@ -72,12 +92,16 @@ public enum Logger {
         logger.info(message);
     }
 
-    public void info(String message, Object object) {
-        logger.info(message, object);
+    public void info(String message, Object a) {
+        logger.info(message, a);
     }
 
-    public void info(String message, Object first, Object second) {
-        logger.info(message, first, second);
+    public void info(String message, Object a, Object b) {
+        logger.info(message, a, b);
+    }
+
+    public void info(String message, Object... args) {
+        logger.info(message, args);
     }
 
     public void info(Exception exception) {
@@ -88,6 +112,18 @@ public enum Logger {
         logger.debug(message);
     }
 
+    public void debug(String message, Object a) {
+        logger.debug(message, a);
+    }
+
+    public void debug(String message, Object a, Object b) {
+        logger.debug(message, a, b);
+    }
+
+    public void debug(String message, Object... args) {
+        logger.debug(message, args);
+    }
+
     public void debug(Exception exception) {
         logger.debug("Exception thrown", exception);
     }
@@ -96,8 +132,16 @@ public enum Logger {
         logger.trace(message);
     }
 
-    public void trace(String message, Object object) {
-        logger.trace(message, object);
+    public void trace(String message, Object a) {
+        logger.trace(message, a);
+    }
+
+    public void trace(String message, Object a, Object b) {
+        logger.trace(message, a, b);
+    }
+
+    public void trace(String message, Object... args) {
+        logger.trace(message, args);
     }
 
     public void trace(Exception exception) {
