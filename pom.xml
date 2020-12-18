@@ -55,6 +55,11 @@
     <version>${jmc.version}</version>
   </dependency>
   <dependency>
+    <groupId>org.openjdk.jmc</groupId>
+    <artifactId>flightrecorder.rules.jdk</artifactId>
+    <version>${jmc.version}</version>
+  </dependency>
+  <dependency>
     <groupId>org.apache.commons</groupId>
     <artifactId>commons-lang3</artifactId>
     <version>${org.apache.commons.lang3.version}</version>
