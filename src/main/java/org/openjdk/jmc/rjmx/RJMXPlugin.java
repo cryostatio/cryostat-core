@@ -62,12 +62,12 @@ public final class RJMXPlugin {
 	private final static Logger LOGGER = Logger.getLogger(PLUGIN_ID);
 
 	// The shared instance
-	private static RJMXPlugin plugin;
+	private static final RJMXPlugin plugin = new RJMXPlugin();
 
 	/**
 	 * The default constructor.
 	 */
-	public RJMXPlugin() {
+	private RJMXPlugin() {
 	}
 
 
