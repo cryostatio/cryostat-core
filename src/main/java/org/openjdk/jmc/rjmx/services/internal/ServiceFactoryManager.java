@@ -170,7 +170,7 @@ public class ServiceFactoryManager {
 //	}
 
 	private void initializeFromExtensions() {
-	    registerService(new ServiceEntry<>(new DiagnosticCommandServiceFactory(), // FIXME are all of these needed?
+	    registerService(new ServiceEntry<>(new DiagnosticCommandServiceFactory(),
 	            "Diagnostic Commands",
 	            "Diagnostic Commands"));
 	    registerService(new ServiceEntry<>(new SubscriptionServiceFactory(),

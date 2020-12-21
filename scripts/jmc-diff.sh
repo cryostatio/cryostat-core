@@ -47,6 +47,8 @@ fi
 
 JMC_DIR=$1
 ROOT_DIR="$(readlink -f "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/..")"
+SUMMARIZE_MISSING="${SUMMARIZE_MISSING:-false}"
+MISSING_FILES=""
 
 diffBundle () {
     local bundle_name="$1"
@@ -59,9 +61,18 @@ diffBundle () {
     else
         local srcFiles=$(find "${src_dir}" -type f)
     fi
+
+    local diff_flags="-u"
+    if [ "${SUMMARIZE_MISSING}" != true ]; then
+        diff_flags="${diff_flags} -N"
+    fi
     
     for i in ${srcFiles}; do
-        diff -uN --label="a/$i" --label="b/$i" "${JMC_DIR}/application/${bundle_name}/$i" "${ROOT_DIR}/$i"
+        if [ "${SUMMARIZE_MISSING}" = true -a ! -f "${ROOT_DIR}/$i" ]; then
+            MISSING_FILES="${MISSING_FILES}\n$i"
+        else
+            diff ${diff_flags} --label="a/$i" --label="b/$i" "${JMC_DIR}/application/${bundle_name}/$i" "${ROOT_DIR}/$i"
+        fi
     done
     popd >/dev/null
 }
@@ -73,3 +84,7 @@ diffBundle "org.openjdk.jmc.rjmx" "src/main/java/org/openjdk/jmc/rjmx" "src/main
 diffBundle "org.openjdk.jmc.rjmx.services.jfr" "src/main/java/org/openjdk/jmc/rjmx/services/jfr"
 diffBundle "org.openjdk.jmc.jdp" "src/main/java/org/openjdk/jmc/jdp"
 diffBundle "org.openjdk.jmc.ui.common" "src/main/java/org/openjdk/jmc/ui/common"
+
+if [ "${SUMMARIZE_MISSING}" = true ]; then
+    echo -e "\nRemoved files:${MISSING_FILES}"
+fi

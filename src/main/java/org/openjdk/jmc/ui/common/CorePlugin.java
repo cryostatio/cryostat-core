@@ -42,7 +42,7 @@ public class CorePlugin {
 	public static final String PLUGIN_ID = "org.openjdk.jmc.ui.common"; //$NON-NLS-1$
 
 	private static final CorePlugin plugin = new CorePlugin();
-	private final static Logger m_logger = Logger.getLogger(PLUGIN_ID);
+	private static final Logger m_logger = Logger.getLogger(PLUGIN_ID);
 
 	private CorePlugin() {
 	}

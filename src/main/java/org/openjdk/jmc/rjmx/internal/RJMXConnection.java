@@ -41,7 +41,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -68,7 +67,6 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import javax.rmi.ssl.SslRMIClientSocketFactory;
 
-//import org.eclipse.core.runtime.ListenerList;
 import org.openjdk.jmc.common.version.JavaVersion;
 import org.openjdk.jmc.common.version.JavaVersionSupport;
 import org.openjdk.jmc.rjmx.ConnectionException;
