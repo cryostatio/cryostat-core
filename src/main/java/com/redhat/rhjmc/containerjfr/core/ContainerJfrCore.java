@@ -45,16 +45,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.LogManager;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.RegistryFactory;
-
-import com.redhat.rhjmc.containerjfr.core.jmc.RegistryProvider;
 import com.redhat.rhjmc.containerjfr.core.jmc.SecurityManager;
 
 public class ContainerJfrCore {
     private ContainerJfrCore() {}
 
-    public static void initialize() throws CoreException, IOException {
+    public static void initialize() throws IOException {
         System.setProperty(
                 "org.openjdk.jmc.common.security.manager",
                 SecurityManager.class.getCanonicalName());
@@ -64,7 +60,5 @@ public class ContainerJfrCore {
             LogManager.getLogManager()
                     .updateConfiguration(config, k -> ((o, n) -> o != null ? o : n));
         }
-
-        RegistryFactory.setDefaultRegistryProvider(new RegistryProvider());
     }
 }
