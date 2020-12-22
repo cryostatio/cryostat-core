@@ -15,15 +15,13 @@
   <java.version>11</java.version>
   <maven.compiler.target>${java.version}</maven.compiler.target>
   <maven.compiler.source>${java.version}</maven.compiler.source>
-  <jmc.version>7.1.1-SNAPSHOT</jmc.version>
+  <jmc.version>7.1.1</jmc.version>
 
   <org.apache.maven.plugins.compiler.version>3.6.1</org.apache.maven.plugins.compiler.version>
   <org.apache.maven.plugins.surefire.version>3.0.0-M4</org.apache.maven.plugins.surefire.version>
   <org.apache.maven.plugins.site.version>3.8.2</org.apache.maven.plugins.site.version>
   <org.apache.maven.plugins.info.reports.version>3.0.0</org.apache.maven.plugins.info.reports.version>
   <org.codehaus.mojo.license.plugin.version>2.0.0</org.codehaus.mojo.license.plugin.version>
-
-  <org.eclipse.core.runtime.version>3.15.0</org.eclipse.core.runtime.version>
 
   <org.apache.commons.lang3.version>3.9</org.apache.commons.lang3.version>
   <org.apache.commons.io.version>2.6</org.apache.commons.io.version>
@@ -43,43 +41,23 @@
 <dependencies>
   <dependency>
     <groupId>org.openjdk.jmc</groupId>
-    <artifactId>org.openjdk.jmc.flightrecorder.configuration</artifactId>
+    <artifactId>common</artifactId>
     <version>${jmc.version}</version>
   </dependency>
   <dependency>
     <groupId>org.openjdk.jmc</groupId>
-    <artifactId>org.openjdk.jmc.rjmx</artifactId>
+    <artifactId>flightrecorder</artifactId>
     <version>${jmc.version}</version>
   </dependency>
   <dependency>
     <groupId>org.openjdk.jmc</groupId>
-    <artifactId>org.openjdk.jmc.rjmx.services.jfr</artifactId>
+    <artifactId>flightrecorder.rules</artifactId>
     <version>${jmc.version}</version>
   </dependency>
   <dependency>
     <groupId>org.openjdk.jmc</groupId>
-    <artifactId>org.openjdk.jmc.jdp</artifactId>
+    <artifactId>flightrecorder.rules.jdk</artifactId>
     <version>${jmc.version}</version>
-  </dependency>
-  <dependency>
-    <groupId>org.openjdk.jmc</groupId>
-    <artifactId>org.openjdk.jmc.ui.common</artifactId>
-    <version>${jmc.version}</version>
-  </dependency>
-  <dependency>
-    <groupId>org.openjdk.jmc</groupId>
-    <artifactId>org.openjdk.jmc.flightrecorder.controlpanel.ui</artifactId>
-    <version>${jmc.version}</version>
-  </dependency>
-  <dependency>
-    <groupId>org.openjdk.jmc</groupId>
-    <artifactId>org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration</artifactId>
-    <version>${jmc.version}</version>
-  </dependency>
-  <dependency>
-    <groupId>org.eclipse.platform</groupId>
-    <artifactId>org.eclipse.core.runtime</artifactId>
-    <version>${org.eclipse.core.runtime.version}</version>
   </dependency>
   <dependency>
     <groupId>org.apache.commons</groupId>
@@ -172,6 +150,9 @@
       <groupId>com.github.spotbugs</groupId>
       <artifactId>spotbugs-maven-plugin</artifactId>
       <version>${com.github.spotbugs.plugin.version}</version>
+      <configuration>
+        <onlyAnalyze>com.redhat.rhjmc.-</onlyAnalyze>
+      </configuration>
       <executions>
         <execution>
           <id>spotbugs</id>
@@ -216,6 +197,9 @@
       </executions>
       <configuration>
         <java>
+          <excludes>
+            <exclude>src/main/java/org/openjdk/jmc/**</exclude>
+          </excludes>
           <googleJavaFormat>
             <version>1.7</version>
             <style>AOSP</style>
@@ -254,6 +238,9 @@
           <root>src/main/java</root>
           <root>src/test/java</root>
         </roots>
+        <excludes>
+          <exclude>**/org/openjdk/jmc/**</exclude>
+        </excludes>
       </configuration>
       <executions>
         <execution>
