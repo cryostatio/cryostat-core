@@ -38,7 +38,7 @@
 # SOFTWARE.
 #
 
-# This script copies JMC 7 classes used by Container JFR Core into
+# This script copies JMC 7 classes used by Cryostat Core into
 # the src/main/java directory
 if [ $# -ne 1 ]; then
     echo "usage: $0 /path/to/jmc7" >&2

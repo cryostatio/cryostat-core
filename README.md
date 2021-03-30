@@ -1,6 +1,6 @@
-# Container-JFR-Core
+# Cryostat-Core
 
-![Build Status](https://github.com/rh-jmc-team/container-jfr-core/actions/workflows/ci.yaml/badge.svg)
+![Build Status](https://github.com/cryostatio/cryostat-core/actions/workflows/ci.yaml/badge.svg)
 
 Core library providing a convenience wrapper and headless stubs for managing
 JFR with JDK Mission Control API
