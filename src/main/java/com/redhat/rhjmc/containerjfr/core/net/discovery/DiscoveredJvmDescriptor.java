@@ -43,27 +43,48 @@ package com.redhat.rhjmc.containerjfr.core.net.discovery;
 
 import java.net.MalformedURLException;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.management.remote.JMXServiceURL;
 
 public class DiscoveredJvmDescriptor {
 
-    private final Map<String, String> o;
+    private final Map<String, String> payload;
 
-    DiscoveredJvmDescriptor(Map<String, String> o) {
-        this.o = o;
+    DiscoveredJvmDescriptor(Map<String, String> payload) {
+        this.payload = payload;
     }
 
     public String getMainClass() {
-        return o.get("MAIN_CLASS");
+        return payload.get("MAIN_CLASS");
     }
 
     public JMXServiceURL getJmxServiceUrl() throws MalformedURLException {
-        return new JMXServiceURL(o.get("JMX_SERVICE_URL"));
+        return new JMXServiceURL(payload.get("JMX_SERVICE_URL"));
     }
 
     @Override
     public String toString() {
-        return o.toString();
+        return payload.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return payload.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) {
+            return false;
+        }
+        if (o == this) {
+            return true;
+        }
+        if (o.getClass() != getClass()) {
+            return false;
+        }
+        DiscoveredJvmDescriptor djd = (DiscoveredJvmDescriptor) o;
+        return Objects.equals(djd.payload, payload);
     }
 }

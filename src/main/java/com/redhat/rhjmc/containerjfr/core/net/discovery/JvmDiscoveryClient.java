@@ -61,11 +61,11 @@ public class JvmDiscoveryClient {
     private final Set<Consumer<JvmDiscoveryEvent>> eventListeners;
     private final DiscoveryListener listener;
 
-    public JvmDiscoveryClient(Logger logger) {
+    // package-private for testing
+    JvmDiscoveryClient(JDPClient jdp, Logger logger) {
+        this.jdp = jdp;
         this.logger = logger;
-        this.jdp = new JDPClient();
         this.eventListeners = new HashSet<>();
-
         this.listener =
                 new DiscoveryListener() {
                     @Override
@@ -99,6 +99,10 @@ public class JvmDiscoveryClient {
                         }
                     }
                 };
+    }
+
+    public JvmDiscoveryClient(Logger logger) {
+        this(new JDPClient(), logger);
     }
 
     public void start() throws IOException {
