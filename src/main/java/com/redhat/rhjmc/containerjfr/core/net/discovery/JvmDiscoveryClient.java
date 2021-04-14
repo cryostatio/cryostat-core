@@ -48,7 +48,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.openjdk.jmc.jdp.client.DiscoveryEvent.Kind;
+import org.openjdk.jmc.jdp.client.DiscoveryEvent;
+import org.openjdk.jmc.jdp.client.DiscoveryListener;
 import org.openjdk.jmc.jdp.client.JDPClient;
 
 import com.redhat.rhjmc.containerjfr.core.log.Logger;
@@ -58,30 +59,58 @@ public class JvmDiscoveryClient {
     private final Logger logger;
     private final JDPClient jdp;
     private final Set<Consumer<JvmDiscoveryEvent>> eventListeners;
+    private final DiscoveryListener listener;
 
     public JvmDiscoveryClient(Logger logger) {
         this.logger = logger;
         this.jdp = new JDPClient();
         this.eventListeners = new HashSet<>();
 
-        this.jdp.addDiscoveryListener(
-                evt -> {
-                    DiscoveredJvmDescriptor desc =
-                            new DiscoveredJvmDescriptor(evt.getDiscoverable().getPayload());
-                    JvmDiscoveryEvent jde =
-                            new JvmDiscoveryEvent(EventKind.fromJmcKind(evt.getKind()), desc);
-                    eventListeners.forEach(c -> c.accept(jde));
-                });
+        this.listener =
+                new DiscoveryListener() {
+                    @Override
+                    public void onDiscovery(DiscoveryEvent evt) {
+                        DiscoveredJvmDescriptor desc =
+                                new DiscoveredJvmDescriptor(evt.getDiscoverable().getPayload());
+                        switch (evt.getKind()) {
+                            case FOUND:
+                                eventListeners.forEach(
+                                        c ->
+                                                c.accept(
+                                                        new JvmDiscoveryEvent(
+                                                                EventKind.FOUND, desc)));
+                                break;
+                            case LOST:
+                                eventListeners.forEach(
+                                        c -> c.accept(new JvmDiscoveryEvent(EventKind.LOST, desc)));
+                                break;
+                            case CHANGED:
+                                eventListeners.forEach(
+                                        c -> c.accept(new JvmDiscoveryEvent(EventKind.LOST, desc)));
+                                eventListeners.forEach(
+                                        c ->
+                                                c.accept(
+                                                        new JvmDiscoveryEvent(
+                                                                EventKind.FOUND, desc)));
+                                break;
+                            default:
+                                logger.error(
+                                        new IllegalArgumentException(evt.getKind().toString()));
+                        }
+                    }
+                };
     }
 
     public void start() throws IOException {
         this.logger.info("JDP Discovery started");
+        this.jdp.addDiscoveryListener(listener);
         this.jdp.start();
     }
 
     public void stop() {
-        this.logger.info("JDP Discovery stopped");
         this.jdp.stop();
+        this.jdp.removeDiscoveryListener(listener);
+        this.logger.info("JDP Discovery stopped");
     }
 
     public void addListener(Consumer<JvmDiscoveryEvent> listener) {
@@ -117,22 +146,8 @@ public class JvmDiscoveryClient {
     }
 
     public enum EventKind {
-        CHANGED,
         FOUND,
         LOST,
         ;
-
-        private static EventKind fromJmcKind(Kind kind) {
-            switch (kind) {
-                case CHANGED:
-                    return EventKind.CHANGED;
-                case FOUND:
-                    return EventKind.FOUND;
-                case LOST:
-                    return EventKind.LOST;
-                default:
-                    throw new IllegalArgumentException(kind.toString());
-            }
-        }
     }
 }
