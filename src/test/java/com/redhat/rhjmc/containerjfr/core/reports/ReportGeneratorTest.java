@@ -170,8 +170,8 @@ class ReportGeneratorTest {
                                 + " <head></head>\n"
                                 + " <body>\n"
                                 + "  <div class=\"foo\" data-someprop=\"someval\">\n"
-                                + "   <a id=\"hl\" href=\"http://example.com\">link text</a>\n"
-                                + "   <a href=\"http://localhost:1234\">hello</a>\n"
+                                + "   <a id=\"hl\" href=\"http://example.com\">link text</a>"
+                                + "<a href=\"http://localhost:1234\">hello</a>\n"
                                 + "  </div>\n"
                                 + " </body>\n"
                                 + "</html>"));
