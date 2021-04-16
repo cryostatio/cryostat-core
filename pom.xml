@@ -28,7 +28,7 @@
   <org.apache.commons.text.version>1.9</org.apache.commons.text.version>
   <org.jsoup.version>1.13.1</org.jsoup.version>
 
-  <com.github.spotbugs.version>4.2.2</com.github.spotbugs.version>
+  <com.github.spotbugs.version>4.2.3</com.github.spotbugs.version>
   <com.github.spotbugs.plugin.version>4.2.2</com.github.spotbugs.plugin.version>
   <org.junit.jupiter.version>5.7.1</org.junit.jupiter.version>
   <org.hamcrest.version>2.2</org.hamcrest.version>
