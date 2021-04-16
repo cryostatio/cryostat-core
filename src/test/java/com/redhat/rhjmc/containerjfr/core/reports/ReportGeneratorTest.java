@@ -47,6 +47,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import com.redhat.rhjmc.containerjfr.core.log.Logger;
+
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,8 +57,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import com.redhat.rhjmc.containerjfr.core.log.Logger;
 
 @ExtendWith(MockitoExtension.class)
 class ReportGeneratorTest {

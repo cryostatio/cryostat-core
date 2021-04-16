@@ -49,6 +49,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.openjdk.jmc.jdp.client.Discoverable;
+import org.openjdk.jmc.jdp.client.DiscoveryEvent;
+import org.openjdk.jmc.jdp.client.DiscoveryListener;
+import org.openjdk.jmc.jdp.client.JDPClient;
+
+import com.redhat.rhjmc.containerjfr.core.log.Logger;
+import com.redhat.rhjmc.containerjfr.core.net.discovery.JvmDiscoveryClient.EventKind;
+
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,14 +68,6 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import org.openjdk.jmc.jdp.client.Discoverable;
-import org.openjdk.jmc.jdp.client.DiscoveryEvent;
-import org.openjdk.jmc.jdp.client.DiscoveryListener;
-import org.openjdk.jmc.jdp.client.JDPClient;
-
-import com.redhat.rhjmc.containerjfr.core.log.Logger;
-import com.redhat.rhjmc.containerjfr.core.net.discovery.JvmDiscoveryClient.EventKind;
 
 @ExtendWith(MockitoExtension.class)
 class JvmDiscoveryClientTest {

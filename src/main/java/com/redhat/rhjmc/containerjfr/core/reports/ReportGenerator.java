@@ -47,13 +47,13 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-
 import org.openjdk.jmc.flightrecorder.CouldNotLoadRecordingException;
 import org.openjdk.jmc.flightrecorder.rules.report.html.JfrHtmlRulesReport;
 
 import com.redhat.rhjmc.containerjfr.core.log.Logger;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 public class ReportGenerator {
 

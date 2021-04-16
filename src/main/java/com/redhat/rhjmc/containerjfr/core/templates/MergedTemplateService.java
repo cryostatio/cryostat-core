@@ -47,14 +47,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.jsoup.nodes.Document;
-
 import org.openjdk.jmc.common.unit.IConstrainedMap;
 import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
 
 import com.redhat.rhjmc.containerjfr.core.net.JFRConnection;
 import com.redhat.rhjmc.containerjfr.core.sys.Environment;
 import com.redhat.rhjmc.containerjfr.core.sys.FileSystem;
+
+import org.jsoup.nodes.Document;
 
 public class MergedTemplateService implements MutableTemplateService {
 

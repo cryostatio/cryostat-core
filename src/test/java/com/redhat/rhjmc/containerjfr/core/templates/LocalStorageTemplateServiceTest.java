@@ -48,6 +48,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import com.redhat.rhjmc.containerjfr.core.sys.Environment;
+import com.redhat.rhjmc.containerjfr.core.sys.FileSystem;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.hamcrest.MatcherAssert;
@@ -63,9 +66,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import com.redhat.rhjmc.containerjfr.core.sys.Environment;
-import com.redhat.rhjmc.containerjfr.core.sys.FileSystem;
 
 @ExtendWith(MockitoExtension.class)
 class LocalStorageTemplateServiceTest {

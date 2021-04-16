@@ -44,6 +44,13 @@ package com.redhat.rhjmc.containerjfr.core.templates;
 import java.util.Collections;
 import java.util.Optional;
 
+import org.openjdk.jmc.flightrecorder.configuration.internal.DefaultValueMap;
+import org.openjdk.jmc.flightrecorder.configuration.internal.EventOptionDescriptorMapper;
+import org.openjdk.jmc.flightrecorder.configuration.internal.EventTypeIDV2;
+import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
+
+import com.redhat.rhjmc.containerjfr.core.net.JFRConnection;
+
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -57,13 +64,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import org.openjdk.jmc.flightrecorder.configuration.internal.DefaultValueMap;
-import org.openjdk.jmc.flightrecorder.configuration.internal.EventOptionDescriptorMapper;
-import org.openjdk.jmc.flightrecorder.configuration.internal.EventTypeIDV2;
-import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
-
-import com.redhat.rhjmc.containerjfr.core.net.JFRConnection;
 
 @ExtendWith(MockitoExtension.class)
 class RemoteTemplateServiceTest {

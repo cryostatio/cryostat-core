@@ -44,10 +44,10 @@ package com.redhat.rhjmc.containerjfr.core.templates;
 import java.util.List;
 import java.util.Optional;
 
-import org.jsoup.nodes.Document;
-
 import org.openjdk.jmc.common.unit.IConstrainedMap;
 import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
+
+import org.jsoup.nodes.Document;
 
 public interface TemplateService {
 
