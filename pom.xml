@@ -18,13 +18,6 @@
     <layout>default</layout>
   </repository>
 </repositories>
-<distributionManagement>
-  <repository>
-    <id>github</id>
-    <name>GitHub Packages</name>
-    <url>https://maven.pkg.github.com/rh-jmc-team/container-jfr-core</url>
-  </repository>
-</distributionManagement>
 
 <properties>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
