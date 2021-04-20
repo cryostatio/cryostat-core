@@ -54,11 +54,11 @@ public class Credentials {
         this.password = password;
     }
 
-    public String getUsername() {
+    String getUsername() {
         return username;
     }
 
-    public String getPassword() {
+    String getPassword() {
         return password;
     }
 
