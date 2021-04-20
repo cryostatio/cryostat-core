@@ -2,7 +2,7 @@
  * #%L
  * Cryostat Core
  * %%
- * Copyright (C) 2021 Red Hat, Inc.
+ * Copyright (C) 2020 - 2021 The Cryostat Authors
  * %%
  * The Universal Permissive License (UPL), Version 1.0
  *

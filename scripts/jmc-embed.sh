@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (c) 2020 Red Hat, Inc.
+# Copyright The Cryostat Authors
 #
 # The Universal Permissive License (UPL), Version 1.0
 #
