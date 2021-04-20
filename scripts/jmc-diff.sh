@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (c) 2020 Red Hat, Inc.
+# Copyright The Cryostat Authors
 #
 # The Universal Permissive License (UPL), Version 1.0
 #
@@ -66,7 +66,7 @@ diffBundle () {
     if [ "${SUMMARIZE_MISSING}" != true ]; then
         diff_flags="${diff_flags} -N"
     fi
-    
+
     for i in ${srcFiles}; do
         if [ "${SUMMARIZE_MISSING}" = true -a ! -f "${ROOT_DIR}/$i" ]; then
             MISSING_FILES="${MISSING_FILES}\n$i"
