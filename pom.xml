@@ -3,11 +3,11 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
 <modelVersion>4.0.0</modelVersion>
-<groupId>com.redhat.rhjmc</groupId>
-<artifactId>containerjfr-core</artifactId>
+<groupId>io.cryostat</groupId>
+<artifactId>cryostat-core</artifactId>
 <version>2.3.0-SNAPSHOT</version>
 <packaging>jar</packaging>
-<name>containerjfr-core</name>
+<name>cryostat-core</name>
 <url>http://maven.apache.org</url>
 
 <repositories>
@@ -161,7 +161,7 @@
       <artifactId>spotbugs-maven-plugin</artifactId>
       <version>${com.github.spotbugs.plugin.version}</version>
       <configuration>
-        <onlyAnalyze>com.redhat.rhjmc.-</onlyAnalyze>
+        <onlyAnalyze>io.cryostat.-</onlyAnalyze>
       </configuration>
       <executions>
         <execution>
@@ -217,7 +217,7 @@
           <trimTrailingWhitespace/>
           <endWithNewline/>
           <importOrder>
-            <order>java,javax,org.openjdk.jmc,com.redhat.rhjmc.containerjfr,</order>
+            <order>java,javax,org.openjdk.jmc,io.cryostat,</order>
           </importOrder>
           <removeUnusedImports/>
         </java>
@@ -240,8 +240,8 @@
       <configuration>
         <licenseName>upl_v1</licenseName>
         <licenseResolver>${project.baseUri}/src/license</licenseResolver>
-        <projectName>Container JFR Core</projectName>
-        <organizationName>Red Hat, Inc.</organizationName>
+        <projectName>Cryostat Core</projectName>
+        <organizationName>The Cryostat Authors</organizationName>
         <inceptionYear>2020</inceptionYear>
         <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
         <roots>
@@ -278,7 +278,7 @@
       <version>${org.jacoco.maven.plugin.version}</version>
       <configuration>
         <excludes>
-          <exclude>com/redhat/rhjmc/containerjfr/core/jmc/**/*</exclude>
+          <exclude>io/cryostat/core/jmc/**/*</exclude>
           <exclude>org/openjdk/jmc/**/*</exclude>
         </excludes>
       </configuration>
