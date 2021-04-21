@@ -180,7 +180,7 @@ public final class NameConverter {
 	private String getValidName(JVMDescriptor descriptor) {
 		Integer pid = descriptor.getPid();
 		if (pid != null && pid.intValue() == Environment.getThisPID() && descriptor.isAttachable()) {
-			return "com.redhat.rhjmc.containerjfr" + ".this"; //$NON-NLS-1$
+			return "io.cryostat" + ".this"; //$NON-NLS-1$
 		}
 		String name = JVMCommandLineToolkit.getMainClassOrJar(descriptor.getJavaCommand());
 		if (name != null && name.length() > 0) {
