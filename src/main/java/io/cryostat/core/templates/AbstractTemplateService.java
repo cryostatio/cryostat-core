@@ -1,5 +1,5 @@
 /*
- * Copyright the Cryostat Authors
+ * Copyright The Cryostat Authors
  *
  * The Universal Permissive License (UPL), Version 1.0
  *
