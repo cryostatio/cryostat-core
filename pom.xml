@@ -30,7 +30,7 @@
   <org.apache.maven.plugins.surefire.version>3.0.0-M5</org.apache.maven.plugins.surefire.version>
   <org.apache.maven.plugins.site.version>3.9.1</org.apache.maven.plugins.site.version>
   <org.apache.maven.plugins.info.reports.version>3.1.1</org.apache.maven.plugins.info.reports.version>
-  <org.codehaus.mojo.license.plugin.version>2.0.0</org.codehaus.mojo.license.plugin.version>
+  <com.mycila.license.maven.plugin.version>4.0</com.mycila.license.maven.plugin.version>
 
   <org.apache.commons.lang3.version>3.12.0</org.apache.commons.lang3.version>
   <org.apache.commons.io.version>2.8.0</org.apache.commons.io.version>
@@ -234,29 +234,28 @@
       <version>${org.apache.maven.plugins.info.reports.version}</version>
     </plugin>
     <plugin>
-      <groupId>org.codehaus.mojo</groupId>
+      <groupId>com.mycila</groupId>
       <artifactId>license-maven-plugin</artifactId>
-      <version>${org.codehaus.mojo.license.plugin.version}</version>
+      <version>${com.mycila.license.maven.plugin.version}</version>
       <configuration>
-        <licenseName>upl_v1</licenseName>
-        <licenseResolver>${project.baseUri}/src/license</licenseResolver>
-        <projectName>Cryostat Core</projectName>
-        <organizationName>The Cryostat Authors</organizationName>
-        <inceptionYear>2020</inceptionYear>
-        <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
-        <roots>
-          <root>src/main/java</root>
-          <root>src/test/java</root>
-        </roots>
-        <excludes>
-          <exclude>**/org/openjdk/jmc/**</exclude>
-        </excludes>
+        <licenseSets>
+          <licenseSet>
+            <header>LICENSE</header>
+            <includes>
+              <include>src/main/**/*.java</include>
+              <include>src/test/**/*.java</include>
+            </includes>
+            <excludes>
+              <exclude>src/main/java/org/openjdk/jmc/**</exclude>
+            </excludes>
+          </licenseSet>
+        </licenseSets>
       </configuration>
       <executions>
         <execution>
           <id>update-license</id>
           <goals>
-            <goal>update-file-header</goal>
+            <goal>check</goal>
           </goals>
           <phase>process-sources</phase>
         </execution>
