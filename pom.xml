@@ -245,6 +245,9 @@
               <include>src/main/**/*.java</include>
               <include>src/test/**/*.java</include>
             </includes>
+            <excludes>
+              <exclude>src/main/java/org/openjdk/jmc/**</exclude>
+            </excludes>
           </licenseSet>
         </licenseSets>
       </configuration>
