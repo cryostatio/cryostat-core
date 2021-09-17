@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved.
- * 
+ *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * The contents of this file are subject to the terms of either the Universal Permissive License
@@ -10,17 +10,17 @@
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this list of conditions
  * and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright notice, this list of
  * conditions and the following disclaimer in the documentation and/or other materials provided with
  * the distribution.
- * 
+ *
  * 3. Neither the name of the copyright holder nor the names of its contributors may be used to
  * endorse or promote products derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
  * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
@@ -35,10 +35,10 @@ package org.openjdk.jmc.rjmx.subscription.internal;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.openjdk.jmc.common.IPredicate;
 import org.openjdk.jmc.rjmx.IConnectionHandle;
 import org.openjdk.jmc.rjmx.subscription.IMBeanHelperService;
 import org.openjdk.jmc.rjmx.subscription.IMRIMetadata;
@@ -60,7 +60,7 @@ public abstract class AbstractAttributeSubscription implements IMRISubscription 
 	private final IMRIMetadata m_attributeInfo;
 	private MRIValueEvent m_lastEvent;
 	private IUpdatePolicy m_updatePolicy;
-	private final IPredicate<Object> m_valueFilter;
+	private final Predicate<Object> m_valueFilter;
 
 	/**
 	 * Constructor for AbstractAttribute.
@@ -180,7 +180,7 @@ public abstract class AbstractAttributeSubscription implements IMRISubscription 
 	 *            the newly created event.
 	 */
 	protected void storeAndFireEvent(MRIValueEvent event) {
-		if (m_valueFilter != null && m_valueFilter.evaluate(event.getValue())) {
+		if (m_valueFilter != null && m_valueFilter.test(event.getValue())) {
 			LOGGER.log(Level.INFO, "Subscription filtered out value: " + event.getValue()); //$NON-NLS-1$
 			return;
 		}
@@ -235,16 +235,16 @@ public abstract class AbstractAttributeSubscription implements IMRISubscription 
 		return getClass().getName() + '[' + getMRIMetadata() + ']';
 	}
 
-	private static IPredicate<Object> getValueFilter(IMRIMetadata metadata) {
+	private static Predicate<Object> getValueFilter(IMRIMetadata metadata) {
 		// FIXME: We hard code the filters for now, but this should be handled along with content types
 		String mri = metadata.getMRI().getQualifiedName();
 		if ("attribute://java.lang:type=OperatingSystem/ProcessCpuLoad".equals(mri) //$NON-NLS-1$
 				|| "attribute://java.lang:type=OperatingSystem/SystemCpuLoad".equals(mri) //$NON-NLS-1$
 				|| "attribute://java.lang:type=OperatingSystem/SystemLoadAverage".equals(mri)) { //$NON-NLS-1$
-			return new IPredicate<Object>() {
+			return new Predicate<Object>() {
 
 				@Override
-				public boolean evaluate(Object value) {
+				public boolean test(Object value) {
 					return !(value instanceof Number) || ((Number) value).doubleValue() < 0;
 				}
 			};

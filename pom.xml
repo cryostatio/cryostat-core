@@ -24,7 +24,7 @@
   <java.version>11</java.version>
   <maven.compiler.target>${java.version}</maven.compiler.target>
   <maven.compiler.source>${java.version}</maven.compiler.source>
-  <jmc.version>7.1.1</jmc.version>
+  <jmc.version>8.1.0</jmc.version>
 
   <org.apache.maven.plugins.compiler.version>3.8.1</org.apache.maven.plugins.compiler.version>
   <org.apache.maven.plugins.surefire.version>3.0.0-M5</org.apache.maven.plugins.surefire.version>
