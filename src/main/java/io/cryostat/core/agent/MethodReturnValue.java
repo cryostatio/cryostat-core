@@ -37,9 +37,35 @@
  */
 package io.cryostat.core.agent;
 
-import java.util.List;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-public abstract class AbstractProbeTemplateService {
+public class MethodReturnValue extends CapturedValue {
 
-    public abstract List<ProbeTemplate> getTemplates() throws Exception;
+    private static final String XML_TAG_RETURN_VALUE = "returnvalue"; // $NON-NLS-1$
+
+    private final Event event;
+
+    MethodReturnValue(Event event) {
+        super();
+
+        this.event = event;
+    }
+
+    MethodReturnValue(Event event, Element element) {
+        super(element);
+
+        this.event = event;
+    }
+
+    @Override
+    public Element buildElement(Document document) {
+        Element element = super.buildElement(document);
+        return (Element) document.renameNode(element, null, XML_TAG_RETURN_VALUE);
+    }
+
+    public MethodReturnValue createWorkingCopy() {
+        MethodReturnValue copy = new MethodReturnValue(event);
+        return copy;
+    }
 }

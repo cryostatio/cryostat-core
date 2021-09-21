@@ -37,13 +37,13 @@
  */
 package io.cryostat.core.agent;
 
-import io.cryostat.core.sys.Environment;
-import io.cryostat.core.sys.FileSystem;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
+
+import io.cryostat.core.sys.Environment;
+import io.cryostat.core.sys.FileSystem;
 
 public class LocalProbeTemplateService extends AbstractProbeTemplateService {
 
@@ -59,23 +59,60 @@ public class LocalProbeTemplateService extends AbstractProbeTemplateService {
 
     public void addTemplate(InputStream inputStream) throws IOException {
         // Sanity Check
-        if(!env.hasEnv(TEMPLATE_PATH)) {
+        if (!env.hasEnv(TEMPLATE_PATH)) {
             throw new IOException(
-                String.format(
-                    "Probe template directory does not exist, must be set using environment variable %s",
-                    TEMPLATE_PATH));
+                    String.format(
+                            "Probe template directory does not exist, must be set using environment variable %s",
+                            TEMPLATE_PATH));
         }
         Path probeTemplateDirectory = fs.pathOf(env.getEnv(TEMPLATE_PATH));
         // Sanity check the directory is set up correctly
-        if (!fs.exists(probeTemplateDirectory) || ! fs.isDirectory(probeTemplateDirectory)
-        || !fs.isReadable(probeTemplateDirectory) || ! fs.isWritable(probeTemplateDirectory)) {
+        if (!fs.exists(probeTemplateDirectory)
+                || !fs.isDirectory(probeTemplateDirectory)
+                || !fs.isReadable(probeTemplateDirectory)
+                || !fs.isWritable(probeTemplateDirectory)) {
             throw new IOException(
-                String.format(
-                    "Probe template directory %s does not exist, is not a directory, or has incorrect permissions.",
-                    probeTemplateDirectory.toString()
-                ));
+                    String.format(
+                            "Probe template directory %s does not exist, is not a directory, or has incorrect permissions.",
+                            probeTemplateDirectory.toString()));
         }
+        try (inputStream) {
+            ProbeTemplate template = new ProbeTemplate();
+            template.deserialize(inputStream);
+            Path path = fs.pathOf(env.getEnv(TEMPLATE_PATH), template.getFileName());
+            if (fs.exists(path)) {
+                throw new Exception(
+                        String.format(
+                                "Event template \"%s\" already exists", template.getFileName()));
+            }
+            fs.writeString(path, template.serialize());
+        } catch (Exception e) {
 
+        }
+    }
+
+    public void deleteTemplate(String templateName) throws Exception {
+        // Sanity Check
+        if (!env.hasEnv(TEMPLATE_PATH)) {
+            throw new IOException(
+                    String.format(
+                            "Probe template directory does not exist, must be set using environment variable %s",
+                            TEMPLATE_PATH));
+        }
+        Path probeTemplateDirectory = fs.pathOf(env.getEnv(TEMPLATE_PATH));
+        if (!fs.exists(probeTemplateDirectory)
+                || !fs.isDirectory(probeTemplateDirectory)
+                || !fs.isReadable(probeTemplateDirectory)
+                || !fs.isWritable(probeTemplateDirectory)) {
+            throw new IOException(
+                    String.format(
+                            "Probe template directory %s does not exist, is not a directory, or has incorrect permissions.",
+                            probeTemplateDirectory.toString()));
+        }
+        if (!fs.deleteIfExists(fs.pathOf(env.getEnv(TEMPLATE_PATH), templateName))) {
+            throw new IOException(
+                    String.format("Probe template \"%s\" does not exist", templateName));
+        }
     }
 
     @Override

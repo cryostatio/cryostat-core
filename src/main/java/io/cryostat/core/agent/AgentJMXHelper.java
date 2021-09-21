@@ -37,114 +37,117 @@
  */
 package io.cryostat.core.agent;
 
+import java.io.IOException;
+import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.management.MBeanServerConnection;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+
 import org.openjdk.jmc.rjmx.ConnectionException;
 import org.openjdk.jmc.rjmx.IConnectionHandle;
 import org.openjdk.jmc.rjmx.IConnectionListener;
 import org.openjdk.jmc.rjmx.IServerHandle;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import javax.management.ReflectionException;
-import javax.management.openmbean.CompositeData;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.logging.Level;
-
 public class AgentJMXHelper {
 
-    private final static String AGENT_OBJECT_NAME = "org.openjdk.jmc.jfr.agent:type=AgentController"; //$NON-NLS-1$
-	private final static String DEFINE_EVENT_PROBES = "defineEventProbes"; //$NON-NLS-1$
-	private final static String RETRIEVE_EVENT_PROBES = "retrieveEventProbes"; //$NON-NLS-1$
-	private final static String RETRIEVE_CURRENT_TRANSFORMS = "retrieveCurrentTransforms"; //$NON-NLS-1$
-	private final static String CONNECTION_USAGE = "Agent MBean"; //$NON-NLS-1$
+    private static final Logger logger = Logger.getLogger(AgentJMXHelper.class.getName());
+    private static final String AGENT_OBJECT_NAME =
+            "org.openjdk.jmc.jfr.agent:type=AgentController"; //$NON-NLS-1$
+    private static final String DEFINE_EVENT_PROBES = "defineEventProbes"; // $NON-NLS-1$
+    private static final String RETRIEVE_EVENT_PROBES = "retrieveEventProbes"; // $NON-NLS-1$
+    private static final String RETRIEVE_CURRENT_TRANSFORMS =
+            "retrieveCurrentTransforms"; //$NON-NLS-1$
+    private static final String CONNECTION_USAGE = "Agent MBean"; // $NON-NLS-1$
 
-	private final IServerHandle serverHandle;
-	private final IConnectionHandle connectionHandle;
-	private final MBeanServerConnection mbsc;
+    private final IServerHandle serverHandle;
+    private final IConnectionHandle connectionHandle;
+    private final MBeanServerConnection mbsc;
 
-    private final Logger logger = Logger.getLogger(AgentJMXHelper.class);
+    public AgentJMXHelper(IServerHandle serverHandle) throws ConnectionException {
+        this.serverHandle = Objects.requireNonNull(serverHandle);
+        connectionHandle = serverHandle.connect(CONNECTION_USAGE, this::onConnectionChange);
+        mbsc = connectionHandle.getServiceOrDummy(MBeanServerConnection.class);
+    }
 
-	public AgentJmxHelper(IServerHandle serverHandle) throws ConnectionException {
-		this.serverHandle = Objects.requireNonNull(serverHandle);
-		connectionHandle = serverHandle.connect(CONNECTION_USAGE, this::onConnectionChange);
-		mbsc = connectionHandle.getServiceOrDummy(MBeanServerConnection.class);
-	}
+    public IServerHandle getServerHandle() {
+        return serverHandle;
+    }
 
-	public IServerHandle getServerHandle() {
-		return serverHandle;
-	}
+    public IConnectionHandle getConnectionHandle() {
+        return connectionHandle;
+    }
 
-	public IConnectionHandle getConnectionHandle() {
-		return connectionHandle;
-	}
+    public MBeanServerConnection getMBeanServerConnection() {
+        return mbsc;
+    }
 
-	public MBeanServerConnection getMBeanServerConnection() {
-		return mbsc;
-	}
+    public void addConnectionChangedListener(IConnectionListener connectionListener) {
+        // connectionListeners.add(Objects.requireNonNull(connectionListener));
+    }
 
-	public void addConnectionChangedListener(IConnectionListener connectionListener) {
-		connectionListeners.add(Objects.requireNonNull(connectionListener));
-	}
+    public void removeConnectionChangedListener(IConnectionListener connectionListener) {
+        // connectionListeners.remove(connectionListener);
+    }
 
-	public void removeConnectionChangedListener(IConnectionListener connectionListener) {
-		connectionListeners.remove(connectionListener);
-	}
+    public boolean isLocalJvm() {
+        return connectionHandle.getServerDescriptor().getJvmInfo() != null;
+    }
 
-	public boolean isLocalJvm() {
-		return connectionHandle.getServerDescriptor().getJvmInfo() != null;
-	}
+    public boolean isMXBeanRegistered() {
+        try {
+            return mbsc.isRegistered(new ObjectName(AGENT_OBJECT_NAME));
+        } catch (MalformedObjectNameException | IOException e) {
+            logger.log(Level.SEVERE, "Could not check if agent MXBean is registered", e);
+        }
+        return false;
+    }
 
-	public boolean isMXBeanRegistered() {
-		try {
-			return mbsc.isRegistered(new ObjectName(AGENT_OBJECT_NAME));
-		} catch (MalformedObjectNameException | IOException e) {
-			logger.log(Level.SEVERE, "Could not check if agent MXBean is registered", e);
-		}
-		return false;
-	}
+    public String retrieveEventProbes() {
+        try {
+            Object result =
+                    mbsc.invoke(
+                            new ObjectName(AGENT_OBJECT_NAME),
+                            RETRIEVE_EVENT_PROBES,
+                            new Object[0],
+                            new String[0]);
+            return result.toString();
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Could not retrieve event probes", e);
+        }
+        return null;
+    }
 
-	public String retrieveEventProbes() {
-		try {
-			Object result = mbsc.invoke(new ObjectName(AGENT_OBJECT_NAME), RETRIEVE_EVENT_PROBES, new Object[0],
-					new String[0]);
-			return result.toString();
-		} catch (Exception e) {
-			logger.log(Level.WARNING, "Could not retrieve event probes", e);
-		}
-		return null;
-	}
+    public Object retrieveCurrentTransforms() {
+        try {
+            Object result =
+                    mbsc.invoke(
+                            new ObjectName(AGENT_OBJECT_NAME),
+                            RETRIEVE_CURRENT_TRANSFORMS,
+                            new Object[0],
+                            new String[0]);
+            return result;
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Could not retrieve current transforms", e);
+        }
+        return null;
+    }
 
-	public Object retrieveCurrentTransforms() {
-		try {
-			Object result = mbsc.invoke(new ObjectName(AGENT_OBJECT_NAME), RETRIEVE_CURRENT_TRANSFORMS, new Object[0],
-					new String[0]);
-			return result;
-		} catch (Exception e) {
-			logger.log(Level.WARNING, "Could not retrieve current transforms", e);
-		}
-		return null;
-	}
+    public void defineEventProbes(String xmlDescription) {
+        try {
+            Object[] params = {xmlDescription};
+            String[] signature = {String.class.getName()};
+            mbsc.invoke(new ObjectName(AGENT_OBJECT_NAME), DEFINE_EVENT_PROBES, params, signature);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Could not define event probes: " + xmlDescription, e);
+        }
+    }
 
-	public void defineEventProbes(String xmlDescription) {
-		try {
-			Object[] params = {xmlDescription};
-			String[] signature = {String.class.getName()};
-			mbsc.invoke(new ObjectName(AGENT_OBJECT_NAME), DEFINE_EVENT_PROBES, params, signature);
-		} catch (Exception e) {
-			logger.log(Level.WARNING, "Could not define event probes: " + xmlDescription,
-					e);
-		}
-	}
-
-	public void onConnectionChange(IConnectionHandle connection) {
-		for (IConnectionListener listener : connectionListeners) {
-			listener.onConnectionChange(connection);
-		}
-	}
-
+    public void onConnectionChange(IConnectionHandle connection) {
+        // for (IConnectionListener listener : connectionListeners) {
+        //	listener.onConnectionChange(connection);
+        // }
+    }
 }

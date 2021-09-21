@@ -37,9 +37,70 @@
  */
 package io.cryostat.core.agent;
 
-import java.util.List;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-public abstract class AbstractProbeTemplateService {
+public class MethodParameter extends CapturedValue {
+    private static final String DEFAULT_PARAMETER_NAME = "New Parameter"; // $NON-NLS-1$
+    private static final int DEFAULT_INDEX = 0;
 
-    public abstract List<ProbeTemplate> getTemplates() throws Exception;
+    private static final String XML_TAG_PARAMETER = "parameter"; // $NON-NLS-1$
+    private static final String XML_ATTRIBUTE_INDEX = "index"; // $NON-NLS-1$
+
+    private final Event event;
+
+    private int index;
+
+    MethodParameter(Event event) {
+        super();
+        this.event = event;
+
+        index = DEFAULT_INDEX;
+        setName(DEFAULT_PARAMETER_NAME);
+    }
+
+    MethodParameter(Event event, Element element) {
+        super(element);
+        this.event = event;
+
+        index = Integer.parseInt(element.getAttribute(XML_ATTRIBUTE_INDEX));
+    }
+
+    @Override
+    public Element buildElement(Document document) {
+        Element element = super.buildElement(document);
+        element = (Element) document.renameNode(element, null, XML_TAG_PARAMETER);
+        element.setAttribute(XML_ATTRIBUTE_INDEX, String.valueOf(index));
+        return element;
+    }
+
+    @Override
+    public void setName(String name) {
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("Name cannot be empty or null.");
+        }
+
+        super.setName(name);
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        if (index < 0) {
+            throw new IllegalArgumentException("Index cannot be negative");
+        }
+
+        this.index = index;
+    }
+
+    public MethodParameter createWorkingCopy() {
+        MethodParameter parameter = new MethodParameter(event);
+
+        copyContentToWorkingCopy(parameter);
+        parameter.index = index;
+
+        return parameter;
+    }
 }
