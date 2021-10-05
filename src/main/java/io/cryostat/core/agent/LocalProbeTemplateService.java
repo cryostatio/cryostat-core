@@ -37,10 +37,14 @@
  */
 package io.cryostat.core.agent;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import io.cryostat.core.sys.Environment;
 import io.cryostat.core.sys.FileSystem;
@@ -57,7 +61,7 @@ public class LocalProbeTemplateService extends AbstractProbeTemplateService {
         this.env = env;
     }
 
-    public void addTemplate(InputStream inputStream) throws IOException {
+    public void addTemplate(InputStream inputStream, String filename) throws IOException {
         // Sanity Check
         if (!env.hasEnv(TEMPLATE_PATH)) {
             throw new IOException(
@@ -78,16 +82,24 @@ public class LocalProbeTemplateService extends AbstractProbeTemplateService {
         }
         try (inputStream) {
             ProbeTemplate template = new ProbeTemplate();
+            // If validation fails this will throw a ProbeValidationException with details
             template.deserialize(inputStream);
-            Path path = fs.pathOf(env.getEnv(TEMPLATE_PATH), template.getFileName());
+            Path path = fs.pathOf(env.getEnv(TEMPLATE_PATH), filename);
             if (fs.exists(path)) {
                 throw new Exception(
                         String.format(
                                 "Event template \"%s\" already exists", template.getFileName()));
             }
-            fs.writeString(path, template.serialize());
+            fs.writeString(
+                    path,
+                    new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
+                            .lines()
+                            .collect(Collectors.joining("\n")));
+        } catch (ProbeValidationException pve) {
+            // rethrow for http handler
+            throw pve;
         } catch (Exception e) {
-
+            // ignore
         }
     }
 

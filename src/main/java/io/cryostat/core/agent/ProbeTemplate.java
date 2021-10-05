@@ -52,6 +52,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -123,18 +124,10 @@ public class ProbeTemplate {
     }
 
     public void deserialize(String xmlSource) throws IOException, SAXException {
-        // TODO: XML Validation, though the agent already does its own validation
-        /*
         ProbeValidator validator = new ProbeValidator();
-        validator.validate(new StreamSource(new ByteArrayInputStream(xmlSource.getBytes(StandardCharsets.UTF_8))));
-        ValidationResult result = validator.getValidationResult();
-        if (!result.isValid()) {
-            if (result.getFatalError() != null) {
-                throw result.getFatalError();
-            } else {
-                throw result.getErrors().get(0);
-            }
-        }*/
+        validator.validate(
+                new StreamSource(
+                        new ByteArrayInputStream(xmlSource.getBytes(StandardCharsets.UTF_8))));
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder;
         try {
