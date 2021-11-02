@@ -64,14 +64,13 @@ public class ProbeTemplate {
     private static final String DEFAULT_FILE_NAME = "new_file.xml";
     private static final String DEFAULT_CLASS_PREFIX = "__JFREvent";
 
-    private static final String FILE_NAME_EXTENSION = ".xml"; // $NON-NLS-1$
-    private static final String XML_TAG_JFR_AGENT = "jfragent"; // $NON-NLS-1$
-    private static final String XML_TAG_CONFIG = "config"; // $NON-NLS-1$
-    private static final String XML_TAG_CLASS_PREFIX = "classprefix"; // $NON-NLS-1$
-    private static final String XML_TAG_ALLOW_TO_STRING = "allowtostring"; // $NON-NLS-1$
-    private static final String XML_TAG_ALLOW_CONVERTER = "allowconverter"; // $NON-NLS-1$
-    private static final String XML_TAG_EVENTS = "events"; // $NON-NLS-1$
-    private static final String XML_TAG_EVENT = "event"; // $NON-NLS-1$
+    private static final String XML_TAG_JFR_AGENT = "jfragent";
+    private static final String XML_TAG_CONFIG = "config";
+    private static final String XML_TAG_CLASS_PREFIX = "classprefix";
+    private static final String XML_TAG_ALLOW_TO_STRING = "allowtostring";
+    private static final String XML_TAG_ALLOW_CONVERTER = "allowconverter";
+    private static final String XML_TAG_EVENTS = "events";
+    private static final String XML_TAG_EVENT = "event";
 
     private String fileName;
     private String classPrefix;

@@ -38,7 +38,6 @@
 package io.cryostat.core.agent;
 
 import java.io.IOException;
-import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,32 +47,22 @@ import javax.management.ObjectName;
 
 import org.openjdk.jmc.rjmx.ConnectionException;
 import org.openjdk.jmc.rjmx.IConnectionHandle;
-import org.openjdk.jmc.rjmx.IConnectionListener;
-import org.openjdk.jmc.rjmx.IServerHandle;
 
 public class AgentJMXHelper {
 
     private static final Logger logger = Logger.getLogger(AgentJMXHelper.class.getName());
     private static final String AGENT_OBJECT_NAME =
-            "org.openjdk.jmc.jfr.agent:type=AgentController"; //$NON-NLS-1$
-    private static final String DEFINE_EVENT_PROBES = "defineEventProbes"; // $NON-NLS-1$
-    private static final String RETRIEVE_EVENT_PROBES = "retrieveEventProbes"; // $NON-NLS-1$
-    private static final String RETRIEVE_CURRENT_TRANSFORMS =
-            "retrieveCurrentTransforms"; //$NON-NLS-1$
-    private static final String CONNECTION_USAGE = "Agent MBean"; // $NON-NLS-1$
+            "org.openjdk.jmc.jfr.agent:type=AgentController";
+    private static final String DEFINE_EVENT_PROBES = "defineEventProbes";
+    private static final String RETRIEVE_EVENT_PROBES = "retrieveEventProbes";
+    private static final String RETRIEVE_CURRENT_TRANSFORMS = "retrieveCurrentTransforms";
 
-    private final IServerHandle serverHandle;
     private final IConnectionHandle connectionHandle;
     private final MBeanServerConnection mbsc;
 
-    public AgentJMXHelper(IServerHandle serverHandle) throws ConnectionException {
-        this.serverHandle = Objects.requireNonNull(serverHandle);
-        connectionHandle = serverHandle.connect(CONNECTION_USAGE, this::onConnectionChange);
+    public AgentJMXHelper(IConnectionHandle connectionHandle) throws ConnectionException {
+        this.connectionHandle = connectionHandle;
         mbsc = connectionHandle.getServiceOrDummy(MBeanServerConnection.class);
-    }
-
-    public IServerHandle getServerHandle() {
-        return serverHandle;
     }
 
     public IConnectionHandle getConnectionHandle() {
@@ -82,18 +71,6 @@ public class AgentJMXHelper {
 
     public MBeanServerConnection getMBeanServerConnection() {
         return mbsc;
-    }
-
-    public void addConnectionChangedListener(IConnectionListener connectionListener) {
-        // connectionListeners.add(Objects.requireNonNull(connectionListener));
-    }
-
-    public void removeConnectionChangedListener(IConnectionListener connectionListener) {
-        // connectionListeners.remove(connectionListener);
-    }
-
-    public boolean isLocalJvm() {
-        return connectionHandle.getServerDescriptor().getJvmInfo() != null;
     }
 
     public boolean isMXBeanRegistered() {
@@ -113,6 +90,7 @@ public class AgentJMXHelper {
                             RETRIEVE_EVENT_PROBES,
                             new Object[0],
                             new String[0]);
+
             return result.toString();
         } catch (Exception e) {
             logger.log(Level.WARNING, "Could not retrieve event probes", e);
@@ -143,11 +121,5 @@ public class AgentJMXHelper {
         } catch (Exception e) {
             logger.log(Level.WARNING, "Could not define event probes: " + xmlDescription, e);
         }
-    }
-
-    public void onConnectionChange(IConnectionHandle connection) {
-        // for (IConnectionListener listener : connectionListeners) {
-        //	listener.onConnectionChange(connection);
-        // }
     }
 }

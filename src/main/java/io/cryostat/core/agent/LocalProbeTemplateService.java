@@ -43,11 +43,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import io.cryostat.core.FlightRecorderException;
 import io.cryostat.core.sys.Environment;
 import io.cryostat.core.sys.FileSystem;
+
+import org.xml.sax.SAXException;
 
 public class LocalProbeTemplateService extends AbstractProbeTemplateService {
 
@@ -62,7 +67,6 @@ public class LocalProbeTemplateService extends AbstractProbeTemplateService {
     }
 
     public void addTemplate(InputStream inputStream, String filename) throws IOException {
-        // Sanity Check
         if (!env.hasEnv(TEMPLATE_PATH)) {
             throw new IOException(
                     String.format(
@@ -127,8 +131,61 @@ public class LocalProbeTemplateService extends AbstractProbeTemplateService {
         }
     }
 
+    public String getTemplate(String templateName) throws Exception {
+        if (!env.hasEnv(TEMPLATE_PATH)) {
+            throw new IOException(
+                    String.format(
+                            "Probe template directory does not exist, must be set using environment variable %s",
+                            TEMPLATE_PATH));
+        }
+        Path probeTemplateDirectory = fs.pathOf(env.getEnv(TEMPLATE_PATH));
+        if (!fs.exists(probeTemplateDirectory)
+                || !fs.isDirectory(probeTemplateDirectory)
+                || !fs.isReadable(probeTemplateDirectory)
+                || !fs.isWritable(probeTemplateDirectory)) {
+            throw new IOException(
+                    String.format(
+                            "Probe template directory %s does not exist, is not a directory, or has incorrect permissions.",
+                            probeTemplateDirectory.toString()));
+        }
+        Path probeTemplatePath = fs.pathOf(env.getEnv(TEMPLATE_PATH), templateName);
+        ProbeTemplate template = new ProbeTemplate();
+        template.deserialize(fs.newInputStream(probeTemplatePath));
+        return template.serialize();
+    }
+
+    protected List<Path> getLocalTemplates() throws IOException {
+        if (!env.hasEnv(TEMPLATE_PATH)) {
+            return Collections.emptyList();
+        }
+        String dirName = env.getEnv(TEMPLATE_PATH);
+        Path dir = fs.pathOf(dirName);
+        if (!fs.isDirectory(dir) || !fs.isReadable(dir)) {
+            throw new IOException(String.format("%s is not a readable directory", dirName));
+        }
+        try {
+            return fs.listDirectoryChildren(dir).stream()
+                    .map(name -> fs.pathOf(dirName, name))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw e;
+        }
+    }
+
     @Override
-    public List<ProbeTemplate> getTemplates() throws Exception {
-        return null;
+    public List<ProbeTemplate> getTemplates() throws FlightRecorderException {
+        try {
+            List<ProbeTemplate> templates = new ArrayList<>();
+            for (Path path : getLocalTemplates()) {
+                try (InputStream stream = fs.newInputStream(path)) {
+                    ProbeTemplate template = new ProbeTemplate();
+                    template.deserialize(stream);
+                    templates.add(template);
+                }
+            }
+            return templates;
+        } catch (IOException | SAXException e) {
+            throw new FlightRecorderException(e);
+        }
     }
 }
