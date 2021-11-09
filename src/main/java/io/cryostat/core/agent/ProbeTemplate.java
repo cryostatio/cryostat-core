@@ -116,27 +116,27 @@ public class ProbeTemplate {
         // Note: we don't worry about hierarchy here and directly get nodes by tag name, since the
         // validation already
         // guaranteed a correct structure and tag names are unique.
-        elements = document.getElementsByTagName(XML_TAG_CONFIG); // $NON-NLS-1$
+        elements = document.getElementsByTagName(XML_TAG_CONFIG);
         if (elements.getLength() != 0) {
             Element configElement = (Element) elements.item(0);
 
-            elements = configElement.getElementsByTagName(XML_TAG_CLASS_PREFIX); // $NON-NLS-1$
+            elements = configElement.getElementsByTagName(XML_TAG_CLASS_PREFIX);
             if (elements.getLength() != 0) {
                 classPrefix = elements.item(0).getTextContent();
             }
 
-            elements = configElement.getElementsByTagName(XML_TAG_ALLOW_TO_STRING); // $NON-NLS-1$
+            elements = configElement.getElementsByTagName(XML_TAG_ALLOW_TO_STRING);
             if (elements.getLength() != 0) {
                 allowToString = Boolean.parseBoolean(elements.item(0).getTextContent());
             }
 
-            elements = configElement.getElementsByTagName(XML_TAG_ALLOW_CONVERTER); // $NON-NLS-1$
+            elements = configElement.getElementsByTagName(XML_TAG_ALLOW_CONVERTER);
             if (elements.getLength() != 0) {
                 allowConverter = Boolean.parseBoolean(elements.item(0).getTextContent());
             }
         }
 
-        elements = document.getElementsByTagName(XML_TAG_EVENTS); // $NON-NLS-1$
+        elements = document.getElementsByTagName(XML_TAG_EVENTS);
         if (elements.getLength() != 0) {
             Element eventsElement = (Element) elements.item(0);
             elements = eventsElement.getElementsByTagName(XML_TAG_EVENT);

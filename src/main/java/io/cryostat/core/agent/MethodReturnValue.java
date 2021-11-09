@@ -42,7 +42,7 @@ import org.w3c.dom.Element;
 
 public class MethodReturnValue extends CapturedValue {
 
-    private static final String XML_TAG_RETURN_VALUE = "returnvalue"; // $NON-NLS-1$
+    private static final String XML_TAG_RETURN_VALUE = "returnvalue";
 
     private final Event event;
 
