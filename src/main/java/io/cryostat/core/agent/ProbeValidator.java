@@ -58,7 +58,7 @@ public class ProbeValidator extends Validator {
 
     private boolean validationResult = false;
 
-    private static final String PROBE_SCHEMA_XSD = "jfrprobes_schema.xsd"; // $NON-NLS-1$
+    private static final String PROBE_SCHEMA_XSD = "jfrprobes_schema.xsd";
     private static final Schema PROBE_SCHEMA;
 
     static {

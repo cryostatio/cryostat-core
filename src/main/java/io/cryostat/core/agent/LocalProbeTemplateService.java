@@ -61,20 +61,18 @@ public class LocalProbeTemplateService extends AbstractProbeTemplateService {
     private final FileSystem fs;
     private final Environment env;
 
-    public LocalProbeTemplateService(FileSystem fs, Environment env) {
+    public LocalProbeTemplateService(FileSystem fs, Environment env) throws IOException {
         this.fs = fs;
         this.env = env;
-    }
-
-    public void addTemplate(InputStream inputStream, String filename) throws IOException {
+        // Sanity check
         if (!env.hasEnv(TEMPLATE_PATH)) {
             throw new IOException(
                     String.format(
                             "Probe template directory does not exist, must be set using environment variable %s",
                             TEMPLATE_PATH));
         }
-        Path probeTemplateDirectory = fs.pathOf(env.getEnv(TEMPLATE_PATH));
         // Sanity check the directory is set up correctly
+        Path probeTemplateDirectory = fs.pathOf(env.getEnv(TEMPLATE_PATH));
         if (!fs.exists(probeTemplateDirectory)
                 || !fs.isDirectory(probeTemplateDirectory)
                 || !fs.isReadable(probeTemplateDirectory)
@@ -84,6 +82,9 @@ public class LocalProbeTemplateService extends AbstractProbeTemplateService {
                             "Probe template directory %s does not exist, is not a directory, or has incorrect permissions.",
                             probeTemplateDirectory.toString()));
         }
+    }
+
+    public void addTemplate(InputStream inputStream, String filename) throws Exception {
         try (inputStream) {
             ProbeTemplate template = new ProbeTemplate();
             // If validation fails this will throw a ProbeValidationException with details
@@ -99,32 +100,13 @@ public class LocalProbeTemplateService extends AbstractProbeTemplateService {
                     new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
                             .lines()
                             .collect(Collectors.joining("\n")));
-        } catch (ProbeValidationException pve) {
-            // rethrow for http handler
-            throw pve;
         } catch (Exception e) {
-            // ignore
+            // rethrow for http handler
+            throw e;
         }
     }
 
     public void deleteTemplate(String templateName) throws Exception {
-        // Sanity Check
-        if (!env.hasEnv(TEMPLATE_PATH)) {
-            throw new IOException(
-                    String.format(
-                            "Probe template directory does not exist, must be set using environment variable %s",
-                            TEMPLATE_PATH));
-        }
-        Path probeTemplateDirectory = fs.pathOf(env.getEnv(TEMPLATE_PATH));
-        if (!fs.exists(probeTemplateDirectory)
-                || !fs.isDirectory(probeTemplateDirectory)
-                || !fs.isReadable(probeTemplateDirectory)
-                || !fs.isWritable(probeTemplateDirectory)) {
-            throw new IOException(
-                    String.format(
-                            "Probe template directory %s does not exist, is not a directory, or has incorrect permissions.",
-                            probeTemplateDirectory.toString()));
-        }
         if (!fs.deleteIfExists(fs.pathOf(env.getEnv(TEMPLATE_PATH), templateName))) {
             throw new IOException(
                     String.format("Probe template \"%s\" does not exist", templateName));
@@ -132,22 +114,6 @@ public class LocalProbeTemplateService extends AbstractProbeTemplateService {
     }
 
     public String getTemplate(String templateName) throws Exception {
-        if (!env.hasEnv(TEMPLATE_PATH)) {
-            throw new IOException(
-                    String.format(
-                            "Probe template directory does not exist, must be set using environment variable %s",
-                            TEMPLATE_PATH));
-        }
-        Path probeTemplateDirectory = fs.pathOf(env.getEnv(TEMPLATE_PATH));
-        if (!fs.exists(probeTemplateDirectory)
-                || !fs.isDirectory(probeTemplateDirectory)
-                || !fs.isReadable(probeTemplateDirectory)
-                || !fs.isWritable(probeTemplateDirectory)) {
-            throw new IOException(
-                    String.format(
-                            "Probe template directory %s does not exist, is not a directory, or has incorrect permissions.",
-                            probeTemplateDirectory.toString()));
-        }
         Path probeTemplatePath = fs.pathOf(env.getEnv(TEMPLATE_PATH), templateName);
         ProbeTemplate template = new ProbeTemplate();
         template.deserialize(fs.newInputStream(probeTemplatePath));

@@ -41,11 +41,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class MethodParameter extends CapturedValue {
-    private static final String DEFAULT_PARAMETER_NAME = "New Parameter"; // $NON-NLS-1$
+    private static final String DEFAULT_PARAMETER_NAME = "New Parameter";
     private static final int DEFAULT_INDEX = 0;
 
-    private static final String XML_TAG_PARAMETER = "parameter"; // $NON-NLS-1$
-    private static final String XML_ATTRIBUTE_INDEX = "index"; // $NON-NLS-1$
+    private static final String XML_TAG_PARAMETER = "parameter";
+    private static final String XML_ATTRIBUTE_INDEX = "index";
 
     private final Event event;
 

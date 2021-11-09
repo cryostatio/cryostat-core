@@ -37,13 +37,8 @@
  */
 package io.cryostat.core.agent;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
+import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -97,46 +92,24 @@ public class ProbeTemplate {
     }
 
     public void deserialize(InputStream xmlStream) throws IOException, SAXException {
-        byte[] output = {};
-        int length = Integer.MAX_VALUE;
-        int pos = 0;
-        while (pos < length) {
-            int bytesToRead;
-            if (pos >= output.length) { // Only expand when there's no room
-                bytesToRead = Math.min(length - pos, output.length + 1024);
-                if (output.length < pos + bytesToRead) {
-                    output = Arrays.copyOf(output, pos + bytesToRead);
-                }
-            } else {
-                bytesToRead = output.length - pos;
-            }
-            int cc = xmlStream.read(output, pos, bytesToRead);
-            if (cc < 0) {
-                if (output.length != pos) {
-                    output = Arrays.copyOf(output, pos);
-                }
-                break;
-            }
-            pos += cc;
-        }
-        deserialize(new String(output, StandardCharsets.UTF_8));
-    }
-
-    public void deserialize(String xmlSource) throws IOException, SAXException {
+        BufferedInputStream stream = new BufferedInputStream(xmlStream);
+        xmlStream.mark(1); // arbitrary readLimit > 0
         ProbeValidator validator = new ProbeValidator();
-        validator.validate(
-                new StreamSource(
-                        new ByteArrayInputStream(xmlSource.getBytes(StandardCharsets.UTF_8))));
+        validator.validate(new StreamSource(stream));
+        xmlStream.reset();
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder;
+
         try {
             builder = factory.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
-            // This should not happen anyway
             throw new RuntimeException(e);
         }
-        Document document =
-                builder.parse(new ByteArrayInputStream(xmlSource.getBytes(StandardCharsets.UTF_8)));
+
+        if (xmlStream.markSupported()) {
+            xmlStream.reset();
+        }
+        Document document = builder.parse(xmlStream);
         NodeList elements;
 
         // parse global configurations

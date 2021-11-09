@@ -60,32 +60,29 @@ class ProbeTemplateServiceTest {
     LocalProbeTemplateService service;
     @Mock FileSystem fs;
     @Mock Environment env;
+    @Mock Path probeTemplatePath;
     String xmlText;
 
     @BeforeEach
     void setup() throws IOException {
         xmlText = IOUtils.toString(this.getClass().getResourceAsStream("template.xml"));
+        Mockito.when(env.hasEnv(LocalProbeTemplateService.TEMPLATE_PATH)).thenReturn(true);
+        Mockito.when(env.getEnv(LocalProbeTemplateService.TEMPLATE_PATH)).thenReturn("/templates");
+        Mockito.when(fs.pathOf("/templates")).thenReturn(probeTemplatePath);
+        Mockito.when(fs.exists(probeTemplatePath)).thenReturn(true);
+        Mockito.when(fs.isDirectory(probeTemplatePath)).thenReturn(true);
+        Mockito.when(fs.isReadable(probeTemplatePath)).thenReturn(true);
+        Mockito.when(fs.isWritable(probeTemplatePath)).thenReturn(true);
         this.service = new LocalProbeTemplateService(fs, env);
     }
 
     @Test
     void addTemplateShouldWriteTemplate() throws Exception {
-        Mockito.when(env.hasEnv(TEMPLATE_PATH)).thenReturn(true);
-        Mockito.when(env.getEnv(TEMPLATE_PATH)).thenReturn("/templates");
-
-        Path path = Mockito.mock(Path.class);
-        Mockito.when(fs.pathOf("/templates")).thenReturn(path);
 
         Path templatePath = Mockito.mock(Path.class);
         Mockito.when(fs.pathOf("/templates", "template.xml")).thenReturn(templatePath);
 
         InputStream stream = IOUtils.toInputStream(xmlText);
-
-        Mockito.when(fs.exists(path)).thenReturn(true);
-        Mockito.when(fs.isDirectory(path)).thenReturn(true);
-        Mockito.when(fs.isReadable(path)).thenReturn(true);
-        Mockito.when(fs.isWritable(path)).thenReturn(true);
-
         service.addTemplate(stream, "template.xml");
 
         Mockito.verify(fs).writeString(fs.pathOf(env.getEnv(TEMPLATE_PATH), "template.xml"), "");
@@ -93,16 +90,9 @@ class ProbeTemplateServiceTest {
 
     @Test
     void deleteTemplateShouldDeleteFile() throws Exception {
-        Mockito.when(env.hasEnv(LocalProbeTemplateService.TEMPLATE_PATH)).thenReturn(true);
-        Mockito.when(env.getEnv(LocalProbeTemplateService.TEMPLATE_PATH)).thenReturn("/templates");
 
         Path path = Mockito.mock(Path.class);
         Path templatePath = Mockito.mock(Path.class);
-        Mockito.when(fs.pathOf("/templates")).thenReturn(path);
-        Mockito.when(fs.exists(path)).thenReturn(true);
-        Mockito.when(fs.isDirectory(path)).thenReturn(true);
-        Mockito.when(fs.isReadable(path)).thenReturn(true);
-        Mockito.when(fs.isWritable(path)).thenReturn(true);
         Mockito.when(fs.pathOf("/templates", "template.xml")).thenReturn(templatePath);
         Mockito.when(fs.deleteIfExists(templatePath)).thenReturn(true);
 

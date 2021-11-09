@@ -43,13 +43,13 @@ import org.w3c.dom.NodeList;
 
 public class Field extends CapturedValue {
 
-    private static final String DEFAULT_FIELD_NAME = "New Field"; // $NON-NLS-1$
-    private static final String DEFAULT_FIELD_EXPRESSION = "myField"; // $NON-NLS-1$
+    private static final String DEFAULT_FIELD_NAME = "New Field";
+    private static final String DEFAULT_FIELD_EXPRESSION = "myField";
     private static final String EXPRESSION_REGEX =
-            "([a-zA-Z_$][a-zA-Z0-9_$]*\\.)*([a-zA-Z_$][a-zA-Z0-9_$]*)(\\.[a-zA-Z_$][a-zA-Z_$]*)*"; // $NON-NLS-1$
+            "([a-zA-Z_$][a-zA-Z0-9_$]*\\.)*([a-zA-Z_$][a-zA-Z0-9_$]*)(\\.[a-zA-Z_$][a-zA-Z_$]*)*";
 
-    private static final String XML_TAG_FIELD = "field"; // $NON-NLS-1$
-    private static final String XML_TAG_EXPRESSION = "expression"; // $NON-NLS-1$
+    private static final String XML_TAG_FIELD = "field";
+    private static final String XML_TAG_EXPRESSION = "expression";
 
     private final Event event;
 
@@ -119,12 +119,4 @@ public class Field extends CapturedValue {
 
         return copy;
     }
-
-    /*
-    public Field createDuplicate() {
-        Field duplicate = createWorkingCopy();
-        duplicate.setName(event.nextUniqueFieldName(getName()));
-
-        return duplicate;
-    }*/
 }

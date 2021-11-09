@@ -73,16 +73,16 @@ public class AgentJMXHelper {
         return mbsc;
     }
 
-    public boolean isMXBeanRegistered() {
+    public boolean isMXBeanRegistered() throws Exception {
         try {
             return mbsc.isRegistered(new ObjectName(AGENT_OBJECT_NAME));
         } catch (MalformedObjectNameException | IOException e) {
             logger.log(Level.SEVERE, "Could not check if agent MXBean is registered", e);
+            throw e;
         }
-        return false;
     }
 
-    public String retrieveEventProbes() {
+    public String retrieveEventProbes() throws Exception {
         try {
             Object result =
                     mbsc.invoke(
@@ -94,8 +94,8 @@ public class AgentJMXHelper {
             return result.toString();
         } catch (Exception e) {
             logger.log(Level.WARNING, "Could not retrieve event probes", e);
+            throw e;
         }
-        return null;
     }
 
     public Object retrieveCurrentTransforms() {

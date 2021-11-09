@@ -40,7 +40,6 @@ package io.cryostat.core.agent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -49,43 +48,23 @@ import org.w3c.dom.NodeList;
 
 public class Event {
 
-    private static final String DEFAULT_STRING_FIELD = ""; // $NON-NLS-1$
-    private static final boolean DEFAULT_BOOLEAN_FIELD = false;
-    private static final Object DEFAULT_OBJECT_FIELD = null;
-    private static final String DEFAULT_EVENT_ID = "event.id"; // $NON-NLS-1$
-    private static final String DEFAULT_EVENT_NAME = "New Custom Event"; // $NON-NLS-1$
-    private static final String DEFAULT_EVENT_CLAZZ = "com.company.project.MyClass"; // $NON-NLS-1$
-    private static final String DEFAULT_METHOD_NAME = "myMethod"; // $NON-NLS-1$
-    private static final String DEFAULT_METHOD_DESCRIPTOR = "()V"; // $NON-NLS-1$
-    private static final String CLAZZ_REGEX =
-            "([a-zA-Z_$][a-zA-Z0-9_$]*\\.)*([a-zA-Z_$][a-zA-Z0-9_$]*)"; // $NON-NLS-1$
-    private static final String PATH_REGEX = "([^/]+/)*([^/]*)"; // $NON-NLS-1$
-    private static final String METHOD_NAME_REGEX = "[a-zA-Z_$][a-zA-Z0-9_$]*"; // $NON-NLS-1$
-    private static final String METHOD_DESCRIPTOR_REGEX =
-            "\\((\\[*([BCDFIJSZ]|L([a-zA-Z_$][a-zA-Z0-9_$]*/)*[a-zA-Z_$][a-zA-Z0-9_$]*;))*\\)(V|\\[*([BCDFIJSZ]|L([a-zA-Z_$][a-zA-Z0-9_$]*/)*[a-zA-Z_$][a-zA-Z0-9_$]*;))"; // $NON-NLS-1$
-
-    private static final Pattern NAME_WITH_COUNT_PATTERN =
-            Pattern.compile("^(.*)\\s*\\((\\d+)\\)$"); // $NON-NLS-1$
-    private static final Pattern COUNT_SUFFIX_PATTERN =
-            Pattern.compile("^\\s*\\((\\d+)\\)$"); // $NON-NLS-1$
-
-    private static final String XML_TAG_EVENT = "event"; // $NON-NLS-1$
-    private static final String XML_TAG_NAME = "label"; // $NON-NLS-1$
-    private static final String XML_TAG_DESCRIPTION = "description"; // $NON-NLS-1$
-    private static final String XML_TAG_CLASS = "class"; // $NON-NLS-1$
-    private static final String XML_TAG_PATH = "path"; // $NON-NLS-1$
-    private static final String XML_TAG_STACK_TRACE = "stacktrace"; // $NON-NLS-1$
-    private static final String XML_TAG_RETHROW = "rethrow"; // $NON-NLS-1$
-    private static final String XML_TAG_LOCATION = "location"; // $NON-NLS-1$
-    private static final String XML_TAG_METHOD = "method"; // $NON-NLS-1$
-    private static final String XML_TAG_DESCRIPTOR = "descriptor"; // $NON-NLS-1$
-    private static final String XML_TAG_PARAMETERS = "parameters"; // $NON-NLS-1$
-    private static final String XML_TAG_PARAMETER = "parameter"; // $NON-NLS-1$
-    private static final String XML_TAG_FIELDS = "fields"; // $NON-NLS-1$
-    private static final String XML_TAG_FIELD = "field"; // $NON-NLS-1$
-    private static final String XML_TAG_RETURN_VALUE = "returnvalue"; // $NON-NLS-1$
-    private static final String XML_ATTRIBUTE_ID = "id"; // $NON-NLS-1$
-    private static final String XML_TAG_METHOD_NAME = "name"; // $NON-NLS-1$
+    private static final String XML_TAG_EVENT = "event";
+    private static final String XML_TAG_NAME = "label";
+    private static final String XML_TAG_DESCRIPTION = "description";
+    private static final String XML_TAG_CLASS = "class";
+    private static final String XML_TAG_PATH = "path";
+    private static final String XML_TAG_STACK_TRACE = "stacktrace";
+    private static final String XML_TAG_RETHROW = "rethrow";
+    private static final String XML_TAG_LOCATION = "location";
+    private static final String XML_TAG_METHOD = "method";
+    private static final String XML_TAG_DESCRIPTOR = "descriptor";
+    private static final String XML_TAG_PARAMETERS = "parameters";
+    private static final String XML_TAG_PARAMETER = "parameter";
+    private static final String XML_TAG_FIELDS = "fields";
+    private static final String XML_TAG_FIELD = "field";
+    private static final String XML_TAG_RETURN_VALUE = "returnvalue";
+    private static final String XML_ATTRIBUTE_ID = "id";
+    private static final String XML_TAG_METHOD_NAME = "name";
 
     private String id;
     private String name;
@@ -142,26 +121,28 @@ public class Event {
         }
 
         Element methodElement = getFirstDirectChildElementByTagName(element, XML_TAG_METHOD);
-        methodName =
-                getFirstDirectChildElementByTagName(methodElement, XML_TAG_METHOD_NAME)
-                        .getTextContent();
-        methodDescriptor =
-                getFirstDirectChildElementByTagName(methodElement, XML_TAG_DESCRIPTOR)
-                        .getTextContent();
+        if (methodElement != null) {
+            methodName =
+                    getFirstDirectChildElementByTagName(methodElement, XML_TAG_METHOD_NAME)
+                            .getTextContent();
+            methodDescriptor =
+                    getFirstDirectChildElementByTagName(methodElement, XML_TAG_DESCRIPTOR)
+                            .getTextContent();
 
-        Element parametersElement =
-                getFirstDirectChildElementByTagName(methodElement, XML_TAG_PARAMETERS);
-        if (parametersElement != null) {
-            NodeList parameterNodes = parametersElement.getElementsByTagName(XML_TAG_PARAMETER);
-            for (int i = 0; i < parameterNodes.getLength(); i++) {
-                parameters.add(createMethodParameter((Element) parameterNodes.item(i)));
+            Element parametersElement =
+                    getFirstDirectChildElementByTagName(methodElement, XML_TAG_PARAMETERS);
+            if (parametersElement != null) {
+                NodeList parameterNodes = parametersElement.getElementsByTagName(XML_TAG_PARAMETER);
+                for (int i = 0; i < parameterNodes.getLength(); i++) {
+                    parameters.add(createMethodParameter((Element) parameterNodes.item(i)));
+                }
             }
-        }
 
-        Element returnValueElement =
-                getFirstDirectChildElementByTagName(methodElement, XML_TAG_RETURN_VALUE);
-        if (returnValueElement != null) {
-            returnValue = createMethodReturnValue(returnValueElement);
+            Element returnValueElement =
+                    getFirstDirectChildElementByTagName(methodElement, XML_TAG_RETURN_VALUE);
+            if (returnValueElement != null) {
+                returnValue = createMethodReturnValue(returnValueElement);
+            }
         }
 
         Element fieldsElement = getFirstDirectChildElementByTagName(element, XML_TAG_FIELDS);
@@ -250,26 +231,24 @@ public class Event {
 
     private Element buildMethodElement(Document document) {
         Element methodElement = document.createElement(XML_TAG_METHOD);
-        {
-            Element methodNameElement = document.createElement(XML_TAG_METHOD_NAME);
-            methodNameElement.setTextContent(methodName);
-            methodElement.appendChild(methodNameElement);
+        Element methodNameElement = document.createElement(XML_TAG_METHOD_NAME);
+        methodNameElement.setTextContent(methodName);
+        methodElement.appendChild(methodNameElement);
 
-            Element methodDescriptorElement = document.createElement(XML_TAG_DESCRIPTOR);
-            methodDescriptorElement.setTextContent(methodDescriptor);
-            methodElement.appendChild(methodDescriptorElement);
+        Element methodDescriptorElement = document.createElement(XML_TAG_DESCRIPTOR);
+        methodDescriptorElement.setTextContent(methodDescriptor);
+        methodElement.appendChild(methodDescriptorElement);
 
-            if (!parameters.isEmpty()) {
-                Element methodParametersElement = document.createElement(XML_TAG_PARAMETERS);
-                for (MethodParameter methodParameter : parameters) {
-                    methodParametersElement.appendChild(methodParameter.buildElement(document));
-                }
-                methodElement.appendChild(methodParametersElement);
+        if (!parameters.isEmpty()) {
+            Element methodParametersElement = document.createElement(XML_TAG_PARAMETERS);
+            for (MethodParameter methodParameter : parameters) {
+                methodParametersElement.appendChild(methodParameter.buildElement(document));
             }
+            methodElement.appendChild(methodParametersElement);
+        }
 
-            if (returnValue != null) {
-                methodElement.appendChild(returnValue.buildElement(document));
-            }
+        if (returnValue != null) {
+            methodElement.appendChild(returnValue.buildElement(document));
         }
 
         return methodElement;
