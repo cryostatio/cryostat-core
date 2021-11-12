@@ -39,7 +39,7 @@ package io.cryostat.core.agent;
 
 import java.util.List;
 
-public abstract class AbstractProbeTemplateService {
+public interface ProbeTemplateService {
 
     public abstract List<ProbeTemplate> getTemplates() throws Exception;
 }
