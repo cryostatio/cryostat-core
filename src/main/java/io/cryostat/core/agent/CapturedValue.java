@@ -194,7 +194,7 @@ public class CapturedValue {
             try {
                 new URI(relationKey);
             } catch (URISyntaxException e) {
-                throw new IllegalArgumentException("Relational Key has incorrect syntax.");
+                throw new IllegalArgumentException("Relational Key has incorrect syntax: " + relationKey);
             }
         }
 
@@ -209,7 +209,7 @@ public class CapturedValue {
         if (converter != null && !converter.isEmpty()) {
             converter = converter.trim();
             if (!converter.matches(CONVERTER_REGEX)) {
-                throw new IllegalArgumentException("Converter has incorrect syntax.");
+                throw new IllegalArgumentException("Converter has incorrect syntax: " + converter);
             }
         }
 

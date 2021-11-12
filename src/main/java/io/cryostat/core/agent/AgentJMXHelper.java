@@ -98,7 +98,7 @@ public class AgentJMXHelper {
         }
     }
 
-    public Object retrieveCurrentTransforms() {
+    public Object retrieveCurrentTransforms() throws Exception {
         try {
             Object result =
                     mbsc.invoke(
@@ -109,17 +109,18 @@ public class AgentJMXHelper {
             return result;
         } catch (Exception e) {
             logger.log(Level.WARNING, "Could not retrieve current transforms", e);
+            throw e;
         }
-        return null;
     }
 
-    public void defineEventProbes(String xmlDescription) {
+    public void defineEventProbes(String xmlDescription) throws Exception {
         try {
             Object[] params = {xmlDescription};
             String[] signature = {String.class.getName()};
             mbsc.invoke(new ObjectName(AGENT_OBJECT_NAME), DEFINE_EVENT_PROBES, params, signature);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Could not define event probes: " + xmlDescription, e);
+            throw e;
         }
     }
 }
