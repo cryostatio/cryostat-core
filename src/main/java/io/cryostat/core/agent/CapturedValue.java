@@ -194,7 +194,8 @@ public class CapturedValue {
             try {
                 new URI(relationKey);
             } catch (URISyntaxException e) {
-                throw new IllegalArgumentException("Relational Key has incorrect syntax: " + relationKey);
+                throw new IllegalArgumentException(
+                        "Relational Key has incorrect syntax: " + relationKey);
             }
         }
 
