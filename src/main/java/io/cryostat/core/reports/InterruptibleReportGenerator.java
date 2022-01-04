@@ -89,7 +89,7 @@ public class InterruptibleReportGenerator {
     private final Set<ReportTransformer> transformers;
 
     private final ExecutorService executor;
-    private final ExecutorService qThread = Executors.newSingleThreadExecutor();
+    private final ExecutorService qThread = Executors.newCachedThreadPool();
 
     public InterruptibleReportGenerator(
             Logger logger, Set<ReportTransformer> transformers, ExecutorService executor) {
