@@ -79,10 +79,9 @@ import org.xml.sax.SAXException;
 /**
  * Re-implementation of {@link ReportGenerator} where the report generation task is represented by a
  * {@link Future}, allowing callers to cancel ongoing rules report analyses or to easily time out on
- * analysis requests.
- * This should eventually replace {@link ReportGenerator} entirely - there should only be benefits
- * to using this implementation.
- * */
+ * analysis requests. This should eventually replace {@link ReportGenerator} entirely - there should
+ * only be benefits to using this implementation.
+ */
 public class InterruptibleReportGenerator {
 
     private final Logger logger;
