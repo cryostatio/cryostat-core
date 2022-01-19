@@ -138,7 +138,7 @@ public class FileSystem {
         return Files.createTempDirectory(prefix, attrs);
     }
 
-    public Path createTempDirectiry(Path path, String prefix, FileAttribute<?>... attrs)
+    public Path createTempDirectory(Path path, String prefix, FileAttribute<?>... attrs)
             throws IOException {
         return Files.createTempDirectory(path, prefix, attrs);
     }
