@@ -236,13 +236,15 @@ public class InterruptibleReportGenerator {
                         ReportRuleEvalEvent evt = new ReportRuleEvalEvent(rule.getName());
                         evt.begin();
 
-                        result.run();
-
-                        evt.end();
-                        if (evt.shouldCommit()) {
-                            evt.commit();
+                        try {
+                            result.run();
+                            return result.get();
+                        } finally {
+                            evt.end();
+                            if (evt.shouldCommit()) {
+                                evt.commit();
+                            }
                         }
-                        return result.get();
                     });
         }
         return callables;
