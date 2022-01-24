@@ -69,6 +69,11 @@ import org.openjdk.jmc.flightrecorder.rules.report.html.internal.RulesHtmlToolki
 
 import io.cryostat.core.log.Logger;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import jdk.jfr.Category;
+import jdk.jfr.Event;
+import jdk.jfr.Label;
+import jdk.jfr.Name;
 import org.jsoup.Jsoup;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -228,12 +233,18 @@ public class InterruptibleReportGenerator {
             callables.add(
                     () -> {
                         logger.trace("Processing rule {}", rule.getName());
-                        // TODO it would be very nice to record a JFR event here to pick up in
-                        // Cryostat's own profiling template, to compare the different rule
-                        // implementations and the time they each take to process with various
-                        // source recording settings
-                        result.run();
-                        return result.get();
+                        ReportRuleEvalEvent evt = new ReportRuleEvalEvent(rule.getName());
+                        evt.begin();
+
+                        try {
+                            result.run();
+                            return result.get();
+                        } finally {
+                            evt.end();
+                            if (evt.shouldCommit()) {
+                                evt.commit();
+                            }
+                        }
                     });
         }
         return callables;
@@ -345,6 +356,21 @@ public class InterruptibleReportGenerator {
         @Override
         public Collection<String> getTopics() {
             return topics;
+        }
+    }
+
+    @Name("io.cryostat.core.reports.InterruptibleReportGenerator.ReportRuleEvalEvent")
+    @Label("Report Rule Evaluation")
+    @Category("Cryostat")
+    @SuppressFBWarnings(
+            value = "URF_UNREAD_FIELD",
+            justification = "The event fields are recorded with JFR instead of accessed directly")
+    public static class ReportRuleEvalEvent extends Event {
+
+        String ruleName;
+
+        ReportRuleEvalEvent(String ruleName) {
+            this.ruleName = ruleName;
         }
     }
 }
