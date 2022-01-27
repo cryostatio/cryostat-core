@@ -373,4 +373,19 @@ public class InterruptibleReportGenerator {
             this.ruleName = ruleName;
         }
     }
+
+    @Name("io.cryostat.core.reports.InterruptibleReportGenerator.ReportGenerationEvent")
+    @Label("Report Generation")
+    @Category("Cryostat")
+    @SuppressFBWarnings(
+            value = "URF_UNREAD_FIELD",
+            justification = "The event fields are recorded with JFR instead of accessed directly")
+    public static class ReportGenerationEvent extends Event {
+
+        String recordingName;
+
+        public ReportGenerationEvent(String recordingName) {
+            this.recordingName = recordingName;
+        }
+    }
 }
