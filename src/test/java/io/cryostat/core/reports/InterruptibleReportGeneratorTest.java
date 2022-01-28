@@ -49,6 +49,7 @@ import java.util.concurrent.Future;
 import java.util.function.Function;
 
 import io.cryostat.core.log.Logger;
+import io.cryostat.core.reports.InterruptibleReportGenerator.ReportResult;
 
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -79,15 +80,18 @@ class InterruptibleReportGeneratorTest {
     @Test
     void shouldProduceReport() throws Exception {
         try (InputStream is = new FileInputStream(getJfrFile())) {
-            Future<String> report = generator.generateReportInterruptibly(is);
-            MatcherAssert.assertThat(report.get(), Matchers.not(Matchers.emptyOrNullString()));
+            Future<ReportResult> report = generator.generateReportInterruptibly(is);
+            MatcherAssert.assertThat(
+                    report.get().getHtml(), Matchers.not(Matchers.emptyOrNullString()));
+            MatcherAssert.assertThat(
+                    report.get().getReportStats(), Matchers.not(Matchers.nullValue()));
         }
     }
 
     @Test
     void shouldBeCancellable() throws Exception {
         try (InputStream is = new FileInputStream(getJfrFile())) {
-            Future<String> report = generator.generateReportInterruptibly(is);
+            Future<ReportResult> report = generator.generateReportInterruptibly(is);
             report.cancel(true);
             Assertions.assertThrows(CancellationException.class, report::get);
         }
