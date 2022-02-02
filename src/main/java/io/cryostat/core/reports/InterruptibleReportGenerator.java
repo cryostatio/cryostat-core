@@ -74,6 +74,7 @@ import jdk.jfr.Category;
 import jdk.jfr.Event;
 import jdk.jfr.Label;
 import jdk.jfr.Name;
+import org.apache.commons.io.input.CountingInputStream;
 import org.jsoup.Jsoup;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -102,18 +103,20 @@ public class InterruptibleReportGenerator {
         this.executor = executor;
     }
 
-    public Future<String> generateReportInterruptibly(InputStream recording) {
+    public Future<ReportResult> generateReportInterruptibly(InputStream recording) {
         return qThread.submit(
                 () -> {
                     // this is generally a re-implementation of JMC JfrHtmlRulesReport#createReport,
                     // but calling our cancellable evalute() method rather than the
                     // RulesToolkit.evaluateParallel as explained further down.
                     List<Future<Result>> resultFutures = new ArrayList<>();
-                    try {
+                    try (CountingInputStream countingRecordingStream =
+                            new CountingInputStream(recording)) {
                         resultFutures.addAll(
                                 evaluate(
                                                 RuleRegistry.getRules(),
-                                                JfrLoaderToolkit.loadEvents(recording))
+                                                JfrLoaderToolkit.loadEvents(
+                                                        countingRecordingStream))
                                         .stream()
                                         .map(executor::submit)
                                         .collect(Collectors.toList()));
@@ -124,12 +127,27 @@ public class InterruptibleReportGenerator {
 
                         List<HtmlResultGroup> groups = loadResultGroups();
 
-                        return transform(
-                                RulesHtmlToolkit.generateStructuredHtml(
-                                        new SimpleResultProvider(results, groups),
-                                        groups,
-                                        new HashMap<String, Boolean>(),
-                                        true));
+                        String html =
+                                transform(
+                                        RulesHtmlToolkit.generateStructuredHtml(
+                                                new SimpleResultProvider(results, groups),
+                                                groups,
+                                                new HashMap<String, Boolean>(),
+                                                true));
+                        long recordingSizeBytes = countingRecordingStream.getByteCount();
+                        int rulesEvaluated = results.size();
+                        int rulesApplicable =
+                                results.stream()
+                                        .filter(
+                                                result ->
+                                                        result.getScore() != Result.NOT_APPLICABLE)
+                                        .collect(Collectors.toList())
+                                        .size();
+
+                        return new ReportResult(
+                                html,
+                                new ReportStats(
+                                        recordingSizeBytes, rulesEvaluated, rulesApplicable));
                     } catch (InterruptedException
                             | IOException
                             | ExecutionException
@@ -141,14 +159,15 @@ public class InterruptibleReportGenerator {
                                     }
                                 });
                         logger.warn(e);
-                        return "<html>"
-                                + " <head></head>"
-                                + " <body>"
-                                + "  <div>"
-                                + e.getMessage()
-                                + "  </div>"
-                                + " </body>"
-                                + "</html>";
+                        return new ReportResult(
+                                "<html>"
+                                        + " <head></head>"
+                                        + " <body>"
+                                        + "  <div>"
+                                        + e.getMessage()
+                                        + "  </div>"
+                                        + " </body>"
+                                        + "</html>");
                     }
                 });
     }
@@ -371,6 +390,82 @@ public class InterruptibleReportGenerator {
 
         ReportRuleEvalEvent(String ruleName) {
             this.ruleName = ruleName;
+        }
+    }
+
+    @Name("io.cryostat.core.reports.InterruptibleReportGenerator.ReportGenerationEvent")
+    @Label("Report Generation")
+    @Category("Cryostat")
+    @SuppressFBWarnings(
+            value = "URF_UNREAD_FIELD",
+            justification = "The event fields are recorded with JFR instead of accessed directly")
+    public static class ReportGenerationEvent extends Event {
+
+        String recordingName;
+        int rulesEvaluated;
+        int rulesApplicable;
+        long recordingSizeBytes;
+
+        public ReportGenerationEvent(String recordingName) {
+            this.recordingName = recordingName;
+        }
+
+        public void setRulesEvaluated(int rulesEvaluated) {
+            this.rulesEvaluated = rulesEvaluated;
+        }
+
+        public void setRulesApplicable(int rulesApplicable) {
+            this.rulesApplicable = rulesApplicable;
+        }
+
+        public void setRecordingSizeBytes(long recordingSizeBytes) {
+            this.recordingSizeBytes = recordingSizeBytes;
+        }
+    }
+
+    public static class ReportResult {
+        String html;
+        ReportStats reportStats;
+
+        ReportResult(String html) {
+            this.html = html;
+        }
+
+        ReportResult(String html, ReportStats reportStats) {
+            this.html = html;
+            this.reportStats = reportStats;
+        }
+
+        public String getHtml() {
+            return this.html;
+        }
+
+        public ReportStats getReportStats() {
+            return this.reportStats;
+        }
+    }
+
+    public static class ReportStats {
+        long recordingSizeBytes;
+        int rulesEvaluated;
+        int rulesApplicable;
+
+        ReportStats(long recordingSizeBytes, int rulesEvaluated, int rulesApplicable) {
+            this.recordingSizeBytes = recordingSizeBytes;
+            this.rulesEvaluated = rulesEvaluated;
+            this.rulesApplicable = rulesApplicable;
+        }
+
+        public long getRecordingSizeBytes() {
+            return this.recordingSizeBytes;
+        }
+
+        public int getRulesEvaluated() {
+            return this.rulesEvaluated;
+        }
+
+        public int getRulesApplicable() {
+            return this.rulesApplicable;
         }
     }
 }
