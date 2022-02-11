@@ -96,9 +96,9 @@ public class MergedTemplateService implements MutableTemplateService {
     }
 
     @Override
-    public void addTemplate(InputStream templateStream)
+    public Template addTemplate(InputStream templateStream)
             throws InvalidXmlException, InvalidEventTemplateException, IOException {
-        local.addTemplate(templateStream);
+        return local.addTemplate(templateStream);
     }
 
     @Override

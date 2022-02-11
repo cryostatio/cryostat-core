@@ -42,8 +42,13 @@ import java.io.InputStream;
 
 public interface MutableTemplateService extends TemplateService {
 
-    void addTemplate(InputStream templateStream)
+    Template addTemplate(InputStream templateStream)
             throws InvalidXmlException, InvalidEventTemplateException, IOException;
+
+    default void deleteTemplate(Template template)
+            throws IOException, InvalidEventTemplateException {
+        deleteTemplate(template.getName());
+    }
 
     void deleteTemplate(String templateName) throws IOException, InvalidEventTemplateException;
 

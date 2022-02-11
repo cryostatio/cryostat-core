@@ -191,7 +191,7 @@ class LocalStorageTemplateServiceTest {
         Mockito.when(fs.isWritable(path)).thenReturn(true);
         Mockito.when(fs.pathOf("/templates", "Profiling")).thenReturn(templatePath);
 
-        service.addTemplate(IOUtils.toInputStream(xmlText));
+        Template t = service.addTemplate(IOUtils.toInputStream(xmlText));
 
         ArgumentCaptor<String> contentCaptor = ArgumentCaptor.forClass(String.class);
         Mockito.verify(fs).writeString(Mockito.eq(templatePath), contentCaptor.capture());
@@ -201,6 +201,14 @@ class LocalStorageTemplateServiceTest {
         // parsed and re-serialized. Jsoup somehow determines that the document before and after
         // does not have the same value, but it clearly does from an actual inspection.
         MatcherAssert.assertThat(distance, Matchers.is(1710));
+
+        MatcherAssert.assertThat(t.getName(), Matchers.equalTo("Profiling"));
+        MatcherAssert.assertThat(
+                t.getDescription(),
+                Matchers.equalTo(
+                        "Low overhead configuration for profiling, typically around 2 % overhead."));
+        MatcherAssert.assertThat(t.getProvider(), Matchers.equalTo("Oracle"));
+        MatcherAssert.assertThat(t.getType(), Matchers.equalTo(TemplateType.CUSTOM));
     }
 
     @Test
