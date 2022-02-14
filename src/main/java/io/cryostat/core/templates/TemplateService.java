@@ -49,7 +49,15 @@ public interface TemplateService {
 
     List<Template> getTemplates() throws Exception;
 
+    default Optional<Document> getXml(Template template) throws Exception {
+        return getXml(template.getName(), template.getType());
+    }
+
     Optional<Document> getXml(String templateName, TemplateType type) throws Exception;
+
+    default Optional<IConstrainedMap<EventOptionID>> getEvents(Template template) throws Exception {
+        return getEvents(template.getName(), template.getType());
+    }
 
     Optional<IConstrainedMap<EventOptionID>> getEvents(String templateName, TemplateType type)
             throws Exception;

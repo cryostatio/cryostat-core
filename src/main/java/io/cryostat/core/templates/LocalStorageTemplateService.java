@@ -87,7 +87,7 @@ public class LocalStorageTemplateService extends AbstractTemplateService
     }
 
     @Override
-    public void addTemplate(InputStream templateStream)
+    public Template addTemplate(InputStream templateStream)
             throws InvalidXmlException, InvalidEventTemplateException, IOException {
         if (!env.hasEnv(TEMPLATE_PATH)) {
             throw new IOException(
@@ -135,6 +135,13 @@ public class LocalStorageTemplateService extends AbstractTemplateService
             }
 
             fs.writeString(path, model.toString());
+
+            XMLTagInstance root = model.getRoot();
+            return new Template(
+                    getAttributeValue(root, "label"),
+                    getAttributeValue(root, "description"),
+                    getAttributeValue(root, "provider"),
+                    providedTemplateType());
         } catch (IOException ioe) {
             throw new InvalidXmlException("Unable to parse XML stream", ioe);
         } catch (ParseException | IllegalArgumentException e) {
