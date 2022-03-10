@@ -46,7 +46,9 @@ import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class FileSystem {
@@ -141,5 +143,10 @@ public class FileSystem {
     public Path createTempDirectory(Path path, String prefix, FileAttribute<?>... attrs)
             throws IOException {
         return Files.createTempDirectory(path, prefix, attrs);
+    }
+
+    public Path setPosixFilePermissions(Path path, Set<PosixFilePermission> perms)
+            throws IOException {
+        return Files.setPosixFilePermissions(path, perms);
     }
 }
