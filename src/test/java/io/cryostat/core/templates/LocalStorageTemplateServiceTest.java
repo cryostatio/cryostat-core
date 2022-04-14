@@ -39,6 +39,7 @@ package io.cryostat.core.templates;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
@@ -69,11 +70,13 @@ class LocalStorageTemplateServiceTest {
     LocalStorageTemplateService service;
     @Mock FileSystem fs;
     @Mock Environment env;
-    String xmlText;
+    String profilingXmlText;
 
     @BeforeEach
     void setup() throws IOException {
-        xmlText = IOUtils.toString(this.getClass().getResourceAsStream("profile.jfc"));
+        profilingXmlText =
+                IOUtils.toString(
+                        this.getClass().getResourceAsStream("profile.jfc"), StandardCharsets.UTF_8);
         this.service = new LocalStorageTemplateService(fs, env);
     }
 
@@ -90,7 +93,7 @@ class LocalStorageTemplateServiceTest {
         Path templatePath = Mockito.mock(Path.class);
         Mockito.when(fs.pathOf("/templates", "profile.jfc")).thenReturn(templatePath);
 
-        InputStream stream = IOUtils.toInputStream(xmlText);
+        InputStream stream = IOUtils.toInputStream(profilingXmlText, StandardCharsets.UTF_8);
         Mockito.when(fs.newInputStream(templatePath)).thenReturn(stream);
 
         Mockito.when(fs.isDirectory(path)).thenReturn(true);
@@ -120,7 +123,7 @@ class LocalStorageTemplateServiceTest {
         Path templatePath = Mockito.mock(Path.class);
         Mockito.when(fs.pathOf("/templates", "profile.jfc")).thenReturn(templatePath);
 
-        InputStream stream = IOUtils.toInputStream(xmlText);
+        InputStream stream = IOUtils.toInputStream(profilingXmlText, StandardCharsets.UTF_8);
         Mockito.when(fs.newInputStream(templatePath)).thenReturn(stream);
 
         Mockito.when(fs.isDirectory(path)).thenReturn(true);
@@ -155,7 +158,7 @@ class LocalStorageTemplateServiceTest {
         Path templatePath = Mockito.mock(Path.class);
         Mockito.when(fs.pathOf("/templates", "profile.jfc")).thenReturn(templatePath);
 
-        InputStream stream = IOUtils.toInputStream(xmlText);
+        InputStream stream = IOUtils.toInputStream(profilingXmlText, StandardCharsets.UTF_8);
         Mockito.when(fs.newInputStream(templatePath)).thenReturn(stream);
 
         Mockito.when(fs.isDirectory(path)).thenReturn(true);
@@ -163,7 +166,8 @@ class LocalStorageTemplateServiceTest {
 
         Optional<Document> doc = service.getXml("Profiling", TemplateType.CUSTOM);
         Assertions.assertTrue(doc.isPresent());
-        Assertions.assertTrue(doc.get().hasSameValue(Jsoup.parse(xmlText, "", Parser.xmlParser())));
+        Assertions.assertTrue(
+                doc.get().hasSameValue(Jsoup.parse(profilingXmlText, "", Parser.xmlParser())));
     }
 
     @Test
@@ -191,12 +195,14 @@ class LocalStorageTemplateServiceTest {
         Mockito.when(fs.isWritable(path)).thenReturn(true);
         Mockito.when(fs.pathOf("/templates", "Profiling")).thenReturn(templatePath);
 
-        Template t = service.addTemplate(IOUtils.toInputStream(xmlText));
+        Template t =
+                service.addTemplate(
+                        IOUtils.toInputStream(profilingXmlText, StandardCharsets.UTF_8));
 
         ArgumentCaptor<String> contentCaptor = ArgumentCaptor.forClass(String.class);
         Mockito.verify(fs).writeString(Mockito.eq(templatePath), contentCaptor.capture());
         String after = contentCaptor.getValue();
-        int distance = LevenshteinDistance.getDefaultInstance().apply(xmlText, after);
+        int distance = LevenshteinDistance.getDefaultInstance().apply(profilingXmlText, after);
         // 1710 is just the experimentally determined LD. The XML is transformed somewhat when
         // parsed and re-serialized. Jsoup somehow determines that the document before and after
         // does not have the same value, but it clearly does from an actual inspection.
