@@ -71,12 +71,17 @@ class LocalStorageTemplateServiceTest {
     @Mock FileSystem fs;
     @Mock Environment env;
     String profilingXmlText;
+    String multiwordXmlText;
 
     @BeforeEach
     void setup() throws IOException {
         profilingXmlText =
                 IOUtils.toString(
                         this.getClass().getResourceAsStream("profile.jfc"), StandardCharsets.UTF_8);
+        multiwordXmlText =
+                IOUtils.toString(
+                        this.getClass().getResourceAsStream("multiword_label.jfc"),
+                        StandardCharsets.UTF_8);
         this.service = new LocalStorageTemplateService(fs, env);
     }
 
@@ -91,7 +96,8 @@ class LocalStorageTemplateServiceTest {
         Mockito.when(fs.listDirectoryChildren(path)).thenReturn(List.of("profile.jfc"));
 
         Path templatePath = Mockito.mock(Path.class);
-        Mockito.when(fs.pathOf("/templates", "profile.jfc")).thenReturn(templatePath);
+        Mockito.when(fs.pathOf(Mockito.eq("/templates"), Mockito.anyString()))
+                .thenReturn(templatePath);
 
         InputStream stream = IOUtils.toInputStream(profilingXmlText, StandardCharsets.UTF_8);
         Mockito.when(fs.newInputStream(templatePath)).thenReturn(stream);
@@ -121,7 +127,8 @@ class LocalStorageTemplateServiceTest {
         Mockito.when(fs.listDirectoryChildren(path)).thenReturn(List.of("profile.jfc"));
 
         Path templatePath = Mockito.mock(Path.class);
-        Mockito.when(fs.pathOf("/templates", "profile.jfc")).thenReturn(templatePath);
+        Mockito.when(fs.pathOf(Mockito.eq("/templates"), Mockito.anyString()))
+                .thenReturn(templatePath);
 
         InputStream stream = IOUtils.toInputStream(profilingXmlText, StandardCharsets.UTF_8);
         Mockito.when(fs.newInputStream(templatePath)).thenReturn(stream);
@@ -156,7 +163,8 @@ class LocalStorageTemplateServiceTest {
         Mockito.when(fs.listDirectoryChildren(path)).thenReturn(List.of("profile.jfc"));
 
         Path templatePath = Mockito.mock(Path.class);
-        Mockito.when(fs.pathOf("/templates", "profile.jfc")).thenReturn(templatePath);
+        Mockito.when(fs.pathOf(Mockito.eq("/templates"), Mockito.anyString()))
+                .thenReturn(templatePath);
 
         InputStream stream = IOUtils.toInputStream(profilingXmlText, StandardCharsets.UTF_8);
         Mockito.when(fs.newInputStream(templatePath)).thenReturn(stream);
@@ -193,7 +201,8 @@ class LocalStorageTemplateServiceTest {
         Mockito.when(fs.isDirectory(path)).thenReturn(true);
         Mockito.when(fs.isReadable(path)).thenReturn(true);
         Mockito.when(fs.isWritable(path)).thenReturn(true);
-        Mockito.when(fs.pathOf("/templates", "Profiling")).thenReturn(templatePath);
+        Mockito.when(fs.pathOf(Mockito.eq("/templates"), Mockito.anyString()))
+                .thenReturn(templatePath);
 
         Template t =
                 service.addTemplate(
@@ -218,6 +227,46 @@ class LocalStorageTemplateServiceTest {
     }
 
     @Test
+    void addTemplateShouldSanitizeLabelAttribute() throws Exception {
+        Mockito.when(env.hasEnv(LocalStorageTemplateService.TEMPLATE_PATH)).thenReturn(true);
+        Mockito.when(env.getEnv(LocalStorageTemplateService.TEMPLATE_PATH))
+                .thenReturn("/templates");
+
+        Path path = Mockito.mock(Path.class);
+        Path templatePath = Mockito.mock(Path.class);
+        Mockito.when(fs.pathOf("/templates")).thenReturn(path);
+        Mockito.when(fs.exists(path)).thenReturn(true);
+        Mockito.when(fs.isDirectory(path)).thenReturn(true);
+        Mockito.when(fs.isReadable(path)).thenReturn(true);
+        Mockito.when(fs.isWritable(path)).thenReturn(true);
+        Mockito.when(fs.pathOf(Mockito.eq("/templates"), Mockito.anyString()))
+                .thenReturn(templatePath);
+
+        Template t =
+                service.addTemplate(
+                        IOUtils.toInputStream(multiwordXmlText, StandardCharsets.UTF_8));
+
+        ArgumentCaptor<String> contentCaptor = ArgumentCaptor.forClass(String.class);
+        Mockito.verify(fs).writeString(Mockito.eq(templatePath), contentCaptor.capture());
+        String after = contentCaptor.getValue();
+        int distance = LevenshteinDistance.getDefaultInstance().apply(profilingXmlText, after);
+        // 1788 is just the experimentally determined LD. The XML is transformed somewhat when
+        // parsed and re-serialized. Jsoup somehow determines that the document before and after
+        // does not have the same value, but it clearly does from an actual inspection.
+        MatcherAssert.assertThat(distance, Matchers.is(1788));
+
+        // it's "Multiword Label" in the source document, and we expect the local storage template
+        // to sanitize that and replace the whitespace with an underscore
+        MatcherAssert.assertThat(t.getName(), Matchers.equalTo("Multiword_Label"));
+
+        MatcherAssert.assertThat(
+                t.getDescription(),
+                Matchers.equalTo("Event Template with multiple words in the label"));
+        MatcherAssert.assertThat(t.getProvider(), Matchers.equalTo("Cryostat"));
+        MatcherAssert.assertThat(t.getType(), Matchers.equalTo(TemplateType.CUSTOM));
+    }
+
+    @Test
     void deleteTemplateShouldDeleteFile() throws Exception {
         Mockito.when(env.hasEnv(LocalStorageTemplateService.TEMPLATE_PATH)).thenReturn(true);
         Mockito.when(env.getEnv(LocalStorageTemplateService.TEMPLATE_PATH))
@@ -230,7 +279,8 @@ class LocalStorageTemplateServiceTest {
         Mockito.when(fs.isDirectory(path)).thenReturn(true);
         Mockito.when(fs.isReadable(path)).thenReturn(true);
         Mockito.when(fs.isWritable(path)).thenReturn(true);
-        Mockito.when(fs.pathOf("/templates", "Profiling")).thenReturn(templatePath);
+        Mockito.when(fs.pathOf(Mockito.eq("/templates"), Mockito.anyString()))
+                .thenReturn(templatePath);
         Mockito.when(fs.deleteIfExists(templatePath)).thenReturn(true);
 
         service.deleteTemplate("Profiling");

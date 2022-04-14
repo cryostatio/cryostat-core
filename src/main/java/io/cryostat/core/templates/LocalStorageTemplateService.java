@@ -52,6 +52,7 @@ import org.openjdk.jmc.common.unit.IConstrainedMap;
 import org.openjdk.jmc.common.unit.SimpleConstrainedMap;
 import org.openjdk.jmc.common.unit.UnitLookup;
 import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
+import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.JFCGrammar;
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLAttributeInstance;
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLModel;
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLTagInstance;
@@ -127,6 +128,7 @@ public class LocalStorageTemplateService extends AbstractTemplateService
             }
 
             String templateName = labelAttr.getExplicitValue();
+            templateName = templateName.replaceAll("[\\W]+", "_");
             Path path = fs.pathOf(env.getEnv(TEMPLATE_PATH), templateName);
 
             if (fs.exists(path)) {
@@ -134,11 +136,13 @@ public class LocalStorageTemplateService extends AbstractTemplateService
                         String.format("Event template \"%s\" already exists", templateName));
             }
 
+            XMLTagInstance root = model.getRoot();
+            root.setValue(JFCGrammar.ATTRIBUTE_LABEL_MANDATORY, templateName);
+
             fs.writeString(path, model.toString());
 
-            XMLTagInstance root = model.getRoot();
             return new Template(
-                    getAttributeValue(root, "label"),
+                    templateName,
                     getAttributeValue(root, "description"),
                     getAttributeValue(root, "provider"),
                     providedTemplateType());
