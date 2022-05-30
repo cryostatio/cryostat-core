@@ -172,6 +172,73 @@ public class InterruptibleReportGenerator {
                 });
     }
 
+    /* Overloaded with filtered set of rules */
+    public Future<ReportResult> generateReportInterruptibly(InputStream recording, Collection<IRule> rules) {
+        return qThread.submit(
+                () -> {
+                    List<Future<Result>> resultFutures = new ArrayList<>();
+                    try (CountingInputStream countingRecordingStream =
+                            new CountingInputStream(recording)) {
+                        resultFutures.addAll(
+                                evaluate(
+                                                rules,
+                                                JfrLoaderToolkit.loadEvents(
+                                                        countingRecordingStream))
+                                        .stream()
+                                        .map(executor::submit)
+                                        .collect(Collectors.toList()));
+                        Collection<Result> results = new HashSet<>();
+                        for (Future<Result> future : resultFutures) {
+                            results.add(future.get());
+                        }
+
+                        List<HtmlResultGroup> groups = loadResultGroups();
+
+                        String html =
+                                transform(
+                                        RulesHtmlToolkit.generateStructuredHtml(
+                                                new SimpleResultProvider(results, groups),
+                                                groups,
+                                                new HashMap<String, Boolean>(),
+                                                true));
+                        long recordingSizeBytes = countingRecordingStream.getByteCount();
+                        int rulesEvaluated = results.size();
+                        int rulesApplicable =
+                                results.stream()
+                                        .filter(
+                                                result ->
+                                                        result.getScore() != Result.NOT_APPLICABLE)
+                                        .collect(Collectors.toList())
+                                        .size();
+
+                        return new ReportResult(
+                                html,
+                                new ReportStats(
+                                        recordingSizeBytes, rulesEvaluated, rulesApplicable));
+                    } catch (InterruptedException
+                            | IOException
+                            | ExecutionException
+                            | CouldNotLoadRecordingException e) {
+                        resultFutures.forEach(
+                                f -> {
+                                    if (!f.isDone()) {
+                                        f.cancel(true);
+                                    }
+                                });
+                        logger.warn(e);
+                        return new ReportResult(
+                                "<html>"
+                                        + " <head></head>"
+                                        + " <body>"
+                                        + "  <div>"
+                                        + e.getMessage()
+                                        + "  </div>"
+                                        + " </body>"
+                                        + "</html>");
+                    }
+                });
+    }
+
     String transform(String report) {
         if (transformers.isEmpty()) {
             return report;
