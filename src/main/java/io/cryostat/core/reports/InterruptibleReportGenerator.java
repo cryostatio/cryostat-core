@@ -45,6 +45,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -52,6 +53,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.RunnableFuture;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.openjdk.jmc.common.io.IOToolkit;
@@ -104,81 +106,24 @@ public class InterruptibleReportGenerator {
     }
 
     public Future<ReportResult> generateReportInterruptibly(InputStream recording) {
-        return qThread.submit(
-                () -> {
-                    // this is generally a re-implementation of JMC JfrHtmlRulesReport#createReport,
-                    // but calling our cancellable evalute() method rather than the
-                    // RulesToolkit.evaluateParallel as explained further down.
-                    List<Future<Result>> resultFutures = new ArrayList<>();
-                    try (CountingInputStream countingRecordingStream =
-                            new CountingInputStream(recording)) {
-                        resultFutures.addAll(
-                                evaluate(
-                                                RuleRegistry.getRules(),
-                                                JfrLoaderToolkit.loadEvents(
-                                                        countingRecordingStream))
-                                        .stream()
-                                        .map(executor::submit)
-                                        .collect(Collectors.toList()));
-                        Collection<Result> results = new HashSet<>();
-                        for (Future<Result> future : resultFutures) {
-                            results.add(future.get());
-                        }
-
-                        List<HtmlResultGroup> groups = loadResultGroups();
-
-                        String html =
-                                transform(
-                                        RulesHtmlToolkit.generateStructuredHtml(
-                                                new SimpleResultProvider(results, groups),
-                                                groups,
-                                                new HashMap<String, Boolean>(),
-                                                true));
-                        long recordingSizeBytes = countingRecordingStream.getByteCount();
-                        int rulesEvaluated = results.size();
-                        int rulesApplicable =
-                                results.stream()
-                                        .filter(
-                                                result ->
-                                                        result.getScore() != Result.NOT_APPLICABLE)
-                                        .collect(Collectors.toList())
-                                        .size();
-
-                        return new ReportResult(
-                                html,
-                                new ReportStats(
-                                        recordingSizeBytes, rulesEvaluated, rulesApplicable));
-                    } catch (InterruptedException
-                            | IOException
-                            | ExecutionException
-                            | CouldNotLoadRecordingException e) {
-                        resultFutures.forEach(
-                                f -> {
-                                    if (!f.isDone()) {
-                                        f.cancel(true);
-                                    }
-                                });
-                        logger.warn(e);
-                        return new ReportResult(
-                                "<html>"
-                                        + " <head></head>"
-                                        + " <body>"
-                                        + "  <div>"
-                                        + e.getMessage()
-                                        + "  </div>"
-                                        + " </body>"
-                                        + "</html>");
-                    }
-                });
+        return generateReportInterruptibly(recording, rule -> true);
     }
 
-    /* Overloaded with filtered set of rules */
-    public Future<ReportResult> generateReportInterruptibly(InputStream recording, Collection<IRule> rules) {
+    public Future<ReportResult> generateReportInterruptibly(
+            InputStream recording, Predicate<IRule> predicate) {
         return qThread.submit(
                 () -> {
                     List<Future<Result>> resultFutures = new ArrayList<>();
                     try (CountingInputStream countingRecordingStream =
                             new CountingInputStream(recording)) {
+                        Objects.requireNonNull(predicate);
+                        Objects.requireNonNull(recording);
+                        // RuleRegistry.getRules().stream()
+                        //         .forEach(r -> System.out.println(String.format("TOPIC: {%s}", r.getTopic())));
+                        Collection<IRule> rules =
+                                RuleRegistry.getRules().stream()
+                                        .filter(predicate)
+                                        .collect(Collectors.toList());
                         resultFutures.addAll(
                                 evaluate(
                                                 rules,
@@ -203,6 +148,7 @@ public class InterruptibleReportGenerator {
                                                 true));
                         long recordingSizeBytes = countingRecordingStream.getByteCount();
                         int rulesEvaluated = results.size();
+                        // System.out.println(String.format("Size {%d}", rulesEvaluated));
                         int rulesApplicable =
                                 results.stream()
                                         .filter(
