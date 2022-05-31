@@ -148,6 +148,10 @@ public class JFRConnection implements AutoCloseable {
         }
     }
 
+    public synchronized String getGUID() {
+        return this.rjmxConnection.getServerDescriptor().getGUID();
+    }
+
     public synchronized boolean isV1() {
         return !isV2();
     }
