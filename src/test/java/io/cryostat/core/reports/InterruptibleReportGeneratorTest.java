@@ -99,17 +99,21 @@ class InterruptibleReportGeneratorTest {
 
     @Test
     void shouldThrowNullRecording() throws Exception {
-        Assertions.assertThrows(NullPointerException.class, () -> {
-                generator.generateReportInterruptibly(null).get();
-        });
+        Assertions.assertThrows(
+                NullPointerException.class,
+                () -> {
+                    generator.generateReportInterruptibly(null).get();
+                });
     }
 
     @Test
     void shouldThrowNullPredicate() throws Exception {
         try (InputStream is = new FileInputStream(getJfrFile())) {
-                Assertions.assertThrows(NullPointerException.class, () -> {
+            Assertions.assertThrows(
+                    NullPointerException.class,
+                    () -> {
                         generator.generateReportInterruptibly(is, null).get();
-                });
+                    });
         }
     }
 
