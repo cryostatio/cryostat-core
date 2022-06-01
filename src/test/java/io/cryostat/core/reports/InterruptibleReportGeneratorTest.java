@@ -98,6 +98,22 @@ class InterruptibleReportGeneratorTest {
     }
 
     @Test
+    void shouldThrowNullRecording() throws Exception {
+        Assertions.assertThrows(NullPointerException.class, () -> {
+                generator.generateReportInterruptibly(null).get();
+        });
+    }
+
+    @Test
+    void shouldThrowNullPredicate() throws Exception {
+        try (InputStream is = new FileInputStream(getJfrFile())) {
+                Assertions.assertThrows(NullPointerException.class, () -> {
+                        generator.generateReportInterruptibly(is, null).get();
+                });
+        }
+    }
+
+    @Test
     void shouldProduceReportWithFilteredRules() throws Exception {
         try (InputStream is = new FileInputStream(getJfrFile())) {
             Future<ReportResult> report =
