@@ -111,13 +111,13 @@ public class InterruptibleReportGenerator {
 
     public Future<ReportResult> generateReportInterruptibly(
             InputStream recording, Predicate<IRule> predicate) {
+        Objects.requireNonNull(recording);
+        Objects.requireNonNull(predicate);
         return qThread.submit(
                 () -> {
                     // this is generally a re-implementation of JMC JfrHtmlRulesReport#createReport,
                     // but calling our cancellable evalute() method rather than the
                     // RulesToolkit.evaluateParallel as explained further down.
-                    Objects.requireNonNull(predicate);
-                    Objects.requireNonNull(recording);
                     List<Future<Result>> resultFutures = new ArrayList<>();
                     try (CountingInputStream countingRecordingStream =
                             new CountingInputStream(recording)) {
