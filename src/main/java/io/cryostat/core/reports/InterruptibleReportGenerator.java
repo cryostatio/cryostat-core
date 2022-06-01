@@ -113,13 +113,14 @@ public class InterruptibleReportGenerator {
             InputStream recording, Predicate<IRule> predicate) {
         return qThread.submit(
                 () -> {
+                    // this is generally a re-implementation of JMC JfrHtmlRulesReport#createReport,
+                    // but calling our cancellable evalute() method rather than the
+                    // RulesToolkit.evaluateParallel as explained further down.
+                    Objects.requireNonNull(predicate);
+                    Objects.requireNonNull(recording);
                     List<Future<Result>> resultFutures = new ArrayList<>();
                     try (CountingInputStream countingRecordingStream =
                             new CountingInputStream(recording)) {
-                        Objects.requireNonNull(predicate);
-                        Objects.requireNonNull(recording);
-                        // RuleRegistry.getRules().stream()
-                        //         .forEach(r -> System.out.println(String.format("TOPIC: {%s}", r.getTopic())));
                         Collection<IRule> rules =
                                 RuleRegistry.getRules().stream()
                                         .filter(predicate)
@@ -148,7 +149,6 @@ public class InterruptibleReportGenerator {
                                                 true));
                         long recordingSizeBytes = countingRecordingStream.getByteCount();
                         int rulesEvaluated = results.size();
-                        // System.out.println(String.format("Size {%d}", rulesEvaluated));
                         int rulesApplicable =
                                 results.stream()
                                         .filter(

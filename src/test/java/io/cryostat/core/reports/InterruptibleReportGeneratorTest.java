@@ -113,6 +113,25 @@ class InterruptibleReportGeneratorTest {
     }
 
     @Test
+    void shouldProduceReportWithFilteredRulesAndTopics() throws Exception {
+        try (InputStream is = new FileInputStream(getJfrFile())) {
+            Future<ReportResult> report =
+                    generator.generateReportInterruptibly(
+                            is,
+                            rule ->
+                                    rule.getId() == "ClassLeak"
+                                            || rule.getId() == "SystemGc"
+                                            || rule.getTopic() == "garbage_collection");
+            MatcherAssert.assertThat(
+                    report.get().getHtml(), Matchers.not(Matchers.emptyOrNullString()));
+            MatcherAssert.assertThat(
+                    report.get().getReportStats(), Matchers.not(Matchers.nullValue()));
+            MatcherAssert.assertThat(
+                    report.get().getReportStats().rulesEvaluated, Matchers.equalTo(10));
+        }
+    }
+
+    @Test
     void shouldProduceEmptyReport() throws Exception {
         try (InputStream is = new FileInputStream(getJfrFile())) {
             Future<ReportResult> report =
