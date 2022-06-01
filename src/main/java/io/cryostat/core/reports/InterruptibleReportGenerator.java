@@ -45,6 +45,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -52,6 +53,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.RunnableFuture;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.openjdk.jmc.common.io.IOToolkit;
@@ -104,6 +106,13 @@ public class InterruptibleReportGenerator {
     }
 
     public Future<ReportResult> generateReportInterruptibly(InputStream recording) {
+        return generateReportInterruptibly(recording, rule -> true);
+    }
+
+    public Future<ReportResult> generateReportInterruptibly(
+            InputStream recording, Predicate<IRule> predicate) {
+        Objects.requireNonNull(recording);
+        Objects.requireNonNull(predicate);
         return qThread.submit(
                 () -> {
                     // this is generally a re-implementation of JMC JfrHtmlRulesReport#createReport,
@@ -112,9 +121,13 @@ public class InterruptibleReportGenerator {
                     List<Future<Result>> resultFutures = new ArrayList<>();
                     try (CountingInputStream countingRecordingStream =
                             new CountingInputStream(recording)) {
+                        Collection<IRule> rules =
+                                RuleRegistry.getRules().stream()
+                                        .filter(predicate)
+                                        .collect(Collectors.toList());
                         resultFutures.addAll(
                                 evaluate(
-                                                RuleRegistry.getRules(),
+                                                rules,
                                                 JfrLoaderToolkit.loadEvents(
                                                         countingRecordingStream))
                                         .stream()

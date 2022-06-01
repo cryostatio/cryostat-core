@@ -97,6 +97,74 @@ class InterruptibleReportGeneratorTest {
         }
     }
 
+    @Test
+    void shouldThrowNullRecording() throws Exception {
+        Assertions.assertThrows(
+                NullPointerException.class,
+                () -> {
+                    generator.generateReportInterruptibly(null).get();
+                });
+    }
+
+    @Test
+    void shouldThrowNullPredicate() throws Exception {
+        try (InputStream is = new FileInputStream(getJfrFile())) {
+            Assertions.assertThrows(
+                    NullPointerException.class,
+                    () -> {
+                        generator.generateReportInterruptibly(is, null).get();
+                    });
+        }
+    }
+
+    @Test
+    void shouldProduceReportWithFilteredRules() throws Exception {
+        try (InputStream is = new FileInputStream(getJfrFile())) {
+            Future<ReportResult> report =
+                    generator.generateReportInterruptibly(
+                            is, rule -> rule.getId() == "ClassLeak" || rule.getId() == "Errors");
+            MatcherAssert.assertThat(
+                    report.get().getHtml(), Matchers.not(Matchers.emptyOrNullString()));
+            MatcherAssert.assertThat(
+                    report.get().getReportStats(), Matchers.not(Matchers.nullValue()));
+            MatcherAssert.assertThat(
+                    report.get().getReportStats().rulesEvaluated, Matchers.equalTo(2));
+        }
+    }
+
+    @Test
+    void shouldProduceReportWithFilteredRulesAndTopics() throws Exception {
+        try (InputStream is = new FileInputStream(getJfrFile())) {
+            Future<ReportResult> report =
+                    generator.generateReportInterruptibly(
+                            is,
+                            rule ->
+                                    rule.getId() == "ClassLeak"
+                                            || rule.getId() == "SystemGc"
+                                            || rule.getTopic() == "garbage_collection");
+            MatcherAssert.assertThat(
+                    report.get().getHtml(), Matchers.not(Matchers.emptyOrNullString()));
+            MatcherAssert.assertThat(
+                    report.get().getReportStats(), Matchers.not(Matchers.nullValue()));
+            MatcherAssert.assertThat(
+                    report.get().getReportStats().rulesEvaluated, Matchers.equalTo(10));
+        }
+    }
+
+    @Test
+    void shouldProduceEmptyReport() throws Exception {
+        try (InputStream is = new FileInputStream(getJfrFile())) {
+            Future<ReportResult> report =
+                    generator.generateReportInterruptibly(is, rule -> rule.getId() == "AFakeRule");
+            MatcherAssert.assertThat(
+                    report.get().getHtml(), Matchers.not(Matchers.emptyOrNullString()));
+            MatcherAssert.assertThat(
+                    report.get().getReportStats(), Matchers.not(Matchers.nullValue()));
+            MatcherAssert.assertThat(
+                    report.get().getReportStats().rulesEvaluated, Matchers.equalTo(0));
+        }
+    }
+
     private synchronized File getJfrFile() throws Exception {
         return Paths.get(getClass().getResource("/profiling_sample.jfr").toURI()).toFile();
     }
