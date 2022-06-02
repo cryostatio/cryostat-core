@@ -39,9 +39,16 @@ package io.cryostat.core.net;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
 import javax.management.remote.JMXServiceURL;
 
 import org.openjdk.jmc.rjmx.ConnectionException;
@@ -56,6 +63,8 @@ import org.openjdk.jmc.rjmx.internal.ServerDescriptor;
 import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
 import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceFactory;
 import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceV2;
+import org.openjdk.jmc.rjmx.subscription.MRI;
+import org.openjdk.jmc.rjmx.subscription.MRI.Type;
 
 import io.cryostat.core.sys.Clock;
 import io.cryostat.core.sys.Environment;
@@ -63,6 +72,8 @@ import io.cryostat.core.sys.FileSystem;
 import io.cryostat.core.templates.MergedTemplateService;
 import io.cryostat.core.templates.TemplateService;
 import io.cryostat.core.tui.ClientWriter;
+
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class JFRConnection implements AutoCloseable {
 
@@ -148,8 +159,36 @@ public class JFRConnection implements AutoCloseable {
         }
     }
 
-    public synchronized String getGUID() {
-        return this.rjmxConnection.getServerDescriptor().getGUID();
+    public synchronized int getJvmId() {
+        try {
+            ObjectName runtimeBean = new ObjectName("java.lang:type=Runtime");
+            List<String> attributes =
+                    new ArrayList<>(
+                            Arrays.asList(
+                                    "ClassPath",
+                                    "Name",
+                                    "InputArguments",
+                                    "LibraryPath",
+                                    "VmVendor",
+                                    "VmVersion",
+                                    "StartTime"));
+            HashCodeBuilder jvmId = new HashCodeBuilder();
+
+            for (String attr : attributes) {
+                jvmId.append(
+                        this.rjmxConnection.getAttributeValue(
+                                new MRI(Type.ATTRIBUTE, runtimeBean, attr)));
+            }
+            return jvmId.hashCode();
+        } catch (MalformedObjectNameException
+                | IOException
+                | AttributeNotFoundException
+                | InstanceNotFoundException
+                | MBeanException
+                | ReflectionException e) {
+            cw.println(e);
+            return 0;
+        }
     }
 
     public synchronized boolean isV1() {
