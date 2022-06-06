@@ -43,12 +43,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.management.AttributeNotFoundException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import javax.management.ReflectionException;
 import javax.management.remote.JMXServiceURL;
 
 import org.openjdk.jmc.rjmx.ConnectionException;
@@ -161,6 +156,9 @@ public class JFRConnection implements AutoCloseable {
 
     public synchronized int getJvmId() {
         try {
+            if (!isConnected()) {
+                connect();
+            }
             ObjectName runtimeBean = new ObjectName("java.lang:type=Runtime");
             List<String> attributes =
                     new ArrayList<>(
@@ -180,12 +178,7 @@ public class JFRConnection implements AutoCloseable {
                                 new MRI(Type.ATTRIBUTE, runtimeBean, attr)));
             }
             return jvmId.hashCode();
-        } catch (MalformedObjectNameException
-                | IOException
-                | AttributeNotFoundException
-                | InstanceNotFoundException
-                | MBeanException
-                | ReflectionException e) {
+        } catch (Exception e) {
             cw.println(e);
             return 0;
         }
