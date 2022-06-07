@@ -185,6 +185,63 @@ public class InterruptibleReportGenerator {
                 });
     }
 
+    public Future<Map<String, ScoreRule>> generateScoreMapInterruptibly(
+            InputStream recording, Predicate<IRule> predicate) {
+        Objects.requireNonNull(recording);
+        Objects.requireNonNull(predicate);
+        return qThread.submit(
+                () -> {
+                    List<Future<Result>> resultFutures = new ArrayList<>();
+                    try (CountingInputStream countingRecordingStream =
+                            new CountingInputStream(recording)) {
+                        Collection<IRule> rules =
+                                RuleRegistry.getRules().stream()
+                                        .filter(predicate)
+                                        .collect(Collectors.toList());
+                        resultFutures.addAll(
+                                evaluate(
+                                                rules,
+                                                JfrLoaderToolkit.loadEvents(
+                                                        countingRecordingStream))
+                                        .stream()
+                                        .map(executor::submit)
+                                        .collect(Collectors.toList()));
+                        Collection<Result> results = new HashSet<>();
+                        for (Future<Result> future : resultFutures) {
+                            results.add(future.get());
+                        }
+
+                        Map<String, ScoreRule> scoreMap = new HashMap<String, ScoreRule>();
+
+                        for (var e : results) {
+                            System.out.println(
+                                    String.format(
+                                            "{%s}: SHORT {%s}, {%s}",
+                                            e.getRule().getId(),
+                                            e.getShortDescription(),
+                                            e.getScore()));
+                            scoreMap.put(
+                                    e.getRule().getId(),
+                                    new ScoreRule(e.getScore(), e.getShortDescription()));
+                        }
+
+                        return scoreMap;
+                    } catch (InterruptedException
+                            | IOException
+                            | ExecutionException
+                            | CouldNotLoadRecordingException e) {
+                        resultFutures.forEach(
+                                f -> {
+                                    if (!f.isDone()) {
+                                        f.cancel(true);
+                                    }
+                                });
+                        logger.warn(e);
+                        return Map.of(e.getMessage(), new ScoreRule(e.hashCode(), ""));
+                    }
+                });
+    }
+
     String transform(String report) {
         if (transformers.isEmpty()) {
             return report;
@@ -207,6 +264,24 @@ public class InterruptibleReportGenerator {
         } catch (Exception e) {
             logger.warn(e);
             return report;
+        }
+    }
+
+    public static class ScoreRule {
+        private double score;
+        private String descripton;
+
+        ScoreRule(double score, String description) {
+            this.score = score;
+            this.descripton = description;
+        }
+
+        public double getScore() {
+            return score;
+        }
+
+        public String getDescription() {
+            return descripton;
         }
     }
 
