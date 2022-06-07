@@ -51,7 +51,7 @@ import java.util.function.Function;
 
 import io.cryostat.core.log.Logger;
 import io.cryostat.core.reports.InterruptibleReportGenerator.ReportResult;
-import io.cryostat.core.reports.InterruptibleReportGenerator.ScoreRule;
+import io.cryostat.core.reports.InterruptibleReportGenerator.RuleEvaluation;
 
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -168,13 +168,14 @@ class InterruptibleReportGeneratorTest {
     }
 
     @Test
-    void shouldProduceScoreMap() throws Exception {
+    void shouldProduceEvalMap() throws Exception {
         try (InputStream is = new FileInputStream(getJfrFile())) {
-            Future<Map<String, ScoreRule>> scoreMap =
-                    generator.generateScoreMapInterruptibly(is, rule -> true);
+            Future<Map<String, RuleEvaluation>> scoreMap =
+                    generator.generateEvalMapInterruptibly(is, rule -> true);
 
-            Map<String, ScoreRule> s = scoreMap.get();
+            Map<String, RuleEvaluation> s = scoreMap.get();
 
+            MatcherAssert.assertThat(s.entrySet(), Matchers.not(Matchers.empty()));
             for (var entry : s.entrySet()) {
                 MatcherAssert.assertThat(
                         entry.getKey(), Matchers.not(Matchers.emptyOrNullString()));
@@ -188,10 +189,10 @@ class InterruptibleReportGeneratorTest {
     }
 
     @Test
-    void shouldBeCancellableScoreMap() throws Exception {
+    void shouldBeCancellableEvalMap() throws Exception {
         try (InputStream is = new FileInputStream(getJfrFile())) {
-            Future<Map<String, ScoreRule>> scoreMap =
-                    generator.generateScoreMapInterruptibly(is, rule -> true);
+            Future<Map<String, RuleEvaluation>> scoreMap =
+                    generator.generateEvalMapInterruptibly(is, rule -> true);
 
             scoreMap.cancel(true);
             Assertions.assertThrows(CancellationException.class, scoreMap::get);
@@ -199,11 +200,10 @@ class InterruptibleReportGeneratorTest {
     }
 
     @Test
-    void shouldProduceScoreMapWithFilteredRules() throws Exception {
+    void shouldProduceEvalMapWithFilteredRules() throws Exception {
         try (InputStream is = new FileInputStream(getJfrFile())) {
-            Future<Map<String, ScoreRule>> scoreMap =
-                    generator.generateScoreMapInterruptibly(
-                            is, rule -> rule.getId() == "ClassLeak");
+            Future<Map<String, RuleEvaluation>> scoreMap =
+                    generator.generateEvalMapInterruptibly(is, rule -> rule.getId() == "ClassLeak");
 
             MatcherAssert.assertThat(
                     scoreMap.get().get("ClassLeak"), Matchers.not(Matchers.nullValue()));
