@@ -214,12 +214,6 @@ public class InterruptibleReportGenerator {
                         Map<String, ScoreRule> scoreMap = new HashMap<String, ScoreRule>();
 
                         for (var e : results) {
-                            System.out.println(
-                                    String.format(
-                                            "{%s}: SHORT {%s}, {%s}",
-                                            e.getRule().getId(),
-                                            e.getShortDescription(),
-                                            e.getScore()));
                             scoreMap.put(
                                     e.getRule().getId(),
                                     new ScoreRule(e.getScore(), e.getShortDescription()));
