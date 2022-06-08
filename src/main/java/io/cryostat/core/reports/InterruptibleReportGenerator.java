@@ -190,13 +190,15 @@ public class InterruptibleReportGenerator {
                             | CouldNotLoadRecordingException e) {
                         return Map.of(
                                 e.getClass().toString(),
-                                new RuleEvaluation(e.hashCode(), "", "", e.getMessage()));
+                                new RuleEvaluation(Double.NaN, "", "", e.getMessage()));
                     }
                 });
     }
 
     public Pair<Collection<Result>, Long> generateResultHelper(
-            InputStream recording, Predicate<IRule> predicate) throws Exception {
+            InputStream recording, Predicate<IRule> predicate)
+            throws InterruptedException, IOException, ExecutionException,
+                    CouldNotLoadRecordingException {
         List<Future<Result>> resultFutures = new ArrayList<>();
         try (CountingInputStream countingRecordingStream = new CountingInputStream(recording)) {
             Collection<IRule> rules =
