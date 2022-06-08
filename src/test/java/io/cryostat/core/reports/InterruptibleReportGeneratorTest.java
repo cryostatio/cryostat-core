@@ -42,6 +42,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.Executors;
@@ -50,6 +51,7 @@ import java.util.function.Function;
 
 import io.cryostat.core.log.Logger;
 import io.cryostat.core.reports.InterruptibleReportGenerator.ReportResult;
+import io.cryostat.core.reports.InterruptibleReportGenerator.RuleEvaluation;
 
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -162,6 +164,50 @@ class InterruptibleReportGeneratorTest {
                     report.get().getReportStats(), Matchers.not(Matchers.nullValue()));
             MatcherAssert.assertThat(
                     report.get().getReportStats().rulesEvaluated, Matchers.equalTo(0));
+        }
+    }
+
+    @Test
+    void shouldProduceEvalMap() throws Exception {
+        try (InputStream is = new FileInputStream(getJfrFile())) {
+            Future<Map<String, RuleEvaluation>> scoreMap =
+                    generator.generateEvalMapInterruptibly(is, rule -> true);
+
+            Map<String, RuleEvaluation> s = scoreMap.get();
+
+            MatcherAssert.assertThat(s.entrySet(), Matchers.not(Matchers.empty()));
+            for (var entry : s.entrySet()) {
+                MatcherAssert.assertThat(
+                        entry.getKey(), Matchers.not(Matchers.emptyOrNullString()));
+                MatcherAssert.assertThat(
+                        entry.getValue().getScore(), Matchers.not(Matchers.notANumber()));
+                MatcherAssert.assertThat(
+                        entry.getValue().getDescription(),
+                        Matchers.not(Matchers.emptyOrNullString()));
+            }
+        }
+    }
+
+    @Test
+    void shouldBeCancellableEvalMap() throws Exception {
+        try (InputStream is = new FileInputStream(getJfrFile())) {
+            Future<Map<String, RuleEvaluation>> scoreMap =
+                    generator.generateEvalMapInterruptibly(is, rule -> true);
+
+            scoreMap.cancel(true);
+            Assertions.assertThrows(CancellationException.class, scoreMap::get);
+        }
+    }
+
+    @Test
+    void shouldProduceEvalMapWithFilteredRules() throws Exception {
+        try (InputStream is = new FileInputStream(getJfrFile())) {
+            Future<Map<String, RuleEvaluation>> scoreMap =
+                    generator.generateEvalMapInterruptibly(is, rule -> rule.getId() == "ClassLeak");
+
+            MatcherAssert.assertThat(
+                    scoreMap.get().get("ClassLeak"), Matchers.not(Matchers.nullValue()));
+            MatcherAssert.assertThat(scoreMap.get().size(), Matchers.equalTo(1));
         }
     }
 

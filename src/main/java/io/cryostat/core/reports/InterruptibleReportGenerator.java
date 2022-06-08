@@ -59,6 +59,7 @@ import java.util.stream.Collectors;
 import org.openjdk.jmc.common.io.IOToolkit;
 import org.openjdk.jmc.common.item.IItemCollection;
 import org.openjdk.jmc.common.util.IPreferenceValueProvider;
+import org.openjdk.jmc.common.util.Pair;
 import org.openjdk.jmc.common.util.XmlToolkit;
 import org.openjdk.jmc.flightrecorder.CouldNotLoadRecordingException;
 import org.openjdk.jmc.flightrecorder.JfrLoaderToolkit;
@@ -118,26 +119,10 @@ public class InterruptibleReportGenerator {
                     // this is generally a re-implementation of JMC JfrHtmlRulesReport#createReport,
                     // but calling our cancellable evalute() method rather than the
                     // RulesToolkit.evaluateParallel as explained further down.
-                    List<Future<Result>> resultFutures = new ArrayList<>();
-                    try (CountingInputStream countingRecordingStream =
-                            new CountingInputStream(recording)) {
-                        Collection<IRule> rules =
-                                RuleRegistry.getRules().stream()
-                                        .filter(predicate)
-                                        .collect(Collectors.toList());
-                        resultFutures.addAll(
-                                evaluate(
-                                                rules,
-                                                JfrLoaderToolkit.loadEvents(
-                                                        countingRecordingStream))
-                                        .stream()
-                                        .map(executor::submit)
-                                        .collect(Collectors.toList()));
-                        Collection<Result> results = new HashSet<>();
-                        for (Future<Result> future : resultFutures) {
-                            results.add(future.get());
-                        }
-
+                    try {
+                        Pair<Collection<Result>, Long> helperPair =
+                                generateResultHelper(recording, predicate);
+                        Collection<Result> results = helperPair.left;
                         List<HtmlResultGroup> groups = loadResultGroups();
 
                         String html =
@@ -147,7 +132,7 @@ public class InterruptibleReportGenerator {
                                                 groups,
                                                 new HashMap<String, Boolean>(),
                                                 true));
-                        long recordingSizeBytes = countingRecordingStream.getByteCount();
+                        long recordingSizeBytes = helperPair.right;
                         int rulesEvaluated = results.size();
                         int rulesApplicable =
                                 results.stream()
@@ -161,17 +146,11 @@ public class InterruptibleReportGenerator {
                                 html,
                                 new ReportStats(
                                         recordingSizeBytes, rulesEvaluated, rulesApplicable));
+
                     } catch (InterruptedException
                             | IOException
                             | ExecutionException
                             | CouldNotLoadRecordingException e) {
-                        resultFutures.forEach(
-                                f -> {
-                                    if (!f.isDone()) {
-                                        f.cancel(true);
-                                    }
-                                });
-                        logger.warn(e);
                         return new ReportResult(
                                 "<html>"
                                         + " <head></head>"
@@ -183,6 +162,70 @@ public class InterruptibleReportGenerator {
                                         + "</html>");
                     }
                 });
+    }
+
+    public Future<Map<String, RuleEvaluation>> generateEvalMapInterruptibly(
+            InputStream recording, Predicate<IRule> predicate) {
+        Objects.requireNonNull(recording);
+        Objects.requireNonNull(predicate);
+        return qThread.submit(
+                () -> {
+                    try {
+                        Collection<Result> results =
+                                generateResultHelper(recording, predicate).left;
+                        Map<String, RuleEvaluation> evalMap = new HashMap<String, RuleEvaluation>();
+                        for (var eval : results) {
+                            evalMap.put(
+                                    eval.getRule().getId(),
+                                    new RuleEvaluation(
+                                            eval.getScore(),
+                                            eval.getRule().getName(),
+                                            eval.getRule().getTopic(),
+                                            eval.getShortDescription()));
+                        }
+                        return evalMap;
+                    } catch (InterruptedException
+                            | IOException
+                            | ExecutionException
+                            | CouldNotLoadRecordingException e) {
+                        return Map.of(
+                                e.getClass().toString(),
+                                new RuleEvaluation(Double.NaN, "", "", e.getMessage()));
+                    }
+                });
+    }
+
+    public Pair<Collection<Result>, Long> generateResultHelper(
+            InputStream recording, Predicate<IRule> predicate)
+            throws InterruptedException, IOException, ExecutionException,
+                    CouldNotLoadRecordingException {
+        List<Future<Result>> resultFutures = new ArrayList<>();
+        try (CountingInputStream countingRecordingStream = new CountingInputStream(recording)) {
+            Collection<IRule> rules =
+                    RuleRegistry.getRules().stream().filter(predicate).collect(Collectors.toList());
+            resultFutures.addAll(
+                    evaluate(rules, JfrLoaderToolkit.loadEvents(countingRecordingStream)).stream()
+                            .map(executor::submit)
+                            .collect(Collectors.toList()));
+            Collection<Result> results = new HashSet<>();
+            for (Future<Result> future : resultFutures) {
+                results.add(future.get());
+            }
+            long recordingSizeBytes = countingRecordingStream.getByteCount();
+            return new Pair<Collection<Result>, Long>(results, recordingSizeBytes);
+        } catch (InterruptedException
+                | IOException
+                | ExecutionException
+                | CouldNotLoadRecordingException e) {
+            resultFutures.forEach(
+                    f -> {
+                        if (!f.isDone()) {
+                            f.cancel(true);
+                        }
+                    });
+            logger.warn(e);
+            throw e;
+        }
     }
 
     String transform(String report) {
@@ -207,6 +250,36 @@ public class InterruptibleReportGenerator {
         } catch (Exception e) {
             logger.warn(e);
             return report;
+        }
+    }
+
+    public static class RuleEvaluation {
+        private double score;
+        private String name;
+        private String topic;
+        private String descripton;
+
+        RuleEvaluation(double score, String name, String topic, String description) {
+            this.score = score;
+            this.name = name;
+            this.topic = topic;
+            this.descripton = description;
+        }
+
+        public double getScore() {
+            return score;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getTopic() {
+            return topic;
+        }
+
+        public String getDescription() {
+            return descripton;
         }
     }
 
