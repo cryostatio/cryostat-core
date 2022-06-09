@@ -85,7 +85,8 @@ class RemoteTemplateServiceTest {
                         Collections.singletonList(
                                 new Template(
                                         "Profiling",
-                                        "Low overhead configuration for profiling, typically around 2 % overhead.",
+                                        "Low overhead configuration for profiling, typically around"
+                                                + " 2 % overhead.",
                                         "Oracle",
                                         TemplateType.TARGET))));
     }

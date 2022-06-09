@@ -111,7 +111,8 @@ class LocalStorageTemplateServiceTest {
                         Collections.singletonList(
                                 new Template(
                                         "Profiling",
-                                        "Low overhead configuration for profiling, typically around 2 % overhead.",
+                                        "Low overhead configuration for profiling, typically around"
+                                                + " 2 % overhead.",
                                         "Oracle",
                                         TemplateType.CUSTOM))));
     }
@@ -221,7 +222,8 @@ class LocalStorageTemplateServiceTest {
         MatcherAssert.assertThat(
                 t.getDescription(),
                 Matchers.equalTo(
-                        "Low overhead configuration for profiling, typically around 2 % overhead."));
+                        "Low overhead configuration for profiling, typically around 2 %"
+                                + " overhead."));
         MatcherAssert.assertThat(t.getProvider(), Matchers.equalTo("Oracle"));
         MatcherAssert.assertThat(t.getType(), Matchers.equalTo(TemplateType.CUSTOM));
     }

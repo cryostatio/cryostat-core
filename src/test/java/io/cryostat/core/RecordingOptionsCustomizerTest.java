@@ -38,8 +38,8 @@
 package io.cryostat.core;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import org.openjdk.jmc.common.unit.QuantityConversionException;
@@ -73,7 +73,7 @@ class RecordingOptionsCustomizerTest {
         customizer.apply(builder);
         verify(builder).toDisk(true);
         verifyNoMoreInteractions(builder);
-        verifyZeroInteractions(cw);
+        verifyNoInteractions(cw);
     }
 
     @Test
@@ -82,7 +82,7 @@ class RecordingOptionsCustomizerTest {
         customizer.apply(builder);
         verify(builder).maxAge(123);
         verifyNoMoreInteractions(builder);
-        verifyZeroInteractions(cw);
+        verifyNoInteractions(cw);
     }
 
     @Test
@@ -92,7 +92,7 @@ class RecordingOptionsCustomizerTest {
         customizer.apply(builder);
         verify(builder).maxAge(456);
         verifyNoMoreInteractions(builder);
-        verifyZeroInteractions(cw);
+        verifyNoInteractions(cw);
     }
 
     @Test
@@ -101,7 +101,7 @@ class RecordingOptionsCustomizerTest {
         customizer.apply(builder);
         verify(builder).maxSize(123);
         verifyNoMoreInteractions(builder);
-        verifyZeroInteractions(cw);
+        verifyNoInteractions(cw);
     }
 
     @Test
@@ -110,7 +110,7 @@ class RecordingOptionsCustomizerTest {
         customizer.unset(RecordingOptionsCustomizer.OptionKey.MAX_SIZE);
         customizer.apply(builder);
         verifyNoMoreInteractions(builder);
-        verifyZeroInteractions(cw);
+        verifyNoInteractions(cw);
     }
 
     @Test
