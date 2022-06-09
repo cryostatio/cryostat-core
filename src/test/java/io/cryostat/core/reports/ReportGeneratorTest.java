@@ -87,7 +87,7 @@ class ReportGeneratorTest {
         MatcherAssert.assertThat(report, Matchers.is(SAMPLE_REPORT));
 
         Mockito.verify(reporter).apply(Mockito.any());
-        Mockito.verifyZeroInteractions(logger);
+        Mockito.verifyNoInteractions(logger);
     }
 
     @Test
@@ -127,7 +127,7 @@ class ReportGeneratorTest {
                                 + "</html>"));
 
         Mockito.verify(reporter).apply(Mockito.any());
-        Mockito.verifyZeroInteractions(logger);
+        Mockito.verifyNoInteractions(logger);
     }
 
     @Test
@@ -173,7 +173,7 @@ class ReportGeneratorTest {
                                 + "</html>"));
 
         Mockito.verify(reporter).apply(Mockito.any());
-        Mockito.verifyZeroInteractions(logger);
+        Mockito.verifyNoInteractions(logger);
     }
 
     @Test
@@ -254,6 +254,6 @@ class ReportGeneratorTest {
                                 + "</html>"));
 
         Mockito.verify(reporter).apply(Mockito.any());
-        Mockito.verifyZeroInteractions(logger);
+        Mockito.verifyNoInteractions(logger);
     }
 }
