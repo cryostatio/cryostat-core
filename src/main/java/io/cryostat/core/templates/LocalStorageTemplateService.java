@@ -93,14 +93,16 @@ public class LocalStorageTemplateService extends AbstractTemplateService
         if (!env.hasEnv(TEMPLATE_PATH)) {
             throw new IOException(
                     String.format(
-                            "Template directory does not exist, must be set using environment variable %s",
+                            "Template directory does not exist, must be set using environment"
+                                    + " variable %s",
                             TEMPLATE_PATH));
         }
         Path dir = fs.pathOf(env.getEnv(TEMPLATE_PATH));
         if (!fs.exists(dir) || !fs.isDirectory(dir) || !fs.isReadable(dir) || !fs.isWritable(dir)) {
             throw new IOException(
                     String.format(
-                            "Template directory %s does not exist, is not a directory, or does not have appropriate permissions",
+                            "Template directory %s does not exist, is not a directory, or does not"
+                                    + " have appropriate permissions",
                             dir.toString()));
         }
         try (templateStream) {
@@ -159,14 +161,16 @@ public class LocalStorageTemplateService extends AbstractTemplateService
         if (!env.hasEnv(TEMPLATE_PATH)) {
             throw new IOException(
                     String.format(
-                            "Template directory does not exist, must be set using environment variable %s",
+                            "Template directory does not exist, must be set using environment"
+                                    + " variable %s",
                             TEMPLATE_PATH));
         }
         Path dir = fs.pathOf(env.getEnv(TEMPLATE_PATH));
         if (!fs.exists(dir) || !fs.isDirectory(dir) || !fs.isReadable(dir) || !fs.isWritable(dir)) {
             throw new IOException(
                     String.format(
-                            "Template directory %s does not exist, is not a directory, or does not have appropriate permissions",
+                            "Template directory %s does not exist, is not a directory, or does not"
+                                    + " have appropriate permissions",
                             dir.toString()));
         }
         if (!fs.deleteIfExists(fs.pathOf(env.getEnv(TEMPLATE_PATH), templateName))) {

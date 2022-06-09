@@ -160,7 +160,8 @@ class EventOptionsCustomizerTest {
         MatcherAssert.assertThat(
                 e.getMessage(),
                 Matchers.equalTo(
-                        "Invalid value \"fooVal\" for event \"com.example.FooType\", option \"fooOption\""));
+                        "Invalid value \"fooVal\" for event \"com.example.FooType\", option"
+                                + " \"fooOption\""));
     }
 
     @Test

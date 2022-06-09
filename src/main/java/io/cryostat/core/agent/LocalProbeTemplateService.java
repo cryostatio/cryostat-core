@@ -67,7 +67,8 @@ public class LocalProbeTemplateService implements ProbeTemplateService {
         if (!env.hasEnv(TEMPLATE_PATH)) {
             throw new IOException(
                     String.format(
-                            "Probe template directory does not exist, must be set using environment variable %s",
+                            "Probe template directory does not exist, must be set using environment"
+                                    + " variable %s",
                             TEMPLATE_PATH));
         }
         // Sanity check the directory is set up correctly
@@ -78,7 +79,8 @@ public class LocalProbeTemplateService implements ProbeTemplateService {
                 || !fs.isWritable(probeTemplateDirectory)) {
             throw new IOException(
                     String.format(
-                            "Probe template directory %s does not exist, is not a directory, or has incorrect permissions.",
+                            "Probe template directory %s does not exist, is not a directory, or has"
+                                    + " incorrect permissions.",
                             probeTemplateDirectory.toString()));
         }
     }
