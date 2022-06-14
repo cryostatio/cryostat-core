@@ -56,9 +56,9 @@ public class RuleFilterParser {
                     .map(rule -> rule.getTopic())
                     .collect(Collectors.toSet());
 
-    private RuleFilterParser() {}
+    public RuleFilterParser() {}
 
-    public static Predicate<IRule> getPredicateRuleFilter(String rawFilter) {
+    public Predicate<IRule> parse(String rawFilter) {
         if (StringUtils.isNotBlank(rawFilter)) {
             String[] filterArray = rawFilter.split(",");
             Predicate<IRule> combinedPredicate = (r) -> false;
