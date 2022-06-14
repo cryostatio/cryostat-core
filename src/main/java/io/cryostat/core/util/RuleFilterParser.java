@@ -56,8 +56,6 @@ public class RuleFilterParser {
                     .map(rule -> rule.getTopic())
                     .collect(Collectors.toSet());
 
-    public RuleFilterParser() {}
-
     public Predicate<IRule> parse(String rawFilter) {
         if (StringUtils.isNotBlank(rawFilter)) {
             String[] filterArray = rawFilter.split(",");
