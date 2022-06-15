@@ -48,20 +48,20 @@ import org.openjdk.jmc.flightrecorder.rules.RuleRegistry;
 import org.apache.commons.lang3.StringUtils;
 
 public class RuleFilterParser {
-    private final Set<String> RULE_IDS_SET;
-    private final Set<String> TOPIC_IDS_SET;
+    private final Set<String> ruleIds;
+    private final Set<String> ruleTopics;
 
-    RuleFilterParser(Set<String> ruleSet, Set<String> topicSet) {
-        this.RULE_IDS_SET = ruleSet;
-        this.TOPIC_IDS_SET = topicSet;
+    RuleFilterParser(Set<String> rules, Set<String> topics) {
+        this.ruleIds = rules;
+        this.ruleTopics = topics;
     }
 
     public RuleFilterParser() {
-        this.RULE_IDS_SET =
+        this.ruleIds =
                 RuleRegistry.getRules().stream()
                         .map(rule -> rule.getId())
                         .collect(Collectors.toSet());
-        this.TOPIC_IDS_SET =
+        this.ruleTopics =
                 RuleRegistry.getRules().stream()
                         .map(rule -> rule.getTopic())
                         .collect(Collectors.toSet());
@@ -73,10 +73,10 @@ public class RuleFilterParser {
             Predicate<IRule> combinedPredicate = (r) -> false;
             for (String filter : filterArray) {
                 String cleanFilter = filter.trim();
-                if (RULE_IDS_SET.stream().anyMatch(cleanFilter::equalsIgnoreCase)) {
+                if (ruleIds.stream().anyMatch(cleanFilter::equalsIgnoreCase)) {
                     Predicate<IRule> pr = (rule) -> rule.getId().equalsIgnoreCase(cleanFilter);
                     combinedPredicate = combinedPredicate.or(pr);
-                } else if (TOPIC_IDS_SET.stream().anyMatch(cleanFilter::equalsIgnoreCase)) {
+                } else if (ruleTopics.stream().anyMatch(cleanFilter::equalsIgnoreCase)) {
                     Predicate<IRule> pr = (rule) -> rule.getTopic().equalsIgnoreCase(cleanFilter);
                     combinedPredicate = combinedPredicate.or(pr);
                 }

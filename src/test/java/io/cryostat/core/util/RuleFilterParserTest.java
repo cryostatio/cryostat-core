@@ -55,6 +55,8 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -96,35 +98,30 @@ public class RuleFilterParserTest {
     }
 
     @Test
-    void shouldAcceptSomeRulesofTopic() {
+    void shouldAcceptSomeRulesOfTopic() {
         String rawFilter = " topic0 ";
 
         Predicate<IRule> result = parser.parse(rawFilter);
         Collection<IRule> rules = iRules.stream().filter(result).collect(Collectors.toList());
-
-        for (var e : rules) {
-            System.out.println(e.getId());
-        }
 
         MatcherAssert.assertThat(result, Matchers.notNullValue());
         MatcherAssert.assertThat(rules, Matchers.hasSize(3));
     }
 
     @Test
-    void shouldAcceptAllWhenFilterNull() {
-        String rawFilter = null;
+    void shouldAcceptBothNoOverlap() {
+        String rawFilter = "Topic2, Rule2, Rule4";
 
         Predicate<IRule> result = parser.parse(rawFilter);
         Collection<IRule> rules = iRules.stream().filter(result).collect(Collectors.toList());
 
         MatcherAssert.assertThat(result, Matchers.notNullValue());
-        MatcherAssert.assertThat(rules, Matchers.hasSize(5));
+        MatcherAssert.assertThat(rules, Matchers.hasSize(2));
     }
 
-    @Test
-    void shouldAcceptAllWhenFilterBlank() {
-        String rawFilter = "  ";
-
+    @ParameterizedTest
+    @NullAndEmptySource
+    void shouldAcceptAllWhenFilterBlank(String rawFilter) {
         Predicate<IRule> result = parser.parse(rawFilter);
         Collection<IRule> rules = iRules.stream().filter(result).collect(Collectors.toList());
 
