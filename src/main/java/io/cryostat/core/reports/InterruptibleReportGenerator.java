@@ -117,7 +117,7 @@ public class InterruptibleReportGenerator {
         return qThread.submit(
                 () -> {
                     // this is generally a re-implementation of JMC JfrHtmlRulesReport#createReport,
-                    // but calling our cancellable evalute() method rather than the
+                    // but calling our cancellable evaluate() method rather than the
                     // RulesToolkit.evaluateParallel as explained further down.
                     try {
                         Pair<Collection<Result>, Long> helperPair =
@@ -195,7 +195,7 @@ public class InterruptibleReportGenerator {
                 });
     }
 
-    public Pair<Collection<Result>, Long> generateResultHelper(
+    private Pair<Collection<Result>, Long> generateResultHelper(
             InputStream recording, Predicate<IRule> predicate)
             throws InterruptedException, IOException, ExecutionException,
                     CouldNotLoadRecordingException {
@@ -257,13 +257,13 @@ public class InterruptibleReportGenerator {
         private double score;
         private String name;
         private String topic;
-        private String descripton;
+        private String description;
 
         RuleEvaluation(double score, String name, String topic, String description) {
             this.score = score;
             this.name = name;
             this.topic = topic;
-            this.descripton = description;
+            this.description = description;
         }
 
         public double getScore() {
@@ -279,7 +279,7 @@ public class InterruptibleReportGenerator {
         }
 
         public String getDescription() {
-            return descripton;
+            return description;
         }
     }
 
