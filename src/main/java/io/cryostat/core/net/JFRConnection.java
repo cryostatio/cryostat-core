@@ -37,9 +37,13 @@
  */
 package io.cryostat.core.net;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -68,7 +72,7 @@ import io.cryostat.core.templates.MergedTemplateService;
 import io.cryostat.core.templates.TemplateService;
 import io.cryostat.core.tui.ClientWriter;
 
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.codec.digest.DigestUtils;
 
 public class JFRConnection implements AutoCloseable {
 
@@ -154,34 +158,33 @@ public class JFRConnection implements AutoCloseable {
         }
     }
 
-    public synchronized int getJvmId() {
-        try {
-            if (!isConnected()) {
-                connect();
-            }
-            ObjectName runtimeBean = new ObjectName("java.lang:type=Runtime");
-            List<String> attributes =
-                    new ArrayList<>(
-                            Arrays.asList(
-                                    "ClassPath",
-                                    "Name",
-                                    "InputArguments",
-                                    "LibraryPath",
-                                    "VmVendor",
-                                    "VmVersion",
-                                    "StartTime"));
-            HashCodeBuilder jvmId = new HashCodeBuilder();
-
-            for (String attr : attributes) {
-                jvmId.append(
-                        this.rjmxConnection.getAttributeValue(
-                                new MRI(Type.ATTRIBUTE, runtimeBean, attr)));
-            }
-            return jvmId.hashCode();
-        } catch (Exception e) {
-            cw.println(e);
-            return 0;
+    public synchronized String getJvmId() throws Exception {
+        if (!isConnected()) {
+            connect();
         }
+        ObjectName runtimeBean = new ObjectName("java.lang:type=Runtime");
+        List<String> attrNames =
+                new ArrayList<>(
+                        Arrays.asList(
+                                "ClassPath",
+                                "Name",
+                                "InputArguments",
+                                "LibraryPath",
+                                "VmVendor",
+                                "VmVersion",
+                                "StartTime"));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
+        DataOutputStream dos = new DataOutputStream(baos);
+
+        for (String attr : attrNames) {
+            dos.writeUTF(
+                    this.rjmxConnection
+                            .getAttributeValue(new MRI(Type.ATTRIBUTE, runtimeBean, attr))
+                            .toString());
+        }
+        byte[] hash = DigestUtils.sha256(baos.toByteArray());
+        return new String(Base64.getUrlEncoder().encode(hash), StandardCharsets.UTF_8).trim();
     }
 
     public synchronized boolean isV1() {
