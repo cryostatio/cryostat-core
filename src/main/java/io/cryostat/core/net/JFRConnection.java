@@ -174,17 +174,17 @@ public class JFRConnection implements AutoCloseable {
                                 "VmVersion",
                                 "StartTime"));
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
-        DataOutputStream dos = new DataOutputStream(baos);
-
-        for (String attr : attrNames) {
-            dos.writeUTF(
-                    this.rjmxConnection
-                            .getAttributeValue(new MRI(Type.ATTRIBUTE, runtimeBean, attr))
-                            .toString());
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
+                DataOutputStream dos = new DataOutputStream(baos)) {
+            for (String attr : attrNames) {
+                dos.writeUTF(
+                        this.rjmxConnection
+                                .getAttributeValue(new MRI(Type.ATTRIBUTE, runtimeBean, attr))
+                                .toString());
+            }
+            byte[] hash = DigestUtils.sha256(baos.toByteArray());
+            return new String(Base64.getUrlEncoder().encode(hash), StandardCharsets.UTF_8).trim();
         }
-        byte[] hash = DigestUtils.sha256(baos.toByteArray());
-        return new String(Base64.getUrlEncoder().encode(hash), StandardCharsets.UTF_8).trim();
     }
 
     public synchronized boolean isV1() {
