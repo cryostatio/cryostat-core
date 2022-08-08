@@ -43,6 +43,9 @@ public enum BaseNodeType implements NodeType {
     // represents a division of the deployment scenario - the universe may consist of a
     // Kubernetes Realm and a JDP Realm, for example
     REALM("Realm"),
+    // represents a leaf node JVM, potentially represented by a connectable TargetNode with a JMX
+    // Service URL
+    JVM("JVM"),
     ;
 
     private final String kind;
