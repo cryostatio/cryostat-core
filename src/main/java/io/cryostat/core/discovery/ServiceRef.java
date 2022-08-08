@@ -70,7 +70,7 @@ public class ServiceRef {
         this.annotations = new Annotations(sr.annotations);
     }
 
-    public URI getServiceUri() {
+    public URI getConnectUrl() {
         return connectUrl;
     }
 

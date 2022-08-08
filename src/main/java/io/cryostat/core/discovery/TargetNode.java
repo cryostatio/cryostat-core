@@ -51,13 +51,13 @@ public class TargetNode extends AbstractNode {
         this(other.nodeType, other.target, other.labels);
     }
 
-    public TargetNode(NodeType nodeType, ServiceRef target) {
-        super(target.getServiceUri().toString(), nodeType, Collections.emptyMap());
+    public TargetNode(String nodeType, ServiceRef target) {
+        super(target.getConnectUrl().toString(), nodeType, Collections.emptyMap());
         this.target = new ServiceRef(target);
     }
 
-    public TargetNode(NodeType nodeType, ServiceRef target, Map<String, String> labels) {
-        super(target.getServiceUri().toString(), nodeType, labels);
+    public TargetNode(String nodeType, ServiceRef target, Map<String, String> labels) {
+        super(target.getConnectUrl().toString(), nodeType, labels);
         this.target = new ServiceRef(target);
     }
 

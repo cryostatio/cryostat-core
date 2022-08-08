@@ -48,7 +48,7 @@ public abstract class AbstractNode implements Comparable<AbstractNode> {
 
     protected final String name;
 
-    protected final NodeType nodeType;
+    protected final String nodeType;
 
     protected final Map<String, String> labels;
 
@@ -56,7 +56,7 @@ public abstract class AbstractNode implements Comparable<AbstractNode> {
         this(other.name, other.nodeType, other.labels);
     }
 
-    protected AbstractNode(String name, NodeType nodeType, Map<String, String> labels) {
+    protected AbstractNode(String name, String nodeType, Map<String, String> labels) {
         this.name = name;
         this.nodeType = nodeType;
         this.labels = new HashMap<>(labels);
@@ -66,7 +66,7 @@ public abstract class AbstractNode implements Comparable<AbstractNode> {
         return name;
     }
 
-    public NodeType getNodeType() {
+    public String getNodeType() {
         return nodeType;
     }
 
@@ -76,10 +76,6 @@ public abstract class AbstractNode implements Comparable<AbstractNode> {
 
     @Override
     public int compareTo(AbstractNode other) {
-        int type = nodeType.ordinal() - other.nodeType.ordinal();
-        if (type != 0) {
-            return type;
-        }
         return name.compareTo(other.name);
     }
 

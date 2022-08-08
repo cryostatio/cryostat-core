@@ -57,7 +57,7 @@ class ServiceRefTest {
     @Test
     void testConstruct() {
         ServiceRef sr = new ServiceRef(EXAMPLE_URI, EXAMPLE_ALIAS);
-        MatcherAssert.assertThat(sr.getServiceUri(), Matchers.equalTo(EXAMPLE_URI));
+        MatcherAssert.assertThat(sr.getConnectUrl(), Matchers.equalTo(EXAMPLE_URI));
         MatcherAssert.assertThat(sr.getAlias(), Matchers.equalTo(Optional.of(EXAMPLE_ALIAS)));
     }
 

@@ -37,7 +37,7 @@
  */
 package io.cryostat.core.discovery;
 
-public enum BaseNodeType implements NodeType {
+public enum BaseNodeType {
     // represents the entire deployment scenario Cryostat finds itself in
     UNIVERSE("Universe"),
     // represents a division of the deployment scenario - the universe may consist of a
@@ -54,7 +54,6 @@ public enum BaseNodeType implements NodeType {
         this.kind = kind;
     }
 
-    @Override
     public String getKind() {
         return kind;
     }

@@ -54,17 +54,17 @@ public class EnvironmentNode extends AbstractNode {
         this(other.name, other.nodeType, other.labels, other.children);
     }
 
-    public EnvironmentNode(String name, NodeType nodeType) {
+    public EnvironmentNode(String name, String nodeType) {
         this(name, nodeType, Collections.emptyMap());
     }
 
-    public EnvironmentNode(String name, NodeType nodeType, Map<String, String> labels) {
+    public EnvironmentNode(String name, String nodeType, Map<String, String> labels) {
         this(name, nodeType, labels, Collections.emptySortedSet());
     }
 
     public EnvironmentNode(
             String name,
-            NodeType nodeType,
+            String nodeType,
             Map<String, String> labels,
             Collection<? extends AbstractNode> children) {
         super(name, nodeType, labels);
