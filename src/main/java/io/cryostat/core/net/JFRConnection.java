@@ -49,6 +49,7 @@ import org.openjdk.jmc.rjmx.ConnectionToolkit;
 import org.openjdk.jmc.rjmx.IConnectionDescriptor;
 import org.openjdk.jmc.rjmx.IConnectionHandle;
 import org.openjdk.jmc.rjmx.IConnectionListener;
+import org.openjdk.jmc.rjmx.ServiceNotAvailableException;
 import org.openjdk.jmc.rjmx.internal.DefaultConnectionHandle;
 import org.openjdk.jmc.rjmx.internal.RJMXConnection;
 import org.openjdk.jmc.rjmx.internal.ServerDescriptor;
@@ -82,7 +83,7 @@ public class JFRConnection implements AutoCloseable {
             Environment env,
             IConnectionDescriptor cd,
             List<Runnable> listeners)
-            throws Exception {
+            throws ConnectionException {
         this.cw = cw;
         this.fs = fs;
         this.env = env;
@@ -91,8 +92,7 @@ public class JFRConnection implements AutoCloseable {
         this.serviceFactory = new FlightRecorderServiceFactory();
     }
 
-    JFRConnection(ClientWriter cw, FileSystem fs, Environment env, IConnectionDescriptor cd)
-            throws Exception {
+    JFRConnection(ClientWriter cw, FileSystem fs, Environment env, IConnectionDescriptor cd) throws ConnectionException {
         this(cw, fs, env, cd, List.of());
     }
 
@@ -100,7 +100,7 @@ public class JFRConnection implements AutoCloseable {
         return this.handle;
     }
 
-    public synchronized IFlightRecorderService getService() throws Exception {
+    public synchronized IFlightRecorderService getService() throws ConnectionException, IOException, ServiceNotAvailableException {
         if (!isConnected()) {
             connect();
         }
@@ -158,7 +158,7 @@ public class JFRConnection implements AutoCloseable {
         return this.rjmxConnection != null && this.rjmxConnection.isConnected();
     }
 
-    public synchronized void connect() throws Exception {
+    public synchronized void connect() throws ConnectionException {
         if (isConnected()) {
             return;
         }
@@ -200,16 +200,15 @@ public class JFRConnection implements AutoCloseable {
         this.disconnect();
     }
 
-    protected synchronized RJMXConnection attemptConnect(IConnectionDescriptor cd)
-            throws Exception {
+    protected synchronized RJMXConnection attemptConnect(IConnectionDescriptor cd) throws ConnectionException {
         try {
-            RJMXConnection conn =
+             RJMXConnection conn =
                     new RJMXConnection(cd, new ServerDescriptor(), JFRConnection::failConnection);
             if (!conn.connect()) {
                 failConnection();
             }
             return conn;
-        } catch (Exception e) {
+        } catch (ConnectionException e) {
             cw.println("connection attempt failed.");
             closeListeners.forEach(Runnable::run);
             throw e;
@@ -217,6 +216,12 @@ public class JFRConnection implements AutoCloseable {
     }
 
     protected static void failConnection() {
-        throw new RuntimeException("Connection Failed");
+        throw new ConnectionFailureException("Connection Failed");
+    }
+
+    static class ConnectionFailureException extends RuntimeException {
+        public ConnectionFailureException(String message) {
+            super(message);
+        }
     }
 }

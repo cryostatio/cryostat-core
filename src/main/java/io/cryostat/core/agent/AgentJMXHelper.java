@@ -41,9 +41,12 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import javax.management.ReflectionException;
 
 import org.openjdk.jmc.rjmx.ConnectionException;
 import org.openjdk.jmc.rjmx.IConnectionHandle;
@@ -73,7 +76,7 @@ public class AgentJMXHelper {
         return mbsc;
     }
 
-    public boolean isMXBeanRegistered() throws Exception {
+    public boolean isMXBeanRegistered() throws MalformedObjectNameException, IOException {
         try {
             return mbsc.isRegistered(new ObjectName(AGENT_OBJECT_NAME));
         } catch (MalformedObjectNameException | IOException e) {
@@ -82,7 +85,7 @@ public class AgentJMXHelper {
         }
     }
 
-    public String retrieveEventProbes() throws Exception {
+    public String retrieveEventProbes() throws InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
         try {
             Object result =
                     mbsc.invoke(
@@ -98,7 +101,7 @@ public class AgentJMXHelper {
         }
     }
 
-    public Object retrieveCurrentTransforms() throws Exception {
+    public Object retrieveCurrentTransforms() throws InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
         try {
             Object result =
                     mbsc.invoke(
@@ -113,14 +116,9 @@ public class AgentJMXHelper {
         }
     }
 
-    public void defineEventProbes(String xmlDescription) throws Exception {
-        try {
+    public void defineEventProbes(String xmlDescription) throws InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
             Object[] params = {xmlDescription};
             String[] signature = {String.class.getName()};
             mbsc.invoke(new ObjectName(AGENT_OBJECT_NAME), DEFINE_EVENT_PROBES, params, signature);
-        } catch (Exception e) {
-            logger.log(Level.WARNING, "Could not define event probes: " + xmlDescription, e);
-            throw e;
-        }
     }
 }

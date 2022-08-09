@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.openjdk.jmc.common.unit.QuantityConversionException;
 import org.openjdk.jmc.flightrecorder.configuration.recording.RecordingOptionsBuilder;
 
 import io.cryostat.core.tui.ClientWriter;
@@ -80,7 +81,7 @@ public class RecordingOptionsCustomizer
                 v ->
                         new CustomizerConsumer() {
                             @Override
-                            public void acceptThrows(RecordingOptionsBuilder t) throws Exception {
+                            public void acceptThrows(RecordingOptionsBuilder t) throws NumberFormatException, QuantityConversionException {
                                 t.maxAge(Long.parseLong(v));
                             }
                         }),
@@ -89,7 +90,7 @@ public class RecordingOptionsCustomizer
                 v ->
                         new CustomizerConsumer() {
                             @Override
-                            public void acceptThrows(RecordingOptionsBuilder t) throws Exception {
+                            public void acceptThrows(RecordingOptionsBuilder t) throws NumberFormatException, QuantityConversionException  {
                                 t.maxSize(Long.parseLong(v));
                             }
                         }),
@@ -98,7 +99,7 @@ public class RecordingOptionsCustomizer
                 v ->
                         new CustomizerConsumer() {
                             @Override
-                            public void acceptThrows(RecordingOptionsBuilder t) throws Exception {
+                            public void acceptThrows(RecordingOptionsBuilder t) throws NumberFormatException, QuantityConversionException  {
                                 t.toDisk(Boolean.parseBoolean(v));
                             }
                         }),

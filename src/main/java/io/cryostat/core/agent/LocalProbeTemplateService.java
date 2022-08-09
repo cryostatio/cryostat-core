@@ -60,7 +60,7 @@ public class LocalProbeTemplateService implements ProbeTemplateService {
     private final FileSystem fs;
     private final Environment env;
 
-    public LocalProbeTemplateService(FileSystem fs, Environment env) throws IOException {
+    protected LocalProbeTemplateService(FileSystem fs, Environment env) throws IOException {
         this.fs = fs;
         this.env = env;
         // Sanity check

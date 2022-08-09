@@ -39,6 +39,8 @@ package io.cryostat.core.util;
 
 import java.util.function.Consumer;
 
+import org.openjdk.jmc.common.unit.QuantityConversionException;
+
 public interface CheckedConsumer<T> extends Consumer<T> {
     default void accept(T t) {
         try {
@@ -48,7 +50,7 @@ public interface CheckedConsumer<T> extends Consumer<T> {
         }
     }
 
-    void acceptThrows(T t) throws Exception;
+    void acceptThrows(T t) throws NumberFormatException, QuantityConversionException;
 
     void handleException(Exception e);
 }

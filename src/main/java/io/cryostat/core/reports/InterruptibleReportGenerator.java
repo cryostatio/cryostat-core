@@ -99,7 +99,7 @@ public class InterruptibleReportGenerator {
     private final ExecutorService executor;
     private final ExecutorService qThread = Executors.newCachedThreadPool();
 
-    public InterruptibleReportGenerator(
+    protected InterruptibleReportGenerator(
             Logger logger, Set<ReportTransformer> transformers, ExecutorService executor) {
         this.logger = logger;
         this.transformers = transformers;

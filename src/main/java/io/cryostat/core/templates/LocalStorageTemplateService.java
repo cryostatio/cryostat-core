@@ -77,7 +77,7 @@ public class LocalStorageTemplateService extends AbstractTemplateService
     private final FileSystem fs;
     private final Environment env;
 
-    public LocalStorageTemplateService(FileSystem fs, Environment env) {
+    protected LocalStorageTemplateService(FileSystem fs, Environment env) {
         this.fs = fs;
         this.env = env;
     }
