@@ -92,7 +92,8 @@ public class JFRConnection implements AutoCloseable {
         this.serviceFactory = new FlightRecorderServiceFactory();
     }
 
-    JFRConnection(ClientWriter cw, FileSystem fs, Environment env, IConnectionDescriptor cd) throws ConnectionException {
+    JFRConnection(ClientWriter cw, FileSystem fs, Environment env, IConnectionDescriptor cd)
+            throws ConnectionException {
         this(cw, fs, env, cd, List.of());
     }
 
@@ -100,7 +101,8 @@ public class JFRConnection implements AutoCloseable {
         return this.handle;
     }
 
-    public synchronized IFlightRecorderService getService() throws ConnectionException, IOException, ServiceNotAvailableException {
+    public synchronized IFlightRecorderService getService()
+            throws ConnectionException, IOException, ServiceNotAvailableException {
         if (!isConnected()) {
             connect();
         }
@@ -200,9 +202,10 @@ public class JFRConnection implements AutoCloseable {
         this.disconnect();
     }
 
-    protected synchronized RJMXConnection attemptConnect(IConnectionDescriptor cd) throws ConnectionException {
+    protected synchronized RJMXConnection attemptConnect(IConnectionDescriptor cd)
+            throws ConnectionException {
         try {
-             RJMXConnection conn =
+            RJMXConnection conn =
                     new RJMXConnection(cd, new ServerDescriptor(), JFRConnection::failConnection);
             if (!conn.connect()) {
                 failConnection();

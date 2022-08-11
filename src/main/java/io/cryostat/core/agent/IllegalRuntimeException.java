@@ -35,16 +35,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.cryostat.core;
+package io.cryostat.core.agent;
 
-public class FlightRecorderException extends Exception {
-    private static final long serialVersionUID = 1L;
-
-    public FlightRecorderException(Throwable cause) {
-        super(cause);
+public class IllegalRuntimeException extends RuntimeException {
+    public IllegalRuntimeException(String message) {
+        super(message);
     }
 
-    public FlightRecorderException(String message, Throwable cause) {
-        super(message, cause);
+    public IllegalRuntimeException(Throwable cause) {
+        super(cause);
     }
 }

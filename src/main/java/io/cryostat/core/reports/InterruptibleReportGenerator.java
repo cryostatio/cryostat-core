@@ -91,6 +91,9 @@ import org.xml.sax.SAXException;
  * analysis requests. This should eventually replace {@link ReportGenerator} entirely - there should
  * only be benefits to using this implementation.
  */
+@SuppressFBWarnings(
+        value = "THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION",
+        justification = "There are no basic exceptions being thrown")
 public class InterruptibleReportGenerator {
 
     private final Logger logger;

@@ -72,7 +72,7 @@ public class AgentJMXHelper {
         return connectionHandle;
     }
 
-    public MBeanServerConnection getMBeanServerConnection() {
+    protected MBeanServerConnection getMBeanServerConnection() {
         return mbsc;
     }
 
@@ -85,7 +85,7 @@ public class AgentJMXHelper {
         }
     }
 
-    public String retrieveEventProbes() throws InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
+    public String retrieveEventProbes() throws MBeanRetrieveException {
         try {
             Object result =
                     mbsc.invoke(
@@ -97,11 +97,11 @@ public class AgentJMXHelper {
             return result.toString();
         } catch (Exception e) {
             logger.log(Level.WARNING, "Could not retrieve event probes", e);
-            throw e;
+            throw new MBeanRetrieveException(e);
         }
     }
 
-    public Object retrieveCurrentTransforms() throws InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
+    public Object retrieveCurrentTransforms() throws MBeanRetrieveException {
         try {
             Object result =
                     mbsc.invoke(
@@ -112,13 +112,33 @@ public class AgentJMXHelper {
             return result;
         } catch (Exception e) {
             logger.log(Level.WARNING, "Could not retrieve current transforms", e);
-            throw e;
+            throw new MBeanRetrieveException(e);
         }
     }
 
-    public void defineEventProbes(String xmlDescription) throws InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
+    public void defineEventProbes(String xmlDescription) throws ProbeDefinitionException {
+        try {
             Object[] params = {xmlDescription};
             String[] signature = {String.class.getName()};
             mbsc.invoke(new ObjectName(AGENT_OBJECT_NAME), DEFINE_EVENT_PROBES, params, signature);
+        } catch (InstanceNotFoundException
+                | MalformedObjectNameException
+                | MBeanException
+                | ReflectionException
+                | IOException e) {
+            throw new ProbeDefinitionException("Could not define event probes", e);
+        }
+    }
+
+    static class ProbeDefinitionException extends Exception {
+        ProbeDefinitionException(String message, Throwable e) {
+            super(message, e);
+        }
+    }
+
+    static class MBeanRetrieveException extends Exception {
+        MBeanRetrieveException(Throwable e) {
+            super(e);
+        }
     }
 }

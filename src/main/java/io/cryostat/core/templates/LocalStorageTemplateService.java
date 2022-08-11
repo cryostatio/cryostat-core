@@ -207,7 +207,7 @@ public class LocalStorageTemplateService extends AbstractTemplateService
                     return Optional.of(doc);
                 }
             } catch (IOException e) {
-                throw new FlightRecorderException(e);
+                throw new FlightRecorderException("Could not get XML", e);
             }
         }
         return Optional.empty();
@@ -254,7 +254,7 @@ public class LocalStorageTemplateService extends AbstractTemplateService
                     .map(name -> fs.pathOf(dirName, name))
                     .collect(Collectors.toList());
         } catch (IOException e) {
-            throw new FlightRecorderException(e);
+            throw new FlightRecorderException("Could not get local templates", e);
         }
     }
 
@@ -269,7 +269,7 @@ public class LocalStorageTemplateService extends AbstractTemplateService
             }
             return models;
         } catch (IOException | ParseException e) {
-            throw new FlightRecorderException(e);
+            throw new FlightRecorderException("Could not get template models", e);
         }
     }
 }

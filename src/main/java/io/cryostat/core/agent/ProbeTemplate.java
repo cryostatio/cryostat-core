@@ -103,7 +103,7 @@ public class ProbeTemplate {
         try {
             builder = factory.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
+            throw new IllegalRuntimeException(e);
         }
 
         if (xmlStream.markSupported()) {
@@ -155,7 +155,7 @@ public class ProbeTemplate {
             transformer = tf.newTransformer();
         } catch (TransformerConfigurationException e) {
             // This should not happen anyway
-            throw new RuntimeException(e);
+            throw new IllegalRuntimeException(e);
         }
         transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
@@ -164,7 +164,7 @@ public class ProbeTemplate {
             transformer.transform(new DOMSource(document), new StreamResult(writer));
         } catch (TransformerException e) {
             // This should not happen anyway
-            throw new RuntimeException(e);
+            throw new IllegalRuntimeException(e);
         }
 
         return writer.getBuffer().toString();
@@ -177,7 +177,7 @@ public class ProbeTemplate {
             builder = factory.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
             // This should not happen anyway
-            throw new RuntimeException(e);
+            throw new IllegalRuntimeException(e);
         }
 
         Document document = builder.newDocument();

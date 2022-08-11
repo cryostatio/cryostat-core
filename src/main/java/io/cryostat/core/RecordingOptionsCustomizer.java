@@ -81,7 +81,8 @@ public class RecordingOptionsCustomizer
                 v ->
                         new CustomizerConsumer() {
                             @Override
-                            public void acceptThrows(RecordingOptionsBuilder t) throws NumberFormatException, QuantityConversionException {
+                            public void acceptThrows(RecordingOptionsBuilder t)
+                                    throws NumberFormatException, QuantityConversionException {
                                 t.maxAge(Long.parseLong(v));
                             }
                         }),
@@ -90,7 +91,8 @@ public class RecordingOptionsCustomizer
                 v ->
                         new CustomizerConsumer() {
                             @Override
-                            public void acceptThrows(RecordingOptionsBuilder t) throws NumberFormatException, QuantityConversionException  {
+                            public void acceptThrows(RecordingOptionsBuilder t)
+                                    throws NumberFormatException, QuantityConversionException {
                                 t.maxSize(Long.parseLong(v));
                             }
                         }),
@@ -99,7 +101,8 @@ public class RecordingOptionsCustomizer
                 v ->
                         new CustomizerConsumer() {
                             @Override
-                            public void acceptThrows(RecordingOptionsBuilder t) throws NumberFormatException, QuantityConversionException  {
+                            public void acceptThrows(RecordingOptionsBuilder t)
+                                    throws NumberFormatException, QuantityConversionException {
                                 t.toDisk(Boolean.parseBoolean(v));
                             }
                         }),
