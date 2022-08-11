@@ -54,6 +54,8 @@ import io.cryostat.core.sys.FileSystem;
 
 import org.xml.sax.SAXException;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class LocalProbeTemplateService implements ProbeTemplateService {
 
     public static final String TEMPLATE_PATH = "CRYOSTAT_PROBE_TEMPLATE_PATH";
@@ -61,7 +63,8 @@ public class LocalProbeTemplateService implements ProbeTemplateService {
     private final FileSystem fs;
     private final Environment env;
 
-    protected LocalProbeTemplateService(FileSystem fs, Environment env) throws IOException {
+    @SuppressFBWarnings(value="EI_EXPOSE_REP2", justification="fields are not exposed since there are no getters")
+    public LocalProbeTemplateService(FileSystem fs, Environment env) throws IOException {
         this.fs = fs;
         this.env = env;
         // Sanity check
