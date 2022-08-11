@@ -102,7 +102,9 @@ public class InterruptibleReportGenerator {
     private final ExecutorService executor;
     private final ExecutorService qThread = Executors.newCachedThreadPool();
 
-    @SuppressFBWarnings(value="EI_EXPOSE_REP2", justification="fields are not exposed since there are no getters")
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "fields are not exposed since there are no getters")
     public InterruptibleReportGenerator(
             Logger logger, Set<ReportTransformer> transformers, ExecutorService executor) {
         this.logger = logger;

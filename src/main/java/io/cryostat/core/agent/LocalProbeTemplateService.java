@@ -52,9 +52,8 @@ import io.cryostat.core.FlightRecorderException;
 import io.cryostat.core.sys.Environment;
 import io.cryostat.core.sys.FileSystem;
 
-import org.xml.sax.SAXException;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.xml.sax.SAXException;
 
 public class LocalProbeTemplateService implements ProbeTemplateService {
 
@@ -63,7 +62,9 @@ public class LocalProbeTemplateService implements ProbeTemplateService {
     private final FileSystem fs;
     private final Environment env;
 
-    @SuppressFBWarnings(value="EI_EXPOSE_REP2", justification="fields are not exposed since there are no getters")
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "fields are not exposed since there are no getters")
     public LocalProbeTemplateService(FileSystem fs, Environment env) throws IOException {
         this.fs = fs;
         this.env = env;

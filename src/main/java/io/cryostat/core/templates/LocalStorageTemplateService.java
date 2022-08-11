@@ -59,11 +59,11 @@ import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XM
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLValidationResult;
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.model.EventConfiguration;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.cryostat.core.FlightRecorderException;
 import io.cryostat.core.sys.Environment;
 import io.cryostat.core.sys.FileSystem;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -78,7 +78,9 @@ public class LocalStorageTemplateService extends AbstractTemplateService
     private final FileSystem fs;
     private final Environment env;
 
-    @SuppressFBWarnings(value="EI_EXPOSE_REP2", justification="fields are not exposed since there are no getters")
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "fields are not exposed since there are no getters")
     public LocalStorageTemplateService(FileSystem fs, Environment env) {
         this.fs = fs;
         this.env = env;
