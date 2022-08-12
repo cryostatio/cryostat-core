@@ -48,8 +48,10 @@ import org.openjdk.jmc.common.unit.IConstrainedMap;
 import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLModel;
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.model.EventConfiguration;
+import org.openjdk.jmc.rjmx.ServiceNotAvailableException;
 import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
 
+import io.cryostat.core.FlightRecorderException;
 import io.cryostat.core.log.Logger;
 import io.cryostat.core.net.JFRConnection;
 
@@ -73,73 +75,92 @@ public class RemoteTemplateService extends AbstractTemplateService implements Te
     }
 
     @Override
-    public Optional<Document> getXml(String templateName, TemplateType type) throws Exception {
+    public Optional<Document> getXml(String templateName, TemplateType type)
+            throws FlightRecorderException {
         if (!providedTemplateType().equals(type)) {
             return Optional.empty();
         }
-        return conn.getService().getServerTemplates().stream()
-                .map(xmlText -> Jsoup.parse(xmlText, "", Parser.xmlParser()))
-                .filter(
-                        doc -> {
-                            Elements els = doc.getElementsByTag("configuration");
-                            if (els.isEmpty()) {
-                                throw new MalformedXMLException(
-                                        "Document did not contain \"configuration\" element");
-                            }
-                            if (els.size() > 1) {
-                                throw new MalformedXMLException(
-                                        "Document contains multiple \"configuration\" elements");
-                            }
-                            Element configuration = els.first();
-                            if (!configuration.hasAttr("label")) {
-                                throw new MalformedXMLException(
-                                        "Configuration element did not have \"label\" attribute");
-                            }
-                            return configuration.attr("label").equals(templateName);
-                        })
-                .findFirst();
+        try {
+            return conn.getService().getServerTemplates().stream()
+                    .map(xmlText -> Jsoup.parse(xmlText, "", Parser.xmlParser()))
+                    .filter(
+                            doc -> {
+                                Elements els = doc.getElementsByTag("configuration");
+                                if (els.isEmpty()) {
+                                    throw new MalformedXMLException(
+                                            "Document did not contain \"configuration\" element");
+                                }
+                                if (els.size() > 1) {
+                                    throw new MalformedXMLException(
+                                            "Document contains multiple \"configuration\""
+                                                    + " elements");
+                                }
+                                Element configuration = els.first();
+                                if (!configuration.hasAttr("label")) {
+                                    throw new MalformedXMLException(
+                                            "Configuration element did not have \"label\""
+                                                    + " attribute");
+                                }
+                                return configuration.attr("label").equals(templateName);
+                            })
+                    .findFirst();
+        } catch (org.openjdk.jmc.rjmx.services.jfr.FlightRecorderException
+                | IOException
+                | ServiceNotAvailableException e) {
+            throw new FlightRecorderException("Could not get XML", e);
+        }
     }
 
     @Override
     public Optional<IConstrainedMap<EventOptionID>> getEvents(
-            String templateName, TemplateType type) throws Exception {
+            String templateName, TemplateType type) throws FlightRecorderException {
         if (!providedTemplateType().equals(type)) {
             return Optional.empty();
         }
-        IFlightRecorderService service = conn.getService();
-        return getTemplateModels().stream()
-                .filter(
-                        m ->
-                                m.getRoot().getAttributeInstances().stream()
-                                        .anyMatch(
-                                                attr ->
-                                                        attr.getAttribute()
-                                                                        .getName()
-                                                                        .equals("label")
-                                                                && attr.getValue()
-                                                                        .equals(templateName)))
-                .findFirst()
-                .map(
-                        model ->
-                                new EventConfiguration(model)
-                                        .getEventOptions(
-                                                service.getDefaultEventOptions()
-                                                        .emptyWithSameConstraints()));
+        try {
+            IFlightRecorderService service = conn.getService();
+            return getTemplateModels().stream()
+                    .filter(
+                            m ->
+                                    m.getRoot().getAttributeInstances().stream()
+                                            .anyMatch(
+                                                    attr ->
+                                                            attr.getAttribute()
+                                                                            .getName()
+                                                                            .equals("label")
+                                                                    && attr.getValue()
+                                                                            .equals(templateName)))
+                    .findFirst()
+                    .map(
+                            model ->
+                                    new EventConfiguration(model)
+                                            .getEventOptions(
+                                                    service.getDefaultEventOptions()
+                                                            .emptyWithSameConstraints()));
+        } catch (IOException | ServiceNotAvailableException e) {
+            throw new FlightRecorderException("Could not get events", e);
+        }
     }
 
     @Override
-    protected List<XMLModel> getTemplateModels() throws Exception {
-        return conn.getService().getServerTemplates().stream()
-                .map(
-                        xmlText -> {
-                            try {
-                                return EventConfiguration.createModel(xmlText);
-                            } catch (ParseException | IOException e) {
-                                Logger.INSTANCE.warn(e);
-                                return null;
-                            }
-                        })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+    protected List<XMLModel> getTemplateModels() throws FlightRecorderException {
+        try {
+            return conn.getService().getServerTemplates().stream()
+                    .map(
+                            xmlText -> {
+                                try {
+                                    return EventConfiguration.createModel(xmlText);
+                                } catch (ParseException | IOException e) {
+                                    Logger.INSTANCE.warn(e);
+                                    return null;
+                                }
+                            })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        } catch (org.openjdk.jmc.rjmx.services.jfr.FlightRecorderException
+                | IOException
+                | ServiceNotAvailableException e) {
+            throw new FlightRecorderException("Could not get template models", e);
+        }
     }
 }

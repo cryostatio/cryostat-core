@@ -39,7 +39,9 @@ package io.cryostat.core.agent;
 
 import java.util.List;
 
+import io.cryostat.core.FlightRecorderException;
+
 public interface ProbeTemplateService {
 
-    public abstract List<ProbeTemplate> getTemplates() throws Exception;
+    public abstract List<ProbeTemplate> getTemplates() throws FlightRecorderException;
 }

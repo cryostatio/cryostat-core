@@ -43,4 +43,8 @@ public class FlightRecorderException extends Exception {
     public FlightRecorderException(Throwable cause) {
         super(cause);
     }
+
+    public FlightRecorderException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

@@ -63,6 +63,7 @@ import io.cryostat.core.FlightRecorderException;
 import io.cryostat.core.sys.Environment;
 import io.cryostat.core.sys.FileSystem;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -77,6 +78,9 @@ public class LocalStorageTemplateService extends AbstractTemplateService
     private final FileSystem fs;
     private final Environment env;
 
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "fields are not exposed since there are no getters")
     public LocalStorageTemplateService(FileSystem fs, Environment env) {
         this.fs = fs;
         this.env = env;
@@ -207,7 +211,7 @@ public class LocalStorageTemplateService extends AbstractTemplateService
                     return Optional.of(doc);
                 }
             } catch (IOException e) {
-                throw new FlightRecorderException(e);
+                throw new FlightRecorderException("Could not get XML", e);
             }
         }
         return Optional.empty();
@@ -254,7 +258,7 @@ public class LocalStorageTemplateService extends AbstractTemplateService
                     .map(name -> fs.pathOf(dirName, name))
                     .collect(Collectors.toList());
         } catch (IOException e) {
-            throw new FlightRecorderException(e);
+            throw new FlightRecorderException("Could not get local templates", e);
         }
     }
 
@@ -269,7 +273,7 @@ public class LocalStorageTemplateService extends AbstractTemplateService
             }
             return models;
         } catch (IOException | ParseException e) {
-            throw new FlightRecorderException(e);
+            throw new FlightRecorderException("Could not get template models", e);
         }
     }
 }

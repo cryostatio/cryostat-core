@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +52,7 @@ import io.cryostat.core.FlightRecorderException;
 import io.cryostat.core.sys.Environment;
 import io.cryostat.core.sys.FileSystem;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.xml.sax.SAXException;
 
 public class LocalProbeTemplateService implements ProbeTemplateService {
@@ -60,6 +62,9 @@ public class LocalProbeTemplateService implements ProbeTemplateService {
     private final FileSystem fs;
     private final Environment env;
 
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "fields are not exposed since there are no getters")
     public LocalProbeTemplateService(FileSystem fs, Environment env) throws IOException {
         this.fs = fs;
         this.env = env;
@@ -85,16 +90,15 @@ public class LocalProbeTemplateService implements ProbeTemplateService {
         }
     }
 
-    public void addTemplate(InputStream inputStream, String filename) throws Exception {
+    public void addTemplate(InputStream inputStream, String filename)
+            throws FileAlreadyExistsException, IOException, SAXException {
         try (inputStream) {
             ProbeTemplate template = new ProbeTemplate();
             // If validation fails this will throw a ProbeValidationException with details
             template.deserialize(inputStream);
             Path path = fs.pathOf(env.getEnv(TEMPLATE_PATH), filename);
             if (fs.exists(path)) {
-                throw new Exception(
-                        String.format(
-                                "Event template \"%s\" already exists", template.getFileName()));
+                throw new FileAlreadyExistsException(template.getFileName());
             }
             fs.writeString(
                     path,
@@ -104,14 +108,14 @@ public class LocalProbeTemplateService implements ProbeTemplateService {
         }
     }
 
-    public void deleteTemplate(String templateName) throws Exception {
+    public void deleteTemplate(String templateName) throws IOException {
         if (!fs.deleteIfExists(fs.pathOf(env.getEnv(TEMPLATE_PATH), templateName))) {
             throw new IOException(
                     String.format("Probe template \"%s\" does not exist", templateName));
         }
     }
 
-    public String getTemplate(String templateName) throws Exception {
+    public String getTemplate(String templateName) throws IOException, SAXException {
         Path probeTemplatePath = fs.pathOf(env.getEnv(TEMPLATE_PATH), templateName);
         ProbeTemplate template = new ProbeTemplate();
         template.deserialize(fs.newInputStream(probeTemplatePath));
@@ -142,7 +146,7 @@ public class LocalProbeTemplateService implements ProbeTemplateService {
             }
             return templates;
         } catch (IOException | SAXException e) {
-            throw new FlightRecorderException(e);
+            throw new FlightRecorderException("Could not get templates", e);
         }
     }
 }
