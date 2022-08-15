@@ -52,6 +52,7 @@ import org.openjdk.jmc.common.unit.IConstrainedMap;
 import org.openjdk.jmc.common.unit.SimpleConstrainedMap;
 import org.openjdk.jmc.common.unit.UnitLookup;
 import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
+import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.JFCGrammar;
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLAttributeInstance;
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLModel;
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLTagInstance;
@@ -62,6 +63,7 @@ import io.cryostat.core.FlightRecorderException;
 import io.cryostat.core.sys.Environment;
 import io.cryostat.core.sys.FileSystem;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -76,6 +78,9 @@ public class LocalStorageTemplateService extends AbstractTemplateService
     private final FileSystem fs;
     private final Environment env;
 
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "fields are not exposed since there are no getters")
     public LocalStorageTemplateService(FileSystem fs, Environment env) {
         this.fs = fs;
         this.env = env;
@@ -87,19 +92,21 @@ public class LocalStorageTemplateService extends AbstractTemplateService
     }
 
     @Override
-    public void addTemplate(InputStream templateStream)
+    public Template addTemplate(InputStream templateStream)
             throws InvalidXmlException, InvalidEventTemplateException, IOException {
         if (!env.hasEnv(TEMPLATE_PATH)) {
             throw new IOException(
                     String.format(
-                            "Template directory does not exist, must be set using environment variable %s",
+                            "Template directory does not exist, must be set using environment"
+                                    + " variable %s",
                             TEMPLATE_PATH));
         }
         Path dir = fs.pathOf(env.getEnv(TEMPLATE_PATH));
         if (!fs.exists(dir) || !fs.isDirectory(dir) || !fs.isReadable(dir) || !fs.isWritable(dir)) {
             throw new IOException(
                     String.format(
-                            "Template directory %s does not exist, is not a directory, or does not have appropriate permissions",
+                            "Template directory %s does not exist, is not a directory, or does not"
+                                    + " have appropriate permissions",
                             dir.toString()));
         }
         try (templateStream) {
@@ -127,6 +134,7 @@ public class LocalStorageTemplateService extends AbstractTemplateService
             }
 
             String templateName = labelAttr.getExplicitValue();
+            templateName = templateName.replaceAll("[\\W]+", "_");
             Path path = fs.pathOf(env.getEnv(TEMPLATE_PATH), templateName);
 
             if (fs.exists(path)) {
@@ -134,7 +142,16 @@ public class LocalStorageTemplateService extends AbstractTemplateService
                         String.format("Event template \"%s\" already exists", templateName));
             }
 
+            XMLTagInstance root = model.getRoot();
+            root.setValue(JFCGrammar.ATTRIBUTE_LABEL_MANDATORY, templateName);
+
             fs.writeString(path, model.toString());
+
+            return new Template(
+                    templateName,
+                    getAttributeValue(root, "description"),
+                    getAttributeValue(root, "provider"),
+                    providedTemplateType());
         } catch (IOException ioe) {
             throw new InvalidXmlException("Unable to parse XML stream", ioe);
         } catch (ParseException | IllegalArgumentException e) {
@@ -148,14 +165,16 @@ public class LocalStorageTemplateService extends AbstractTemplateService
         if (!env.hasEnv(TEMPLATE_PATH)) {
             throw new IOException(
                     String.format(
-                            "Template directory does not exist, must be set using environment variable %s",
+                            "Template directory does not exist, must be set using environment"
+                                    + " variable %s",
                             TEMPLATE_PATH));
         }
         Path dir = fs.pathOf(env.getEnv(TEMPLATE_PATH));
         if (!fs.exists(dir) || !fs.isDirectory(dir) || !fs.isReadable(dir) || !fs.isWritable(dir)) {
             throw new IOException(
                     String.format(
-                            "Template directory %s does not exist, is not a directory, or does not have appropriate permissions",
+                            "Template directory %s does not exist, is not a directory, or does not"
+                                    + " have appropriate permissions",
                             dir.toString()));
         }
         if (!fs.deleteIfExists(fs.pathOf(env.getEnv(TEMPLATE_PATH), templateName))) {
@@ -192,7 +211,7 @@ public class LocalStorageTemplateService extends AbstractTemplateService
                     return Optional.of(doc);
                 }
             } catch (IOException e) {
-                throw new FlightRecorderException(e);
+                throw new FlightRecorderException("Could not get XML", e);
             }
         }
         return Optional.empty();
@@ -239,7 +258,7 @@ public class LocalStorageTemplateService extends AbstractTemplateService
                     .map(name -> fs.pathOf(dirName, name))
                     .collect(Collectors.toList());
         } catch (IOException e) {
-            throw new FlightRecorderException(e);
+            throw new FlightRecorderException("Could not get local templates", e);
         }
     }
 
@@ -254,7 +273,7 @@ public class LocalStorageTemplateService extends AbstractTemplateService
             }
             return models;
         } catch (IOException | ParseException e) {
-            throw new FlightRecorderException(e);
+            throw new FlightRecorderException("Could not get template models", e);
         }
     }
 }

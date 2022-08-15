@@ -49,11 +49,14 @@ import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXServiceURL;
 
 import org.openjdk.jmc.rjmx.ConnectionDescriptorBuilder;
+import org.openjdk.jmc.rjmx.ConnectionException;
 import org.openjdk.jmc.rjmx.ConnectionToolkit;
 
 import io.cryostat.core.sys.Environment;
 import io.cryostat.core.sys.FileSystem;
 import io.cryostat.core.tui.ClientWriter;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public class JFRConnectionToolkit {
 
@@ -61,22 +64,28 @@ public class JFRConnectionToolkit {
     private final FileSystem fs;
     private final Environment env;
 
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "no mutable fields can be accessed through this class")
     public JFRConnectionToolkit(ClientWriter cw, FileSystem fs, Environment env) {
         this.cw = cw;
         this.fs = fs;
         this.env = env;
     }
 
-    public JFRConnection connect(JMXServiceURL url) throws Exception {
+    public JFRConnection connect(JMXServiceURL url)
+            throws ConnectionException, IllegalStateException {
         return connect(url, null);
     }
 
-    public JFRConnection connect(JMXServiceURL url, Credentials credentials) throws Exception {
+    public JFRConnection connect(JMXServiceURL url, Credentials credentials)
+            throws ConnectionException, IllegalStateException {
         return connect(url, credentials, List.of());
     }
 
     public JFRConnection connect(
-            JMXServiceURL url, Credentials credentials, List<Runnable> listeners) throws Exception {
+            JMXServiceURL url, Credentials credentials, List<Runnable> listeners)
+            throws ConnectionException, IllegalStateException {
         ConnectionDescriptorBuilder connectionDescriptorBuilder = new ConnectionDescriptorBuilder();
         connectionDescriptorBuilder = connectionDescriptorBuilder.url(url);
         if (credentials != null) {

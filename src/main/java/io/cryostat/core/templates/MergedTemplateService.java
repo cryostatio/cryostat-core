@@ -46,6 +46,7 @@ import java.util.Optional;
 import org.openjdk.jmc.common.unit.IConstrainedMap;
 import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
 
+import io.cryostat.core.FlightRecorderException;
 import io.cryostat.core.net.JFRConnection;
 import io.cryostat.core.sys.Environment;
 import io.cryostat.core.sys.FileSystem;
@@ -63,7 +64,7 @@ public class MergedTemplateService implements MutableTemplateService {
     }
 
     @Override
-    public List<Template> getTemplates() throws Exception {
+    public List<Template> getTemplates() throws FlightRecorderException {
         List<Template> templates = new ArrayList<>();
         templates.addAll(remote.getTemplates());
         templates.addAll(local.getTemplates());
@@ -71,7 +72,8 @@ public class MergedTemplateService implements MutableTemplateService {
     }
 
     @Override
-    public Optional<Document> getXml(String templateName, TemplateType type) throws Exception {
+    public Optional<Document> getXml(String templateName, TemplateType type)
+            throws FlightRecorderException {
         switch (type) {
             case CUSTOM:
                 return local.getXml(templateName, type);
@@ -84,7 +86,7 @@ public class MergedTemplateService implements MutableTemplateService {
 
     @Override
     public Optional<IConstrainedMap<EventOptionID>> getEvents(
-            String templateName, TemplateType type) throws Exception {
+            String templateName, TemplateType type) throws FlightRecorderException {
         switch (type) {
             case CUSTOM:
                 return local.getEvents(templateName, type);
@@ -96,9 +98,9 @@ public class MergedTemplateService implements MutableTemplateService {
     }
 
     @Override
-    public void addTemplate(InputStream templateStream)
+    public Template addTemplate(InputStream templateStream)
             throws InvalidXmlException, InvalidEventTemplateException, IOException {
-        local.addTemplate(templateStream);
+        return local.addTemplate(templateStream);
     }
 
     @Override

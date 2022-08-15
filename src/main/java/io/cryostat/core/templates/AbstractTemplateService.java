@@ -44,10 +44,12 @@ import java.util.stream.Collectors;
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLModel;
 import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLTagInstance;
 
+import io.cryostat.core.FlightRecorderException;
+
 abstract class AbstractTemplateService implements TemplateService {
 
     @Override
-    public List<Template> getTemplates() throws Exception {
+    public List<Template> getTemplates() throws FlightRecorderException {
         return getTemplateModels().stream()
                 .map(xml -> xml.getRoot())
                 .map(
@@ -62,7 +64,7 @@ abstract class AbstractTemplateService implements TemplateService {
 
     protected abstract TemplateType providedTemplateType();
 
-    protected abstract List<XMLModel> getTemplateModels() throws Exception;
+    protected abstract List<XMLModel> getTemplateModels() throws FlightRecorderException;
 
     protected String getAttributeValue(XMLTagInstance node, String valueKey) {
         return node.getAttributeInstances().stream()

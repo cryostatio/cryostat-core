@@ -35,42 +35,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.cryostat.core.templates;
 
-import java.io.IOException;
-import java.io.InputStream;
+package io.cryostat.core.util;
 
-public interface MutableTemplateService extends TemplateService {
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
-    Template addTemplate(InputStream templateStream)
-            throws InvalidXmlException, InvalidEventTemplateException, IOException;
+import org.openjdk.jmc.flightrecorder.rules.IRule;
+import org.openjdk.jmc.flightrecorder.rules.RuleRegistry;
 
-    default void deleteTemplate(Template template)
-            throws IOException, InvalidEventTemplateException {
-        deleteTemplate(template.getName());
+import org.apache.commons.lang3.StringUtils;
+
+public class RuleFilterParser {
+    private final Set<String> ruleIds;
+    private final Set<String> ruleTopics;
+
+    RuleFilterParser(Set<String> rules, Set<String> topics) {
+        this.ruleIds = rules;
+        this.ruleTopics = topics;
     }
 
-    void deleteTemplate(String templateName) throws IOException, InvalidEventTemplateException;
-
-    @SuppressWarnings("serial")
-    public static class InvalidXmlException extends Exception {
-        InvalidXmlException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        InvalidXmlException(String message) {
-            super(message);
-        }
+    public RuleFilterParser() {
+        this.ruleIds =
+                RuleRegistry.getRules().stream()
+                        .map(rule -> rule.getId())
+                        .collect(Collectors.toSet());
+        this.ruleTopics =
+                RuleRegistry.getRules().stream()
+                        .map(rule -> rule.getTopic())
+                        .collect(Collectors.toSet());
     }
 
-    @SuppressWarnings("serial")
-    public static class InvalidEventTemplateException extends Exception {
-        InvalidEventTemplateException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        InvalidEventTemplateException(String message) {
-            super(message);
+    public Predicate<IRule> parse(String rawFilter) {
+        if (StringUtils.isNotBlank(rawFilter)) {
+            String[] filterArray = rawFilter.split(",");
+            Predicate<IRule> combinedPredicate = (r) -> false;
+            for (String filter : filterArray) {
+                String cleanFilter = filter.trim();
+                if (ruleIds.stream().anyMatch(cleanFilter::equalsIgnoreCase)) {
+                    Predicate<IRule> pr = (rule) -> rule.getId().equalsIgnoreCase(cleanFilter);
+                    combinedPredicate = combinedPredicate.or(pr);
+                } else if (ruleTopics.stream().anyMatch(cleanFilter::equalsIgnoreCase)) {
+                    Predicate<IRule> pr = (rule) -> rule.getTopic().equalsIgnoreCase(cleanFilter);
+                    combinedPredicate = combinedPredicate.or(pr);
+                }
+            }
+            return combinedPredicate;
+        } else {
+            return (r) -> true;
         }
     }
 }

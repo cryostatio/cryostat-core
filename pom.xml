@@ -5,7 +5,7 @@
 <modelVersion>4.0.0</modelVersion>
 <groupId>io.cryostat</groupId>
 <artifactId>cryostat-core</artifactId>
-<version>2.3.1</version>
+<version>2.13.0-SNAPSHOT</version>
 <packaging>jar</packaging>
 <name>cryostat-core</name>
 <url>http://maven.apache.org</url>
@@ -21,7 +21,7 @@
 
 <properties>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  <java.version>11</java.version>
+  <java.version>17</java.version>
   <maven.compiler.target>${java.version}</maven.compiler.target>
   <maven.compiler.source>${java.version}</maven.compiler.source>
   <jmc.version>7.1.1</jmc.version>
@@ -37,14 +37,14 @@
   <org.apache.commons.text.version>1.9</org.apache.commons.text.version>
   <org.jsoup.version>1.14.2</org.jsoup.version>
 
-  <com.github.spotbugs.version>4.2.3</com.github.spotbugs.version>
-  <com.github.spotbugs.plugin.version>4.2.3</com.github.spotbugs.plugin.version>
-  <org.junit.jupiter.version>5.7.1</org.junit.jupiter.version>
+  <com.github.spotbugs.version>4.7.1</com.github.spotbugs.version>
+  <com.github.spotbugs.plugin.version>4.7.0.0</com.github.spotbugs.plugin.version>
+  <org.junit.jupiter.version>5.8.2</org.junit.jupiter.version>
   <org.hamcrest.version>2.2</org.hamcrest.version>
-  <org.mockito.version>3.9.0</org.mockito.version>
-  <org.jacoco.maven.plugin.version>0.8.6</org.jacoco.maven.plugin.version>
-  <com.diffplug.spotless.maven.plugin.version>2.10.1</com.diffplug.spotless.maven.plugin.version>
-  <org.slf4j.version>1.7.30</org.slf4j.version>
+  <org.mockito.version>4.6.1</org.mockito.version>
+  <org.jacoco.maven.plugin.version>0.8.8</org.jacoco.maven.plugin.version>
+  <com.diffplug.spotless.maven.plugin.version>2.22.7</com.diffplug.spotless.maven.plugin.version>
+  <org.slf4j.version>1.7.35</org.slf4j.version>
 </properties>
 
 <dependencies>
@@ -72,6 +72,11 @@
     <groupId>org.apache.commons</groupId>
     <artifactId>commons-lang3</artifactId>
     <version>${org.apache.commons.lang3.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>commons-io</groupId>
+    <artifactId>commons-io</artifactId>
+    <version>${org.apache.commons.io.version}</version>
   </dependency>
   <dependency>
     <groupId>org.jsoup</groupId>
@@ -119,12 +124,6 @@
     <groupId>org.mockito</groupId>
     <artifactId>mockito-inline</artifactId>
     <version>${org.mockito.version}</version>
-    <scope>test</scope>
-  </dependency>
-  <dependency>
-    <groupId>commons-io</groupId>
-    <artifactId>commons-io</artifactId>
-    <version>${org.apache.commons.io.version}</version>
     <scope>test</scope>
   </dependency>
   <dependency>
@@ -211,8 +210,9 @@
             <exclude>src/main/java/org/openjdk/jmc/**</exclude>
           </excludes>
           <googleJavaFormat>
-            <version>1.7</version>
+            <version>1.15.0</version>
             <style>AOSP</style>
+            <reflowLongStrings>true</reflowLongStrings>
           </googleJavaFormat>
           <trimTrailingWhitespace/>
           <endWithNewline/>

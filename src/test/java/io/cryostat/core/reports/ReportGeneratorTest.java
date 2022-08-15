@@ -87,7 +87,7 @@ class ReportGeneratorTest {
         MatcherAssert.assertThat(report, Matchers.is(SAMPLE_REPORT));
 
         Mockito.verify(reporter).apply(Mockito.any());
-        Mockito.verifyZeroInteractions(logger);
+        Mockito.verifyNoInteractions(logger);
     }
 
     @Test
@@ -118,16 +118,16 @@ class ReportGeneratorTest {
                 report,
                 Matchers.is(
                         "<html>\n"
-                                + " <head></head>\n"
-                                + " <body>\n"
-                                + "  <div class=\"foo\">\n"
-                                + "   <a id=\"hl\" href=\"http://example.com\">new description</a>\n"
-                                + "  </div>\n"
-                                + " </body>\n"
-                                + "</html>"));
+                            + " <head></head>\n"
+                            + " <body>\n"
+                            + "  <div class=\"foo\">\n"
+                            + "   <a id=\"hl\" href=\"http://example.com\">new description</a>\n"
+                            + "  </div>\n"
+                            + " </body>\n"
+                            + "</html>"));
 
         Mockito.verify(reporter).apply(Mockito.any());
-        Mockito.verifyZeroInteractions(logger);
+        Mockito.verifyNoInteractions(logger);
     }
 
     @Test
@@ -173,7 +173,7 @@ class ReportGeneratorTest {
                                 + "</html>"));
 
         Mockito.verify(reporter).apply(Mockito.any());
-        Mockito.verifyZeroInteractions(logger);
+        Mockito.verifyNoInteractions(logger);
     }
 
     @Test
@@ -254,6 +254,6 @@ class ReportGeneratorTest {
                                 + "</html>"));
 
         Mockito.verify(reporter).apply(Mockito.any());
-        Mockito.verifyZeroInteractions(logger);
+        Mockito.verifyNoInteractions(logger);
     }
 }
