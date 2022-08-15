@@ -253,4 +253,22 @@ public class Event {
 
         return methodElement;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{ \"label\" : ");
+        sb.append("\"" + this.name + "\",");
+        sb.append("\"description\" : ");
+        sb.append("\"" + this.description + "\",");
+        sb.append("\"class\" : ");
+        sb.append("\"" + this.clazz + "\",");
+        sb.append("\"rethrow\" : ");
+        sb.append("\"" + this.useRethrow + "\",");
+        sb.append("\"stacktrace\" : ");
+        sb.append("\"" + this.recordStackTrace + "\",");
+        sb.append("\"methodname\" : ");
+        sb.append("\"" + this.methodName + "\"}");
+        return sb.toString();
+    }
 }

@@ -37,11 +37,8 @@
  */
 package io.cryostat.core.agent;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -94,11 +91,7 @@ public class LocalProbeTemplateService implements ProbeTemplateService {
                         String.format(
                                 "Event template \"%s\" already exists", template.getFileName()));
             }
-            fs.writeString(
-                    path,
-                    new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
-                            .lines()
-                            .collect(Collectors.joining("\n")));
+            fs.writeString(path, template.serialize());
         }
     }
 
@@ -132,10 +125,18 @@ public class LocalProbeTemplateService implements ProbeTemplateService {
         try {
             List<ProbeTemplate> templates = new ArrayList<>();
             for (Path path : getLocalTemplates()) {
-                try (InputStream stream = fs.newInputStream(path)) {
-                    ProbeTemplate template = new ProbeTemplate();
-                    template.deserialize(stream);
-                    templates.add(template);
+                if (path != null) {
+                    try (InputStream stream = fs.newInputStream(path)) {
+                        Path fileName = path.getFileName();
+                        if (fileName != null) {
+                            ProbeTemplate template = new ProbeTemplate();
+                            template.deserialize(stream);
+                            template.setFileName(fileName.toString());
+                            templates.add(template);
+                        }
+                    }
+                } else {
+                    throw new IOException("getLocalTemplates returned null path");
                 }
             }
             return templates;
