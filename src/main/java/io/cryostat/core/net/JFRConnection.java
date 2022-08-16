@@ -186,7 +186,7 @@ public class JFRConnection implements AutoCloseable {
                 } else {
                     throw new IllegalArgumentException(
                             String.format(
-                                    "Unexpected attribute class of %s", attrObject.getClass()));
+                                    "Unexpected attribute: {%s} of type: {%s}", attr, attrObject.getClass()));
                 }
             }
             byte[] hash = DigestUtils.sha256(baos.toByteArray());
