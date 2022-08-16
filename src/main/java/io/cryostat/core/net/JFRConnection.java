@@ -202,40 +202,42 @@ public class JFRConnection implements AutoCloseable {
     private synchronized Object[] castPrimitiveToObject(Object primitiveObject) {
         Object[] objArr;
         String componentType = primitiveObject.getClass().getComponentType().toString();
-        switch(componentType) {
+        switch (componentType) {
             case "boolean":
-                objArr = ArrayUtils.toObject((boolean []) primitiveObject);
+                objArr = ArrayUtils.toObject((boolean[]) primitiveObject);
                 break;
-                
+
             case "byte":
-                objArr = ArrayUtils.toObject((byte []) primitiveObject);
+                objArr = ArrayUtils.toObject((byte[]) primitiveObject);
                 break;
 
             case "char":
-                objArr = ArrayUtils.toObject((char []) primitiveObject);
+                objArr = ArrayUtils.toObject((char[]) primitiveObject);
                 break;
 
             case "short":
-                objArr = ArrayUtils.toObject((short []) primitiveObject);
+                objArr = ArrayUtils.toObject((short[]) primitiveObject);
                 break;
-            
+
             case "int":
-                objArr = ArrayUtils.toObject((int []) primitiveObject);
+                objArr = ArrayUtils.toObject((int[]) primitiveObject);
+                break;
 
             case "long":
-                objArr = ArrayUtils.toObject((long []) primitiveObject);
+                objArr = ArrayUtils.toObject((long[]) primitiveObject);
                 break;
-            
+
             case "float":
-                objArr = ArrayUtils.toObject((float []) primitiveObject);
+                objArr = ArrayUtils.toObject((float[]) primitiveObject);
                 break;
-            
+
             case "double":
-                objArr = ArrayUtils.toObject((double []) primitiveObject);
+                objArr = ArrayUtils.toObject((double[]) primitiveObject);
                 break;
-                
+
             default:
-                throw new IllegalStateException(String.format("Unexpected primitive array of type %s", componentType));
+                throw new IllegalStateException(
+                        String.format("Unexpected primitive array of type %s", componentType));
         }
         return objArr;
     }
