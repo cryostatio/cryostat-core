@@ -47,6 +47,10 @@ import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
+import javax.management.ReflectionException;
 import javax.management.remote.JMXServiceURL;
 
 import org.openjdk.jmc.rjmx.ConnectionException;
@@ -157,7 +161,7 @@ public class JFRConnection implements AutoCloseable {
         }
     }
 
-    public synchronized String getJvmId() throws Exception {
+    public synchronized String getJvmId() throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException {
         if (!isConnected()) {
             connect();
         }
