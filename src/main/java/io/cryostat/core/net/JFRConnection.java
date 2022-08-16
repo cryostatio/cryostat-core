@@ -186,7 +186,7 @@ public class JFRConnection implements AutoCloseable {
                         this.rjmxConnection.getAttributeValue(
                                 new MRI(Type.ATTRIBUTE, ConnectionToolkit.RUNTIME_BEAN_NAME, attr));
                 if (attrObject.getClass().isArray()) {
-                    if (!attrObject.getClass().getComponentType().isPrimitive()) {
+                    if (attrObject.getClass().getComponentType().isPrimitive()) {
                         attrObject = castPrimitiveToObject(attrObject);
                     }
                     dos.writeUTF(Arrays.toString((Object[]) attrObject));
