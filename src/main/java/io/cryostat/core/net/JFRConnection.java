@@ -47,7 +47,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.management.ObjectName;
 import javax.management.remote.JMXServiceURL;
 
 import org.openjdk.jmc.rjmx.ConnectionException;
@@ -162,7 +161,6 @@ public class JFRConnection implements AutoCloseable {
         if (!isConnected()) {
             connect();
         }
-        ObjectName runtimeBean = new ObjectName("java.lang:type=Runtime");
         List<String> attrNames =
                 new ArrayList<>(
                         Arrays.asList(
@@ -177,10 +175,19 @@ public class JFRConnection implements AutoCloseable {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
                 DataOutputStream dos = new DataOutputStream(baos)) {
             for (String attr : attrNames) {
-                dos.writeUTF(
-                        this.rjmxConnection
-                                .getAttributeValue(new MRI(Type.ATTRIBUTE, runtimeBean, attr))
-                                .toString());
+                Object attrObject =
+                        this.rjmxConnection.getAttributeValue(
+                                new MRI(Type.ATTRIBUTE, ConnectionToolkit.RUNTIME_BEAN_NAME, attr));
+
+                if (attrObject instanceof String || attrObject instanceof Long) {
+                    dos.writeUTF(attrObject.toString());
+                } else if (attrObject instanceof String[]) {
+                    dos.writeUTF(Arrays.toString((String[]) attrObject));
+                } else {
+                    throw new IllegalArgumentException(
+                            String.format(
+                                    "Unexpected attribute class of %s", attrObject.getClass()));
+                }
             }
             byte[] hash = DigestUtils.sha256(baos.toByteArray());
             return new String(Base64.getUrlEncoder().encode(hash), StandardCharsets.UTF_8).trim();
