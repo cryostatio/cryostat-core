@@ -161,7 +161,9 @@ public class JFRConnection implements AutoCloseable {
         }
     }
 
-    public synchronized String getJvmId() throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException {
+    public synchronized String getJvmId()
+            throws AttributeNotFoundException, InstanceNotFoundException, MBeanException,
+                    ReflectionException, IOException {
         if (!isConnected()) {
             connect();
         }
@@ -182,15 +184,10 @@ public class JFRConnection implements AutoCloseable {
                 Object attrObject =
                         this.rjmxConnection.getAttributeValue(
                                 new MRI(Type.ATTRIBUTE, ConnectionToolkit.RUNTIME_BEAN_NAME, attr));
-
-                if (attrObject instanceof String || attrObject instanceof Long) {
-                    dos.writeUTF(attrObject.toString());
-                } else if (attrObject instanceof String[]) {
+                if (attrObject.getClass().isArray()) {
                     dos.writeUTF(Arrays.toString((String[]) attrObject));
                 } else {
-                    throw new IllegalArgumentException(
-                            String.format(
-                                    "Unexpected attribute: {%s} of type: {%s}", attr, attrObject.getClass()));
+                    dos.writeUTF(attrObject.toString());
                 }
             }
             byte[] hash = DigestUtils.sha256(baos.toByteArray());
