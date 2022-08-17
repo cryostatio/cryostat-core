@@ -76,7 +76,6 @@ import io.cryostat.core.templates.TemplateService;
 import io.cryostat.core.tui.ClientWriter;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang3.ArrayUtils;
 
 public class JFRConnection implements AutoCloseable {
 
@@ -186,10 +185,8 @@ public class JFRConnection implements AutoCloseable {
                         this.rjmxConnection.getAttributeValue(
                                 new MRI(Type.ATTRIBUTE, ConnectionToolkit.RUNTIME_BEAN_NAME, attr));
                 if (attrObject.getClass().isArray()) {
-                    if (attrObject.getClass().getComponentType().isPrimitive()) {
-                        attrObject = castPrimitiveToObject(attrObject);
-                    }
-                    dos.writeUTF(Arrays.toString((Object[]) attrObject));
+                    String stringified = stringifyArray(attrObject);
+                    dos.writeUTF(stringified);
                 } else {
                     dos.writeUTF(attrObject.toString());
                 }
@@ -199,47 +196,46 @@ public class JFRConnection implements AutoCloseable {
         }
     }
 
-    private synchronized Object[] castPrimitiveToObject(Object primitiveObject) {
-        Object[] objArr;
-        String componentType = primitiveObject.getClass().getComponentType().toString();
+    private String stringifyArray(Object arrayObject) {
+        String stringified;
+        String componentType = arrayObject.getClass().getComponentType().toString();
         switch (componentType) {
             case "boolean":
-                objArr = ArrayUtils.toObject((boolean[]) primitiveObject);
+                stringified = Arrays.toString((boolean[]) arrayObject);
                 break;
 
             case "byte":
-                objArr = ArrayUtils.toObject((byte[]) primitiveObject);
+                stringified = Arrays.toString((byte[]) arrayObject);
                 break;
 
             case "char":
-                objArr = ArrayUtils.toObject((char[]) primitiveObject);
+                stringified = Arrays.toString((char[]) arrayObject);
                 break;
 
             case "short":
-                objArr = ArrayUtils.toObject((short[]) primitiveObject);
+                stringified = Arrays.toString((short[]) arrayObject);
                 break;
 
             case "int":
-                objArr = ArrayUtils.toObject((int[]) primitiveObject);
+                stringified = Arrays.toString((int[]) arrayObject);
                 break;
 
             case "long":
-                objArr = ArrayUtils.toObject((long[]) primitiveObject);
+                stringified = Arrays.toString((long[]) arrayObject);
                 break;
 
             case "float":
-                objArr = ArrayUtils.toObject((float[]) primitiveObject);
+                stringified = Arrays.toString((float[]) arrayObject);
                 break;
 
             case "double":
-                objArr = ArrayUtils.toObject((double[]) primitiveObject);
+                stringified = Arrays.toString((double[]) arrayObject);
                 break;
 
             default:
-                throw new IllegalStateException(
-                        String.format("Unexpected primitive array of type %s", componentType));
+                stringified = Arrays.toString((Object[]) arrayObject);
         }
-        return objArr;
+        return stringified;
     }
 
     public synchronized boolean isV1() {
