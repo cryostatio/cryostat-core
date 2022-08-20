@@ -37,11 +37,20 @@
  */
 package io.cryostat.core.net;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
+import javax.management.ReflectionException;
 import javax.management.remote.JMXServiceURL;
 
 import org.openjdk.jmc.rjmx.ConnectionException;
@@ -56,6 +65,8 @@ import org.openjdk.jmc.rjmx.internal.ServerDescriptor;
 import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
 import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceFactory;
 import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceV2;
+import org.openjdk.jmc.rjmx.subscription.MRI;
+import org.openjdk.jmc.rjmx.subscription.MRI.Type;
 
 import io.cryostat.core.sys.Clock;
 import io.cryostat.core.sys.Environment;
@@ -63,6 +74,8 @@ import io.cryostat.core.sys.FileSystem;
 import io.cryostat.core.templates.MergedTemplateService;
 import io.cryostat.core.templates.TemplateService;
 import io.cryostat.core.tui.ClientWriter;
+
+import org.apache.commons.codec.digest.DigestUtils;
 
 public class JFRConnection implements AutoCloseable {
 
@@ -146,6 +159,83 @@ public class JFRConnection implements AutoCloseable {
             cw.println(e);
             return 0;
         }
+    }
+
+    public synchronized String getJvmId()
+            throws AttributeNotFoundException, InstanceNotFoundException, MBeanException,
+                    ReflectionException, IOException {
+        if (!isConnected()) {
+            connect();
+        }
+        List<String> attrNames =
+                new ArrayList<>(
+                        Arrays.asList(
+                                "ClassPath",
+                                "Name",
+                                "InputArguments",
+                                "LibraryPath",
+                                "VmVendor",
+                                "VmVersion",
+                                "StartTime"));
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
+                DataOutputStream dos = new DataOutputStream(baos)) {
+            for (String attr : attrNames) {
+                Object attrObject =
+                        this.rjmxConnection.getAttributeValue(
+                                new MRI(Type.ATTRIBUTE, ConnectionToolkit.RUNTIME_BEAN_NAME, attr));
+                if (attrObject.getClass().isArray()) {
+                    String stringified = stringifyArray(attrObject);
+                    dos.writeUTF(stringified);
+                } else {
+                    dos.writeUTF(attrObject.toString());
+                }
+            }
+            byte[] hash = DigestUtils.sha256(baos.toByteArray());
+            return new String(Base64.getUrlEncoder().encode(hash), StandardCharsets.UTF_8).trim();
+        }
+    }
+
+    private String stringifyArray(Object arrayObject) {
+        String stringified;
+        String componentType = arrayObject.getClass().getComponentType().toString();
+        switch (componentType) {
+            case "boolean":
+                stringified = Arrays.toString((boolean[]) arrayObject);
+                break;
+
+            case "byte":
+                stringified = Arrays.toString((byte[]) arrayObject);
+                break;
+
+            case "char":
+                stringified = Arrays.toString((char[]) arrayObject);
+                break;
+
+            case "short":
+                stringified = Arrays.toString((short[]) arrayObject);
+                break;
+
+            case "int":
+                stringified = Arrays.toString((int[]) arrayObject);
+                break;
+
+            case "long":
+                stringified = Arrays.toString((long[]) arrayObject);
+                break;
+
+            case "float":
+                stringified = Arrays.toString((float[]) arrayObject);
+                break;
+
+            case "double":
+                stringified = Arrays.toString((double[]) arrayObject);
+                break;
+
+            default:
+                stringified = Arrays.toString((Object[]) arrayObject);
+        }
+        return stringified;
     }
 
     public synchronized boolean isV1() {
