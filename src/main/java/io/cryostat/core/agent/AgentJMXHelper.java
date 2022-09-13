@@ -72,7 +72,7 @@ public class AgentJMXHelper {
         return connectionHandle;
     }
 
-    public MBeanServerConnection getMBeanServerConnection() {
+    protected MBeanServerConnection getMBeanServerConnection() {
         return mbsc;
     }
 
