@@ -113,10 +113,7 @@ public class ProbeTemplate {
             throw new IllegalStateException(e);
         }
 
-        if (xmlStream.markSupported()) {
-            xmlStream.reset();
-        }
-        Document document = builder.parse(xmlStream);
+        Document document = builder.parse(stream);
         NodeList elements;
 
         // parse global configurations
