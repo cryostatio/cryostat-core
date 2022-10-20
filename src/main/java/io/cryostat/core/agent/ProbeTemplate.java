@@ -92,14 +92,7 @@ public class ProbeTemplate {
     }
 
     public void deserialize(InputStream xmlStream) throws IOException, SAXException {
-        BufferedInputStream stream =
-                new BufferedInputStream(xmlStream) {
-                    @Override
-                    public void close() throws IOException {
-                        // The XML Validator closes the stream when it finishes validation,
-                        // we want to keep it open for further processing after validating.
-                    }
-                };
+        AgentXMLStream stream = new AgentXMLStream(xmlStream);
         stream.mark(1); // arbitrary readLimit > 0
         ProbeValidator validator = new ProbeValidator();
         validator.validate(new StreamSource(stream));
@@ -114,6 +107,7 @@ public class ProbeTemplate {
         }
 
         Document document = builder.parse(stream);
+        stream.close();
         NodeList elements;
 
         // parse global configurations
