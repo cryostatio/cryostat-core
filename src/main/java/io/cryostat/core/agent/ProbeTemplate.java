@@ -92,11 +92,11 @@ public class ProbeTemplate {
     }
 
     public void deserialize(InputStream xmlStream) throws IOException, SAXException {
-        BufferedInputStream stream = new BufferedInputStream(xmlStream);
-        xmlStream.mark(1); // arbitrary readLimit > 0
+        AgentXMLStream stream = new AgentXMLStream(xmlStream);
+        stream.mark(1); // arbitrary readLimit > 0
         ProbeValidator validator = new ProbeValidator();
         validator.validate(new StreamSource(stream));
-        xmlStream.reset();
+        stream.reset();
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder;
 
@@ -106,10 +106,8 @@ public class ProbeTemplate {
             throw new IllegalStateException(e);
         }
 
-        if (xmlStream.markSupported()) {
-            xmlStream.reset();
-        }
-        Document document = builder.parse(xmlStream);
+        Document document = builder.parse(stream);
+        stream.close();
         NodeList elements;
 
         // parse global configurations
@@ -244,5 +242,9 @@ public class ProbeTemplate {
 
     public String getFileName() {
         return fileName;
+    }
+
+    public void setFileName(String name) {
+        this.fileName = name;
     }
 }
