@@ -110,8 +110,18 @@ public class JFRConnection implements AutoCloseable {
         this(cw, fs, env, cd, List.of());
     }
 
-    public synchronized IConnectionHandle getHandle() {
-        return this.handle;
+    public synchronized IConnectionHandle getHandle() throws ConnectionException, IOException {
+        if (!isConnected()) {
+            connect();
+        }
+        IConnectionHandle handle = this.handle;
+        if (handle == null || !isConnected()) {
+            throw new ConnectionException(
+                    String.format(
+                            "Could not connect to remote target %s",
+                            this.connectionDescriptor.createJMXServiceURL().toString()));
+        }
+        return handle;
     }
 
     public synchronized IFlightRecorderService getService()
