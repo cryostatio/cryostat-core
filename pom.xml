@@ -21,8 +21,8 @@
 
 <distributionManagement>
   <repository>
-    <id>github-cryostat-core</id>
-    <name>GitHub Packages (Cryostat Core)</name>
+    <id>github</id>
+    <name>GitHub Packages</name>
     <url>https://maven.pkg.github.com/cryostatio/cryostat-core</url>
   </repository>
 </distributionManagement>
