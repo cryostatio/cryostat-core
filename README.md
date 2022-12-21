@@ -8,7 +8,7 @@ JFR with JDK Mission Control API
 ## Requirements
 Build:
 - Maven
-- JDK17+
+- JDK11+
 
 ## Build
 
