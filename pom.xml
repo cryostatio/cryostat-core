@@ -19,6 +19,14 @@
   </repository>
 </repositories>
 
+<distributionManagement>
+  <repository>
+    <id>github-cryostat-core</id>
+    <name>GitHub Packages (Cryostat Core)</name>
+    <url>https://maven.pkg.github.com/cryostatio/cryostat-core</url>
+  </repository>
+</distributionManagement>
+
 <properties>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   <java.version>11</java.version>
