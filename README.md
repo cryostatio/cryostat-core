@@ -26,7 +26,7 @@ creating the file if it does not exist:
   xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
   <servers>
     <server>
-      <id>github-cryostat-core</id>
+      <id>github</id>
       <username>$MY_GITHUB_USERNAME</username>
       <password>$MY_GITHUB_ACCESSTOKEN</password>
     </server>
@@ -42,7 +42,7 @@ Then, add the following to your build's `pom.xml`:
 ```xml
 <repositories>
   <repository>
-    <id>github-cryostat-core</id>
+    <id>github</id>
     <url>https://maven.pkg.github.com/cryostatio/cryostat-core</url>
   </repository>
 </repositories>
