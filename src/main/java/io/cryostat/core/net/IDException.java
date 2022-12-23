@@ -39,38 +39,9 @@ package io.cryostat.core.net;
 
 import java.io.IOException;
 
-import javax.management.remote.JMXServiceURL;
+public class IDException extends IOException {
 
-import org.openjdk.jmc.rjmx.ConnectionException;
-import org.openjdk.jmc.rjmx.IConnectionHandle;
-import org.openjdk.jmc.rjmx.ServiceNotAvailableException;
-import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
-
-import io.cryostat.core.sys.Clock;
-import io.cryostat.core.templates.TemplateService;
-
-public interface JFRConnection extends AutoCloseable {
-
-    public IConnectionHandle getHandle() throws ConnectionException, IOException;
-
-    public IFlightRecorderService getService()
-            throws ConnectionException, IOException, ServiceNotAvailableException;
-
-    public TemplateService getTemplateService();
-
-    public long getApproximateServerTime(Clock clock);
-
-    public JMXServiceURL getJMXURL() throws IOException;
-
-    public String getHost();
-
-    public int getPort();
-
-    public String getJvmId() throws IDException, IOException;
-
-    public boolean isConnected();
-
-    public void connect() throws ConnectionException;
-
-    public void disconnect();
+    public IDException(Throwable cause) {
+        super(cause);
+    }
 }
