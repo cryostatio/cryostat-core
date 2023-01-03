@@ -94,7 +94,7 @@ public class JFRConnectionToolkit {
                             .username(credentials.getUsername())
                             .password(credentials.getPassword());
         }
-        return new JFRConnection(cw, fs, env, connectionDescriptorBuilder.build(), listeners);
+        return new JFRJMXConnection(cw, fs, env, connectionDescriptorBuilder.build(), listeners);
     }
 
     public String getHostName(JMXServiceURL url) {
