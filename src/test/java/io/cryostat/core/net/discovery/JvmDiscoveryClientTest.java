@@ -207,14 +207,11 @@ class JvmDiscoveryClientTest {
                             "com.example.Foo", "service:jmx:rmi:///jndi/rmi://foo:9091/jmxrmi");
             listener.onDiscovery(new DiscoveryEvent(DiscoveryEvent.Kind.CHANGED, discoverable));
 
-            MatcherAssert.assertThat(
-                    kinds, Matchers.equalTo(List.of(EventKind.LOST, EventKind.FOUND)));
+            MatcherAssert.assertThat(kinds, Matchers.equalTo(List.of(EventKind.MODIFIED)));
             MatcherAssert.assertThat(
                     jvms,
                     Matchers.equalTo(
-                            List.of(
-                                    new DiscoveredJvmDescriptor(discoverable.getPayload()),
-                                    new DiscoveredJvmDescriptor(discoverable.getPayload()))));
+                            List.of(new DiscoveredJvmDescriptor(discoverable.getPayload()))));
         }
     }
 

@@ -82,12 +82,10 @@ public class JvmDiscoveryClient {
                                 break;
                             case CHANGED:
                                 eventListeners.forEach(
-                                        c -> c.accept(new JvmDiscoveryEvent(EventKind.LOST, desc)));
-                                eventListeners.forEach(
                                         c ->
                                                 c.accept(
                                                         new JvmDiscoveryEvent(
-                                                                EventKind.FOUND, desc)));
+                                                                EventKind.MODIFIED, desc)));
                                 break;
                             default:
                                 logger.error(
@@ -148,6 +146,6 @@ public class JvmDiscoveryClient {
     public enum EventKind {
         FOUND,
         LOST,
-        ;
+        MODIFIED;
     }
 }
