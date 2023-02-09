@@ -37,52 +37,36 @@
  */
 package io.cryostat.core.net;
 
-import java.io.IOException;
-import java.util.List;
+public class JVMDetails {
+    private final RuntimeDetails runtimeDetails;
+    private final MemoryDetails memoryDetails;
+    private final ThreadDetails threadDetails;
+    private final OperatingSystemDetails operatingSystemDetails;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.IntrospectionException;
-import javax.management.ReflectionException;
-import javax.management.remote.JMXServiceURL;
+    public JVMDetails(
+            RuntimeDetails runtimeDetails,
+            MemoryDetails memoryDetails,
+            ThreadDetails threadDetails,
+            OperatingSystemDetails operatingSystemDetails) {
+        this.runtimeDetails = runtimeDetails;
+        this.memoryDetails = memoryDetails;
+        this.threadDetails = threadDetails;
+        this.operatingSystemDetails = operatingSystemDetails;
+    }
 
-import org.openjdk.jmc.rjmx.ConnectionException;
-import org.openjdk.jmc.rjmx.IConnectionHandle;
-import org.openjdk.jmc.rjmx.ServiceNotAvailableException;
-import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
+    public RuntimeDetails getRuntimeDetails() {
+        return runtimeDetails;
+    }
 
-import io.cryostat.core.sys.Clock;
-import io.cryostat.core.templates.TemplateService;
+    public MemoryDetails getMemoryDetails() {
+        return memoryDetails;
+    }
 
-public interface JFRConnection extends AutoCloseable {
+    public ThreadDetails getThreadDetails() {
+        return threadDetails;
+    }
 
-    public IConnectionHandle getHandle() throws ConnectionException, IOException;
-
-    public IFlightRecorderService getService()
-            throws ConnectionException, IOException, ServiceNotAvailableException;
-
-    public TemplateService getTemplateService();
-
-    public long getApproximateServerTime(Clock clock);
-
-    public JMXServiceURL getJMXURL() throws IOException;
-
-    public String getHost();
-
-    public int getPort();
-
-    public String getJvmId() throws IDException, IOException;
-
-    public JVMDetails getJvmDetails(
-            List<String> runtimeAttrs,
-            List<String> memoryAttrs,
-            List<String> threadAttrs,
-            List<String> osAttrs)
-            throws ConnectionException, IOException, InstanceNotFoundException,
-                    IntrospectionException, ReflectionException;
-
-    public boolean isConnected();
-
-    public void connect() throws ConnectionException;
-
-    public void disconnect();
+    public OperatingSystemDetails getOperatingSystemDetails() {
+        return operatingSystemDetails;
+    }
 }

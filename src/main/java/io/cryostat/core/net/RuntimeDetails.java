@@ -37,52 +37,51 @@
  */
 package io.cryostat.core.net;
 
-import java.io.IOException;
-import java.util.List;
+import java.util.Collections;
+import java.util.Map;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.IntrospectionException;
-import javax.management.ReflectionException;
-import javax.management.remote.JMXServiceURL;
+public class RuntimeDetails {
+    private final String description;
+    private final Map<String, Object> attributes;
 
-import org.openjdk.jmc.rjmx.ConnectionException;
-import org.openjdk.jmc.rjmx.IConnectionHandle;
-import org.openjdk.jmc.rjmx.ServiceNotAvailableException;
-import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
+    public RuntimeDetails(String description, Map<String, Object> attributes) {
+        this.description = description;
+        this.attributes = Collections.unmodifiableMap(attributes);
+    }
 
-import io.cryostat.core.sys.Clock;
-import io.cryostat.core.templates.TemplateService;
+    public String getDescription() {
+        return this.description;
+    }
 
-public interface JFRConnection extends AutoCloseable {
+    public Map<String, Object> getAttributes() {
+        return Collections.unmodifiableMap(attributes);
+    }
 
-    public IConnectionHandle getHandle() throws ConnectionException, IOException;
+    // public MemoryUsage getHeapMemoryUsage() {
+    //     return (MemoryUsage) map.get("HeapMemoryUsage");
+    // }
 
-    public IFlightRecorderService getService()
-            throws ConnectionException, IOException, ServiceNotAvailableException;
+    // public MemoryUsage getNonHeapMemoryUsage() {
+    //     return (MemoryUsage) map.get("NonHeapMemoryUsage");
+    // }
 
-    public TemplateService getTemplateService();
+    // public long getObjectPendingFinalizationCount() {
+    //     return (long) map.get("ObjectPendingFinalizationCount");
+    // }
 
-    public long getApproximateServerTime(Clock clock);
+    // public long getFreeHeapMemory() {
+    //     return (long) map.get("FreeHeapMemory");
+    // }
 
-    public JMXServiceURL getJMXURL() throws IOException;
+    // public long getFreeNonHeapMemory() {
+    //     return (long) map.get("FreeNonHeapMemory");
+    // }
 
-    public String getHost();
+    // public long getHeapMemoryUsagePercent() {
+    //     return (long) map.get("HeapMemoryUsagePercent");
+    // }
 
-    public int getPort();
-
-    public String getJvmId() throws IDException, IOException;
-
-    public JVMDetails getJvmDetails(
-            List<String> runtimeAttrs,
-            List<String> memoryAttrs,
-            List<String> threadAttrs,
-            List<String> osAttrs)
-            throws ConnectionException, IOException, InstanceNotFoundException,
-                    IntrospectionException, ReflectionException;
-
-    public boolean isConnected();
-
-    public void connect() throws ConnectionException;
-
-    public void disconnect();
+    // public boolean isVerbose() {
+    //     return (boolean) map.get("Verbose");
+    // }
 }

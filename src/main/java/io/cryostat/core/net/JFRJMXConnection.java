@@ -44,13 +44,20 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
+import javax.management.IntrospectionException;
+import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
+import javax.management.ObjectName;
 import javax.management.ReflectionException;
+import javax.management.openmbean.CompositeData;
 import javax.management.remote.JMXServiceURL;
 
 import org.openjdk.jmc.rjmx.ConnectionException;
@@ -207,6 +214,94 @@ public class JFRJMXConnection implements JFRConnection {
                 | ReflectionException e) {
             throw new IDException(e);
         }
+    }
+
+    private Map<String, Object> stringifyCompositeData(CompositeData compositeData) {
+        Map<String, Object> map = new HashMap<>();
+        for (String key : compositeData.getCompositeType().keySet()) {
+            Object value = compositeData.get(key);
+            if (value instanceof CompositeData) {
+                map.put(key, stringifyCompositeData((CompositeData) value));
+            } else if (value.getClass().isArray()) {
+                map.put(key, stringifyArray(value));
+            } else {
+                map.put(key, value);
+            }
+        }
+        return map;
+    }
+
+    private Map<String, Object> getAttributeMap(ObjectName beanName, List<String> attrNames)
+            throws InstanceNotFoundException, IntrospectionException, ReflectionException,
+                    IOException {
+        Map<String, Object> attrMap = new HashMap<>();
+        if (attrNames == null || attrNames.isEmpty()) {
+            attrNames =
+                    Arrays.asList(rjmxConnection.getMBeanInfo(beanName).getAttributes()).stream()
+                            .map(MBeanAttributeInfo::getName)
+                            .toList();
+        }
+        for (String attr : attrNames) {
+            try {
+                Object attrObject =
+                        this.rjmxConnection.getAttributeValue(
+                                new MRI(Type.ATTRIBUTE, beanName, attr));
+                if (attrObject instanceof CompositeData) {
+                    attrObject = stringifyCompositeData((CompositeData) attrObject);
+                    attrMap.put(attr, attrObject);
+                } else if (attrObject.getClass().isArray() || attrObject instanceof Collection) {
+                    String stringified = stringifyArray(attrObject);
+                    attrMap.put(attr, stringified);
+                } else {
+                    attrMap.put(attr, attrObject);
+                }
+            } catch (AttributeNotFoundException
+                    | InstanceNotFoundException
+                    | MBeanException
+                    | ReflectionException
+                    | IOException e) {
+                cw.println(e);
+            }
+        }
+        return attrMap;
+    }
+
+    public synchronized JVMDetails getJvmDetails(
+            List<String> runtimeAttrs,
+            List<String> memoryAttrs,
+            List<String> threadAttrs,
+            List<String> osAttrs)
+            throws IOException, InstanceNotFoundException, IntrospectionException,
+                    ReflectionException {
+        if (!isConnected()) {
+            connect();
+        }
+
+        Map<String, Object> runtimeMap =
+                getAttributeMap(ConnectionToolkit.RUNTIME_BEAN_NAME, runtimeAttrs);
+        Map<String, Object> memoryMap =
+                getAttributeMap(ConnectionToolkit.MEMORY_BEAN_NAME, memoryAttrs);
+        Map<String, Object> threadMap =
+                getAttributeMap(ConnectionToolkit.THREAD_BEAN_NAME, threadAttrs);
+        Map<String, Object> osMap =
+                getAttributeMap(ConnectionToolkit.OPERATING_SYSTEM_BEAN_NAME, osAttrs);
+
+        String runtimeDesc =
+                rjmxConnection.getMBeanInfo(ConnectionToolkit.RUNTIME_BEAN_NAME).getDescription();
+        String memoryDesc =
+                rjmxConnection.getMBeanInfo(ConnectionToolkit.MEMORY_BEAN_NAME).getDescription();
+        String threadDesc =
+                rjmxConnection.getMBeanInfo(ConnectionToolkit.THREAD_BEAN_NAME).getDescription();
+        String osDesc =
+                rjmxConnection
+                        .getMBeanInfo(ConnectionToolkit.OPERATING_SYSTEM_BEAN_NAME)
+                        .getDescription();
+
+        return new JVMDetails(
+                new RuntimeDetails(runtimeDesc, runtimeMap),
+                new MemoryDetails(memoryDesc, memoryMap),
+                new ThreadDetails(threadDesc, threadMap),
+                new OperatingSystemDetails(osDesc, osMap));
     }
 
     private String stringifyArray(Object arrayObject) {
