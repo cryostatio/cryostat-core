@@ -54,19 +54,19 @@ public class JMXMetrics {
         this.operatingSystemDetails = operatingSystemDetails;
     }
 
-    public RuntimeDetails getRuntimeDetails() {
+    public RuntimeDetails getRuntime() {
         return runtimeDetails;
     }
 
-    public MemoryDetails getMemoryDetails() {
+    public MemoryDetails getMemory() {
         return memoryDetails;
     }
 
-    public ThreadDetails getThreadDetails() {
+    public ThreadDetails getThread() {
         return threadDetails;
     }
 
-    public OperatingSystemDetails getOperatingSystemDetails() {
+    public OperatingSystemDetails getOs() {
         return operatingSystemDetails;
     }
 }

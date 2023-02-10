@@ -284,7 +284,10 @@ public class JFRJMXConnection implements JFRConnection {
                         | MBeanException
                         | ReflectionException
                         | IOException e) {
-                    cw.println(e);
+                    cw.println(
+                            String.format(
+                                    "Could not read attribute: [%s], message: [%s]",
+                                    attr.getName(), e.getMessage()));
                 }
             }
         }
