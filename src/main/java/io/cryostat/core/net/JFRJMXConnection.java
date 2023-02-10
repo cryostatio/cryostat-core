@@ -238,8 +238,9 @@ public class JFRJMXConnection implements JFRConnection {
         if (attrNames == null || attrNames.isEmpty()) {
             attrNames =
                     Arrays.asList(rjmxConnection.getMBeanInfo(beanName).getAttributes()).stream()
+                            .filter(MBeanAttributeInfo::isReadable)
                             .map(MBeanAttributeInfo::getName)
-                            .toList();
+                            .collect(Collectors.toList());
         }
         for (String attr : attrNames) {
             try {
