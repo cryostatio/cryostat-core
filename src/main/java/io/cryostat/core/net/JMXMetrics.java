@@ -37,13 +37,13 @@
  */
 package io.cryostat.core.net;
 
-public class JVMDetails {
+public class JMXMetrics {
     private final RuntimeDetails runtimeDetails;
     private final MemoryDetails memoryDetails;
     private final ThreadDetails threadDetails;
     private final OperatingSystemDetails operatingSystemDetails;
 
-    public JVMDetails(
+    public JMXMetrics(
             RuntimeDetails runtimeDetails,
             MemoryDetails memoryDetails,
             ThreadDetails threadDetails,

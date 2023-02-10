@@ -41,47 +41,73 @@ import java.util.Collections;
 import java.util.Map;
 
 public class RuntimeDetails {
-    private final String description;
     private final Map<String, Object> attributes;
 
-    public RuntimeDetails(String description, Map<String, Object> attributes) {
-        this.description = description;
+    public RuntimeDetails(Map<String, Object> attributes) {
         this.attributes = Collections.unmodifiableMap(attributes);
     }
 
-    public String getDescription() {
-        return this.description;
+    public String getBootClassPath() {
+        return (String) attributes.get("BootClassPath");
     }
 
-    public Map<String, Object> getAttributes() {
-        return Collections.unmodifiableMap(attributes);
+    public String getClassPath() {
+        return (String) attributes.get("ClassPath");
     }
 
-    // public MemoryUsage getHeapMemoryUsage() {
-    //     return (MemoryUsage) map.get("HeapMemoryUsage");
-    // }
+    public String[] getInputArguments() {
+        return (String[]) attributes.get("InputArguments");
+    }
 
-    // public MemoryUsage getNonHeapMemoryUsage() {
-    //     return (MemoryUsage) map.get("NonHeapMemoryUsage");
-    // }
+    public String getLibraryPath() {
+        return (String) attributes.get("LibraryPath");
+    }
 
-    // public long getObjectPendingFinalizationCount() {
-    //     return (long) map.get("ObjectPendingFinalizationCount");
-    // }
+    public String getManagementSpecVersion() {
+        return (String) attributes.get("ManagementSpecVersion");
+    }
 
-    // public long getFreeHeapMemory() {
-    //     return (long) map.get("FreeHeapMemory");
-    // }
+    public String getName() {
+        return (String) attributes.get("Name");
+    }
 
-    // public long getFreeNonHeapMemory() {
-    //     return (long) map.get("FreeNonHeapMemory");
-    // }
+    public String getSpecName() {
+        return (String) attributes.get("SpecName");
+    }
 
-    // public long getHeapMemoryUsagePercent() {
-    //     return (long) map.get("HeapMemoryUsagePercent");
-    // }
+    public String getSpecVendor() {
+        return (String) attributes.get("SpecVendor");
+    }
 
-    // public boolean isVerbose() {
-    //     return (boolean) map.get("Verbose");
-    // }
+    public String getSpecVersion() {
+        return (String) attributes.get("SpecVersion");
+    }
+
+    public long getStartTime() {
+        return (long) attributes.get("StartTime");
+    }
+
+    public Map<String, String> getSystemProperties() {
+        return (Map<String, String>) attributes.get("SystemProperties");
+    }
+
+    public long getUptime() {
+        return (long) attributes.get("Uptime");
+    }
+
+    public String getVmName() {
+        return (String) attributes.get("VmName");
+    }
+
+    public String getVmVendor() {
+        return (String) attributes.get("VmVendor");
+    }
+
+    public String getVmVersion() {
+        return (String) attributes.get("VmVersion");
+    }
+
+    public boolean isBootClassPathSupported() {
+        return (boolean) attributes.get("BootClassPathSupported");
+    }
 }

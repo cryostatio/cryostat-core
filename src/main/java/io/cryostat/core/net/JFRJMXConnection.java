@@ -44,20 +44,21 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
-import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularDataSupport;
 import javax.management.remote.JMXServiceURL;
 
 import org.openjdk.jmc.rjmx.ConnectionException;
@@ -216,13 +217,13 @@ public class JFRJMXConnection implements JFRConnection {
         }
     }
 
-    private Map<String, Object> stringifyCompositeData(CompositeData compositeData) {
+    private Map<String, Object> parseCompositeData(CompositeData compositeData) {
         Map<String, Object> map = new HashMap<>();
         for (String key : compositeData.getCompositeType().keySet()) {
             Object value = compositeData.get(key);
             if (value instanceof CompositeData) {
-                map.put(key, stringifyCompositeData((CompositeData) value));
-            } else if (value.getClass().isArray()) {
+                map.put(key, parseCompositeData((CompositeData) value));
+            } else if (value instanceof TabularDataSupport) {
                 map.put(key, stringifyArray(value));
             } else {
                 map.put(key, value);
@@ -231,78 +232,82 @@ public class JFRJMXConnection implements JFRConnection {
         return map;
     }
 
-    private Map<String, Object> getAttributeMap(ObjectName beanName, List<String> attrNames)
+    private Map<Object, Object> parseTabularData(TabularData tabularData) {
+        Set<List<?>> keySet = (Set<List<?>>) tabularData.keySet();
+        Map<Object, Object> tdMap = new HashMap<>();
+        for (List<?> keys : keySet) {
+            CompositeData compositeData = tabularData.get(keys.toArray());
+            var cd = parseCompositeData(compositeData);
+            if (keys.size() == 1 && cd.size() == 2) {
+                Object actualKey = keys.get(0);
+                Map<?, ?> valueMap = (Map<?, ?>) cd;
+                if (valueMap.containsKey("key")
+                        && valueMap.containsKey("value")
+                        && valueMap.get("key").equals(actualKey)) {
+                    tdMap.put(valueMap.get("key"), valueMap.get("value"));
+                } else {
+                    tdMap.put(keys.get(0), cd);
+                }
+            } else {
+                tdMap.put(keys, cd);
+            }
+        }
+        return tdMap;
+    }
+
+    private Object parseObject(Object obj) {
+        if (obj instanceof CompositeData) {
+            return parseCompositeData((CompositeData) obj);
+        } else if (obj instanceof TabularData) {
+            return parseTabularData((TabularData) obj);
+        } else {
+            return obj;
+        }
+    }
+
+    private Map<String, Object> getAttributeMap(ObjectName beanName)
             throws InstanceNotFoundException, IntrospectionException, ReflectionException,
                     IOException {
         Map<String, Object> attrMap = new HashMap<>();
-        if (attrNames == null || attrNames.isEmpty()) {
-            attrNames =
-                    Arrays.asList(rjmxConnection.getMBeanInfo(beanName).getAttributes()).stream()
-                            .filter(MBeanAttributeInfo::isReadable)
-                            .map(MBeanAttributeInfo::getName)
-                            .collect(Collectors.toList());
-        }
-        for (String attr : attrNames) {
-            try {
-                Object attrObject =
-                        this.rjmxConnection.getAttributeValue(
-                                new MRI(Type.ATTRIBUTE, beanName, attr));
-                if (attrObject instanceof CompositeData) {
-                    attrObject = stringifyCompositeData((CompositeData) attrObject);
-                    attrMap.put(attr, attrObject);
-                } else if (attrObject.getClass().isArray() || attrObject instanceof Collection) {
-                    String stringified = stringifyArray(attrObject);
-                    attrMap.put(attr, stringified);
-                } else {
-                    attrMap.put(attr, attrObject);
+
+        var attrs = rjmxConnection.getMBeanInfo(beanName).getAttributes();
+
+        for (var attr : attrs) {
+            if (attr.isReadable() && !attr.getName().equals("ObjectName")) {
+                try {
+                    Object attrObject =
+                            this.rjmxConnection.getAttributeValue(
+                                    new MRI(Type.ATTRIBUTE, beanName, attr.getName()));
+                    attrMap.put(attr.getName(), parseObject(attrObject));
+                } catch (AttributeNotFoundException
+                        | InstanceNotFoundException
+                        | MBeanException
+                        | ReflectionException
+                        | IOException e) {
+                    cw.println(e);
                 }
-            } catch (AttributeNotFoundException
-                    | InstanceNotFoundException
-                    | MBeanException
-                    | ReflectionException
-                    | IOException e) {
-                cw.println(e);
             }
         }
         return attrMap;
     }
 
-    public synchronized JVMDetails getJvmDetails(
-            List<String> runtimeAttrs,
-            List<String> memoryAttrs,
-            List<String> threadAttrs,
-            List<String> osAttrs)
+    public synchronized JMXMetrics getJMXMetrics()
             throws IOException, InstanceNotFoundException, IntrospectionException,
                     ReflectionException {
         if (!isConnected()) {
             connect();
         }
 
-        Map<String, Object> runtimeMap =
-                getAttributeMap(ConnectionToolkit.RUNTIME_BEAN_NAME, runtimeAttrs);
-        Map<String, Object> memoryMap =
-                getAttributeMap(ConnectionToolkit.MEMORY_BEAN_NAME, memoryAttrs);
-        Map<String, Object> threadMap =
-                getAttributeMap(ConnectionToolkit.THREAD_BEAN_NAME, threadAttrs);
-        Map<String, Object> osMap =
-                getAttributeMap(ConnectionToolkit.OPERATING_SYSTEM_BEAN_NAME, osAttrs);
+        Map<String, Object> runtimeMap = getAttributeMap(ConnectionToolkit.RUNTIME_BEAN_NAME);
+        Map<String, Object> memoryMap = getAttributeMap(ConnectionToolkit.MEMORY_BEAN_NAME);
+        Map<String, Object> threadMap = getAttributeMap(ConnectionToolkit.THREAD_BEAN_NAME);
+        Map<String, Object> osMap = getAttributeMap(ConnectionToolkit.OPERATING_SYSTEM_BEAN_NAME);
 
-        String runtimeDesc =
-                rjmxConnection.getMBeanInfo(ConnectionToolkit.RUNTIME_BEAN_NAME).getDescription();
-        String memoryDesc =
-                rjmxConnection.getMBeanInfo(ConnectionToolkit.MEMORY_BEAN_NAME).getDescription();
-        String threadDesc =
-                rjmxConnection.getMBeanInfo(ConnectionToolkit.THREAD_BEAN_NAME).getDescription();
-        String osDesc =
-                rjmxConnection
-                        .getMBeanInfo(ConnectionToolkit.OPERATING_SYSTEM_BEAN_NAME)
-                        .getDescription();
-
-        return new JVMDetails(
-                new RuntimeDetails(runtimeDesc, runtimeMap),
-                new MemoryDetails(memoryDesc, memoryMap),
-                new ThreadDetails(threadDesc, threadMap),
-                new OperatingSystemDetails(osDesc, osMap));
+        return new JMXMetrics(
+                new RuntimeDetails(runtimeMap),
+                new MemoryDetails(memoryMap),
+                new ThreadDetails(threadMap),
+                new OperatingSystemDetails(osMap));
     }
 
     private String stringifyArray(Object arrayObject) {

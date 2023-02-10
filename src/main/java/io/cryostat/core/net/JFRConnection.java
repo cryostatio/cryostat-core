@@ -38,7 +38,6 @@
 package io.cryostat.core.net;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
@@ -72,11 +71,7 @@ public interface JFRConnection extends AutoCloseable {
 
     public String getJvmId() throws IDException, IOException;
 
-    public JVMDetails getJvmDetails(
-            List<String> runtimeAttrs,
-            List<String> memoryAttrs,
-            List<String> threadAttrs,
-            List<String> osAttrs)
+    public JMXMetrics getJMXMetrics()
             throws ConnectionException, IOException, InstanceNotFoundException,
                     IntrospectionException, ReflectionException;
 

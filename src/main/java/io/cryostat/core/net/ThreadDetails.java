@@ -41,109 +41,99 @@ import java.util.Collections;
 import java.util.Map;
 
 public class ThreadDetails {
-    private final String description;
     private final Map<String, Object> attributes;
 
-    public ThreadDetails(String description, Map<String, Object> attributes) {
-        this.description = description;
+    public ThreadDetails(Map<String, Object> attributes) {
         this.attributes = Collections.unmodifiableMap(attributes);
     }
 
-    public String getDescription() {
-        return description;
+    public long[] getAllThreadIds() {
+        return (long[]) attributes.get("AllThreadIds");
     }
 
-    public Map<String, Object> getAttributes() {
-        return Collections.unmodifiableMap(attributes);
+    public long getCurrentThreadCpuTime() {
+        return (long) attributes.get("CurrentThreadCpuTime");
     }
 
-    // public long[] getAllThreadIds() {
-    //     return (long[]) map.get("AllThreadIds");
-    // }
+    public long getCurrentThreadUserTime() {
+        return (long) attributes.get("CurrentThreadUserTime");
+    }
 
-    // public long getCurrentThreadCpuTime() {
-    //     return (long) map.get("CurrentThreadCpuTime");
-    // }
+    public int getDaemonThreadCount() {
+        return (int) attributes.get("DaemonThreadCount");
+    }
 
-    // public long getCurrentThreadUserTime() {
-    //     return (long) map.get("CurrentThreadUserTime");
-    // }
+    public int getPeakThreadCount() {
+        return (int) attributes.get("PeakThreadCount");
+    }
 
-    // public int getDaemonThreadCount() {
-    //     return (int) map.get("DaemonThreadCount");
-    // }
+    public int getThreadCount() {
+        return (int) attributes.get("ThreadCount");
+    }
 
-    // public int getPeakThreadCount() {
-    //     return (int) map.get("PeakThreadCount");
-    // }
+    public long getTotalStartedThreadCount() {
+        return (long) attributes.get("TotalStartedThreadCount");
+    }
 
-    // public int getThreadCount() {
-    //     return (int) map.get("ThreadCount");
-    // }
+    public boolean isCurrentThreadCpuTimeSupported() {
+        return (boolean) attributes.get("CurrentThreadCpuTimeSupported");
+    }
 
-    // public long getTotalStartedThreadCount() {
-    //     return (long) map.get("TotalStartedThreadCount");
-    // }
+    public boolean isObjectMonitorUsageSupported() {
+        return (boolean) attributes.get("ObjectMonitorUsageSupported");
+    }
 
-    // public boolean isCurrentThreadCpuTimeSupported() {
-    //     return (boolean) map.get("CurrentThreadCpuTimeSupported");
-    // }
+    public boolean isSynchronizerUsageSupported() {
+        return (boolean) attributes.get("SynchronizerUsageSupported");
+    }
 
-    // public boolean isObjectMonitorUsageSupported() {
-    //     return (boolean) map.get("ObjectMonitorUsageSupported");
-    // }
+    public boolean isThreadContentionMonitoringEnabled() {
+        return (boolean) attributes.get("ThreadContentionMonitoringEnabled");
+    }
 
-    // public boolean isSynchronizerUsageSupported() {
-    //     return (boolean) map.get("SynchronizerUsageSupported");
-    // }
+    public boolean isThreadContentionMonitoringSupported() {
+        return (boolean) attributes.get("ThreadContentionMonitoringSupported");
+    }
 
-    // public boolean isThreadContentionMonitoringEnabled() {
-    //     return (boolean) map.get("ThreadContentionMonitoringEnabled");
-    // }
+    public boolean isThreadCpuTimeEnabled() {
+        return (boolean) attributes.get("ThreadCpuTimeEnabled");
+    }
 
-    // public boolean isThreadContentionMonitoringSupported() {
-    //     return (boolean) map.get("ThreadContentionMonitoringSupported");
-    // }
+    public boolean isThreadCpuTimeSupported() {
+        return (boolean) attributes.get("ThreadCpuTimeSupported");
+    }
 
-    // public boolean isThreadCpuTimeEnabled() {
-    //     return (boolean) map.get("ThreadCpuTimeEnabled");
-    // }
-
-    // public boolean isThreadCpuTimeSupported() {
-    //     return (boolean) map.get("ThreadCpuTimeSupported");
-    // }
-
-    // @Override
-    // public String toString() {
-    //     return "ThreadDetails{"
-    //             + "AllThreadIds="
-    //             + getAllThreadIds()
-    //             + ", CurrentThreadCpuTime="
-    //             + getCurrentThreadCpuTime()
-    //             + ", CurrentThreadUserTime="
-    //             + getCurrentThreadUserTime()
-    //             + ", DaemonThreadCount="
-    //             + getDaemonThreadCount()
-    //             + ", PeakThreadCount="
-    //             + getPeakThreadCount()
-    //             + ", ThreadCount="
-    //             + getThreadCount()
-    //             + ", TotalStartedThreadCount="
-    //             + getTotalStartedThreadCount()
-    //             + ", CurrentThreadCpuTimeSupported="
-    //             + isCurrentThreadCpuTimeSupported()
-    //             + ", ObjectMonitorUsageSupported="
-    //             + isObjectMonitorUsageSupported()
-    //             + ", SynchronizerUsageSupported="
-    //             + isSynchronizerUsageSupported()
-    //             + ", ThreadContentionMonitoringEnabled="
-    //             + isThreadContentionMonitoringEnabled()
-    //             + ", ThreadContentionMonitoringSupported="
-    //             + isThreadContentionMonitoringSupported()
-    //             + ", ThreadCpuTimeEnabled="
-    //             + isThreadCpuTimeEnabled()
-    //             + ", ThreadCpuTimeSupported="
-    //             + isThreadCpuTimeSupported()
-    //             + '}';
-    // }
+    @Override
+    public String toString() {
+        return "ThreadDetails{"
+                + "AllThreadIds="
+                + getAllThreadIds()
+                + ", CurrentThreadCpuTime="
+                + getCurrentThreadCpuTime()
+                + ", CurrentThreadUserTime="
+                + getCurrentThreadUserTime()
+                + ", DaemonThreadCount="
+                + getDaemonThreadCount()
+                + ", PeakThreadCount="
+                + getPeakThreadCount()
+                + ", ThreadCount="
+                + getThreadCount()
+                + ", TotalStartedThreadCount="
+                + getTotalStartedThreadCount()
+                + ", CurrentThreadCpuTimeSupported="
+                + isCurrentThreadCpuTimeSupported()
+                + ", ObjectMonitorUsageSupported="
+                + isObjectMonitorUsageSupported()
+                + ", SynchronizerUsageSupported="
+                + isSynchronizerUsageSupported()
+                + ", ThreadContentionMonitoringEnabled="
+                + isThreadContentionMonitoringEnabled()
+                + ", ThreadContentionMonitoringSupported="
+                + isThreadContentionMonitoringSupported()
+                + ", ThreadCpuTimeEnabled="
+                + isThreadCpuTimeEnabled()
+                + ", ThreadCpuTimeSupported="
+                + isThreadCpuTimeSupported()
+                + '}';
+    }
 }

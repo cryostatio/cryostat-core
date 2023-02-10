@@ -37,51 +37,42 @@
  */
 package io.cryostat.core.net;
 
+import java.lang.management.MemoryUsage;
 import java.util.Collections;
 import java.util.Map;
 
 public class MemoryDetails {
-    private final String description;
     private final Map<String, Object> attributes;
 
-    public MemoryDetails(String description, Map<String, Object> attributes) {
-        this.description = description;
+    public MemoryDetails(Map<String, Object> attributes) {
         this.attributes = Collections.unmodifiableMap(attributes);
     }
 
-    public String getDescription() {
-        return description;
+    public MemoryUsage getHeapMemoryUsage() {
+        return (MemoryUsage) attributes.get("HeapMemoryUsage");
     }
 
-    public Map<String, Object> getAttributes() {
-        return Collections.unmodifiableMap(attributes);
+    public MemoryUsage getNonHeapMemoryUsage() {
+        return (MemoryUsage) attributes.get("NonHeapMemoryUsage");
     }
 
-    // public MemoryUsage getHeapMemoryUsage() {
-    //     return (MemoryUsage) map.get("HeapMemoryUsage");
-    // }
+    public long getObjectPendingFinalizationCount() {
+        return (long) attributes.get("ObjectPendingFinalizationCount");
+    }
 
-    // public MemoryUsage getNonHeapMemoryUsage() {
-    //     return (MemoryUsage) map.get("NonHeapMemoryUsage");
-    // }
+    public long getFreeHeapMemory() {
+        return (long) attributes.get("FreeHeapMemory");
+    }
 
-    // public long getObjectPendingFinalizationCount() {
-    //     return (long) map.get("ObjectPendingFinalizationCount");
-    // }
+    public long getFreeNonHeapMemory() {
+        return (long) attributes.get("FreeNonHeapMemory");
+    }
 
-    // public long getFreeHeapMemory() {
-    //     return (long) map.get("FreeHeapMemory");
-    // }
+    public long getHeapMemoryUsagePercent() {
+        return (long) attributes.get("HeapMemoryUsagePercent");
+    }
 
-    // public long getFreeNonHeapMemory() {
-    //     return (long) map.get("FreeNonHeapMemory");
-    // }
-
-    // public long getHeapMemoryUsagePercent() {
-    //     return (long) map.get("HeapMemoryUsagePercent");
-    // }
-
-    // public boolean isVerbose() {
-    //     return (boolean) map.get("Verbose");
-    // }
+    public boolean isVerbose() {
+        return (boolean) attributes.get("Verbose");
+    }
 }

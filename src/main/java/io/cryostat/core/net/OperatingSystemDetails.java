@@ -41,106 +41,96 @@ import java.util.Collections;
 import java.util.Map;
 
 public class OperatingSystemDetails {
-    private final String description;
     private final Map<String, Object> attributes;
 
-    public OperatingSystemDetails(String description, Map<String, Object> attributes) {
-        this.description = description;
+    public OperatingSystemDetails(Map<String, Object> attributes) {
         this.attributes = Collections.unmodifiableMap(attributes);
     }
 
-    public String getDescription() {
-        return description;
+    public String getArch() {
+        return (String) attributes.get("Arch");
     }
 
-    public Map<String, Object> getAttributes() {
-        return Collections.unmodifiableMap(attributes);
+    public int getAvailableProcessors() {
+        return (int) attributes.get("AvailableProcessors");
     }
 
-    // public String getArch() {
-    //     return (String) map.get("Arch");
-    // }
+    public String getName() {
+        return (String) attributes.get("Name");
+    }
 
-    // public int getAvailableProcessors() {
-    //     return (int) map.get("AvailableProcessors");
-    // }
+    public double getSystemLoadAverage() {
+        return (double) attributes.get("SystemLoadAverage");
+    }
 
-    // public String getName() {
-    //     return (String) map.get("Name");
-    // }
+    public String getVersion() {
+        return (String) attributes.get("Version");
+    }
 
-    // public double getSystemLoadAverage() {
-    //     return (double) map.get("SystemLoadAverage");
-    // }
+    public long getCommittedVirtualMemorySize() {
+        return (long) attributes.get("CommittedVirtualMemorySize");
+    }
 
-    // public String getVersion() {
-    //     return (String) map.get("Version");
-    // }
+    public long getFreePhysicalMemorySize() {
+        return (long) attributes.get("FreePhysicalMemorySize");
+    }
 
-    // public long getCommittedVirtualMemorySize() {
-    //     return (long) map.get("CommittedVirtualMemorySize");
-    // }
+    public long getFreeSwapSpaceSize() {
+        return (long) attributes.get("FreeSwapSpaceSize");
+    }
 
-    // public long getFreePhysicalMemorySize() {
-    //     return (long) map.get("FreePhysicalMemorySize");
-    // }
+    public double getProcessCpuLoad() {
+        return (double) attributes.get("ProcessCpuLoad");
+    }
 
-    // public long getFreeSwapSpaceSize() {
-    //     return (long) map.get("FreeSwapSpaceSize");
-    // }
+    public long getProcessCpuTime() {
+        return (long) attributes.get("ProcessCpuTime");
+    }
 
-    // public double getProcessCpuLoad() {
-    //     return (double) map.get("ProcessCpuLoad");
-    // }
+    public double getSystemCpuLoad() {
+        return (double) attributes.get("SystemCpuLoad");
+    }
 
-    // public long getProcessCpuTime() {
-    //     return (long) map.get("ProcessCpuTime");
-    // }
+    public long getTotalPhysicalMemorySize() {
+        return (long) attributes.get("TotalPhysicalMemorySize");
+    }
 
-    // public double getSystemCpuLoad() {
-    //     return (double) map.get("SystemCpuLoad");
-    // }
+    public double getTotalSwapSpaceSize() {
+        return (double) attributes.get("TotalSwapSpaceSize");
+    }
 
-    // public long getTotalPhysicalMemorySize() {
-    //     return (long) map.get("TotalPhysicalMemorySize");
-    // }
-
-    // public double getTotalSwapSpaceSize() {
-    //     return (double) map.get("TotalSwapSpaceSize");
-    // }
-
-    // @Override
-    // public String toString() {
-    //     return "OperatingSystemDetails{"
-    //             + "arch='"
-    //             + getArch()
-    //             + '\''
-    //             + ", availableProcessors="
-    //             + getAvailableProcessors()
-    //             + ", name='"
-    //             + getName()
-    //             + '\''
-    //             + ", systemLoadAverage="
-    //             + getSystemLoadAverage()
-    //             + ", version='"
-    //             + getVersion()
-    //             + '\''
-    //             + ", committedVirtualMemorySize="
-    //             + getCommittedVirtualMemorySize()
-    //             + ", freePhysicalMemorySize="
-    //             + getFreePhysicalMemorySize()
-    //             + ", freeSwapSpaceSize="
-    //             + getFreeSwapSpaceSize()
-    //             + ", processCpuLoad="
-    //             + getProcessCpuLoad()
-    //             + ", processCpuTime="
-    //             + getProcessCpuTime()
-    //             + ", systemCpuLoad="
-    //             + getSystemCpuLoad()
-    //             + ", totalPhysicalMemorySize="
-    //             + getTotalPhysicalMemorySize()
-    //             + ", totalSwapSpaceSize="
-    //             + getTotalSwapSpaceSize()
-    //             + '}';
-    // }
+    @Override
+    public String toString() {
+        return "OperatingSystemDetails{"
+                + "arch='"
+                + getArch()
+                + '\''
+                + ", availableProcessors="
+                + getAvailableProcessors()
+                + ", name='"
+                + getName()
+                + '\''
+                + ", systemLoadAverage="
+                + getSystemLoadAverage()
+                + ", version='"
+                + getVersion()
+                + '\''
+                + ", committedVirtualMemorySize="
+                + getCommittedVirtualMemorySize()
+                + ", freePhysicalMemorySize="
+                + getFreePhysicalMemorySize()
+                + ", freeSwapSpaceSize="
+                + getFreeSwapSpaceSize()
+                + ", processCpuLoad="
+                + getProcessCpuLoad()
+                + ", processCpuTime="
+                + getProcessCpuTime()
+                + ", systemCpuLoad="
+                + getSystemCpuLoad()
+                + ", totalPhysicalMemorySize="
+                + getTotalPhysicalMemorySize()
+                + ", totalSwapSpaceSize="
+                + getTotalSwapSpaceSize()
+                + '}';
+    }
 }
