@@ -102,38 +102,4 @@ public class ThreadDetails {
     public boolean isThreadCpuTimeSupported() {
         return (boolean) attributes.get("ThreadCpuTimeSupported");
     }
-
-    @Override
-    public String toString() {
-        return "ThreadDetails{"
-                + "AllThreadIds="
-                + getAllThreadIds()
-                + ", CurrentThreadCpuTime="
-                + getCurrentThreadCpuTime()
-                + ", CurrentThreadUserTime="
-                + getCurrentThreadUserTime()
-                + ", DaemonThreadCount="
-                + getDaemonThreadCount()
-                + ", PeakThreadCount="
-                + getPeakThreadCount()
-                + ", ThreadCount="
-                + getThreadCount()
-                + ", TotalStartedThreadCount="
-                + getTotalStartedThreadCount()
-                + ", CurrentThreadCpuTimeSupported="
-                + isCurrentThreadCpuTimeSupported()
-                + ", ObjectMonitorUsageSupported="
-                + isObjectMonitorUsageSupported()
-                + ", SynchronizerUsageSupported="
-                + isSynchronizerUsageSupported()
-                + ", ThreadContentionMonitoringEnabled="
-                + isThreadContentionMonitoringEnabled()
-                + ", ThreadContentionMonitoringSupported="
-                + isThreadContentionMonitoringSupported()
-                + ", ThreadCpuTimeEnabled="
-                + isThreadCpuTimeEnabled()
-                + ", ThreadCpuTimeSupported="
-                + isThreadCpuTimeSupported()
-                + '}';
-    }
 }

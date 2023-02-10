@@ -98,39 +98,4 @@ public class OperatingSystemDetails {
     public double getTotalSwapSpaceSize() {
         return (double) attributes.get("TotalSwapSpaceSize");
     }
-
-    @Override
-    public String toString() {
-        return "OperatingSystemDetails{"
-                + "arch='"
-                + getArch()
-                + '\''
-                + ", availableProcessors="
-                + getAvailableProcessors()
-                + ", name='"
-                + getName()
-                + '\''
-                + ", systemLoadAverage="
-                + getSystemLoadAverage()
-                + ", version='"
-                + getVersion()
-                + '\''
-                + ", committedVirtualMemorySize="
-                + getCommittedVirtualMemorySize()
-                + ", freePhysicalMemorySize="
-                + getFreePhysicalMemorySize()
-                + ", freeSwapSpaceSize="
-                + getFreeSwapSpaceSize()
-                + ", processCpuLoad="
-                + getProcessCpuLoad()
-                + ", processCpuTime="
-                + getProcessCpuTime()
-                + ", systemCpuLoad="
-                + getSystemCpuLoad()
-                + ", totalPhysicalMemorySize="
-                + getTotalPhysicalMemorySize()
-                + ", totalSwapSpaceSize="
-                + getTotalSwapSpaceSize()
-                + '}';
-    }
 }
