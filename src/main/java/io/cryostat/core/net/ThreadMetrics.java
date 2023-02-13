@@ -48,31 +48,31 @@ public class ThreadMetrics {
     }
 
     public long[] getAllThreadIds() {
-        return (long[]) attributes.getOrDefault("AllThreadIds", new long[0]);
+        return (long[]) attributes.get("AllThreadIds");
     }
 
     public long getCurrentThreadCpuTime() {
-        return (long) attributes.getOrDefault("CurrentThreadCpuTime", Long.MIN_VALUE);
+        return (long) attributes.get("CurrentThreadCpuTime");
     }
 
     public long getCurrentThreadUserTime() {
-        return (long) attributes.getOrDefault("CurrentThreadUserTime", Long.MIN_VALUE);
+        return (long) attributes.get("CurrentThreadUserTime");
     }
 
     public int getDaemonThreadCount() {
-        return (int) attributes.getOrDefault("DaemonThreadCount", Integer.MIN_VALUE);
+        return (int) attributes.get("DaemonThreadCount");
     }
 
     public int getPeakThreadCount() {
-        return (int) attributes.getOrDefault("PeakThreadCount", Integer.MIN_VALUE);
+        return (int) attributes.get("PeakThreadCount");
     }
 
     public int getThreadCount() {
-        return (int) attributes.getOrDefault("ThreadCount", Integer.MIN_VALUE);
+        return (int) attributes.get("ThreadCount");
     }
 
     public long getTotalStartedThreadCount() {
-        return (long) attributes.getOrDefault("TotalStartedThreadCount", Long.MIN_VALUE);
+        return (long) attributes.get("TotalStartedThreadCount");
     }
 
     public boolean isCurrentThreadCpuTimeSupported() {

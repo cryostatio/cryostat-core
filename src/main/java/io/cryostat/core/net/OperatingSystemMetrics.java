@@ -40,8 +40,6 @@ package io.cryostat.core.net;
 import java.util.Collections;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
-
 public class OperatingSystemMetrics {
     private final Map<String, Object> attributes;
 
@@ -50,54 +48,54 @@ public class OperatingSystemMetrics {
     }
 
     public String getArch() {
-        return (String) attributes.getOrDefault("Arch", StringUtils.EMPTY);
+        return (String) attributes.get("Arch");
     }
 
     public int getAvailableProcessors() {
-        return (int) attributes.getOrDefault("AvailableProcessors", Integer.MIN_VALUE);
+        return (int) attributes.get("AvailableProcessors");
     }
 
     public String getName() {
-        return (String) attributes.getOrDefault("Name", StringUtils.EMPTY);
+        return (String) attributes.get("Name");
     }
 
     public double getSystemLoadAverage() {
-        return (double) attributes.getOrDefault("SystemLoadAverage", Double.MIN_VALUE);
+        return (double) attributes.get("SystemLoadAverage");
     }
 
     public String getVersion() {
-        return (String) attributes.getOrDefault("Version", StringUtils.EMPTY);
+        return (String) attributes.get("Version");
     }
 
     public long getCommittedVirtualMemorySize() {
-        return (long) attributes.getOrDefault("CommittedVirtualMemorySize", Long.MIN_VALUE);
+        return (long) attributes.get("CommittedVirtualMemorySize");
     }
 
     public long getFreePhysicalMemorySize() {
-        return (long) attributes.getOrDefault("FreePhysicalMemorySize", Long.MIN_VALUE);
+        return (long) attributes.get("FreePhysicalMemorySize");
     }
 
     public long getFreeSwapSpaceSize() {
-        return (long) attributes.getOrDefault("FreeSwapSpaceSize", Long.MIN_VALUE);
+        return (long) attributes.get("FreeSwapSpaceSize");
     }
 
     public double getProcessCpuLoad() {
-        return (double) attributes.getOrDefault("ProcessCpuLoad", Double.MIN_VALUE);
+        return (double) attributes.get("ProcessCpuLoad");
     }
 
     public long getProcessCpuTime() {
-        return (long) attributes.getOrDefault("ProcessCpuTime", Long.MIN_VALUE);
+        return (long) attributes.get("ProcessCpuTime");
     }
 
     public double getSystemCpuLoad() {
-        return (double) attributes.getOrDefault("SystemCpuLoad", Double.MIN_VALUE);
+        return (double) attributes.get("SystemCpuLoad");
     }
 
     public long getTotalPhysicalMemorySize() {
-        return (long) attributes.getOrDefault("TotalPhysicalMemorySize", Long.MIN_VALUE);
+        return (long) attributes.get("TotalPhysicalMemorySize");
     }
 
     public double getTotalSwapSpaceSize() {
-        return (double) attributes.getOrDefault("TotalSwapSpaceSize", Double.MIN_VALUE);
+        return (double) attributes.get("TotalSwapSpaceSize");
     }
 }

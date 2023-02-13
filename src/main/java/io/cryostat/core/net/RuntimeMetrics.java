@@ -40,8 +40,6 @@ package io.cryostat.core.net;
 import java.util.Collections;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
-
 public class RuntimeMetrics {
     private final Map<String, Object> attributes;
 
@@ -50,64 +48,63 @@ public class RuntimeMetrics {
     }
 
     public String getBootClassPath() {
-        return (String) attributes.getOrDefault("BootClassPath", StringUtils.EMPTY);
+        return (String) attributes.get("BootClassPath");
     }
 
     public String getClassPath() {
-        return (String) attributes.getOrDefault("ClassPath", StringUtils.EMPTY);
+        return (String) attributes.get("ClassPath");
     }
 
     public String[] getInputArguments() {
-        return (String[]) attributes.getOrDefault("InputArguments", new String[0]);
+        return (String[]) attributes.get("InputArguments");
     }
 
     public String getLibraryPath() {
-        return (String) attributes.getOrDefault("LibraryPath", StringUtils.EMPTY);
+        return (String) attributes.get("LibraryPath");
     }
 
     public String getManagementSpecVersion() {
-        return (String) attributes.getOrDefault("ManagementSpecVersion", StringUtils.EMPTY);
+        return (String) attributes.get("ManagementSpecVersion");
     }
 
     public String getName() {
-        return (String) attributes.getOrDefault("Name", StringUtils.EMPTY);
+        return (String) attributes.get("Name");
     }
 
     public String getSpecName() {
-        return (String) attributes.getOrDefault("SpecName", StringUtils.EMPTY);
+        return (String) attributes.get("SpecName");
     }
 
     public String getSpecVendor() {
-        return (String) attributes.getOrDefault("SpecVendor", StringUtils.EMPTY);
+        return (String) attributes.get("SpecVendor");
     }
 
     public String getSpecVersion() {
-        return (String) attributes.getOrDefault("SpecVersion", StringUtils.EMPTY);
+        return (String) attributes.get("SpecVersion");
     }
 
     public long getStartTime() {
-        return (long) attributes.getOrDefault("StartTime", Long.MIN_VALUE);
+        return (long) attributes.get("StartTime");
     }
 
     public Map<String, String> getSystemProperties() {
-        return (Map<String, String>)
-                attributes.getOrDefault("SystemProperties", Collections.emptyMap());
+        return (Map<String, String>) attributes.get("SystemProperties");
     }
 
     public long getUptime() {
-        return (long) attributes.getOrDefault("Uptime", Long.MIN_VALUE);
+        return (long) attributes.get("Uptime");
     }
 
     public String getVmName() {
-        return (String) attributes.getOrDefault("VmName", StringUtils.EMPTY);
+        return (String) attributes.get("VmName");
     }
 
     public String getVmVendor() {
-        return (String) attributes.getOrDefault("VmVendor", StringUtils.EMPTY);
+        return (String) attributes.get("VmVendor");
     }
 
     public String getVmVersion() {
-        return (String) attributes.getOrDefault("VmVersion", StringUtils.EMPTY);
+        return (String) attributes.get("VmVersion");
     }
 
     public boolean isBootClassPathSupported() {

@@ -49,35 +49,27 @@ public class MemoryMetrics {
     }
 
     public CustomMemoryUsage getHeapMemoryUsage() {
-        return (CustomMemoryUsage)
-                attributes.getOrDefault(
-                        "HeapMemoryUsage",
-                        new CustomMemoryUsage(
-                                Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE));
+        return (CustomMemoryUsage) attributes.get("HeapMemoryUsage");
     }
 
     public CustomMemoryUsage getNonHeapMemoryUsage() {
-        return (CustomMemoryUsage)
-                attributes.getOrDefault(
-                        "NonHeapMemoryUsage",
-                        new CustomMemoryUsage(
-                                Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE));
+        return (CustomMemoryUsage) attributes.get("NonHeapMemoryUsage");
     }
 
     public long getObjectPendingFinalizationCount() {
-        return (long) attributes.getOrDefault("ObjectPendingFinalizationCount", Long.MIN_VALUE);
+        return (long) attributes.get("ObjectPendingFinalizationCount");
     }
 
     public long getFreeHeapMemory() {
-        return (long) attributes.getOrDefault("FreeHeapMemory", Long.MIN_VALUE);
+        return (long) attributes.get("FreeHeapMemory");
     }
 
     public long getFreeNonHeapMemory() {
-        return (long) attributes.getOrDefault("FreeNonHeapMemory", Long.MIN_VALUE);
+        return (long) attributes.get("FreeNonHeapMemory");
     }
 
     public double getHeapMemoryUsagePercent() {
-        return (double) attributes.getOrDefault("HeapMemoryUsagePercent", Double.MIN_VALUE);
+        return (double) attributes.get("HeapMemoryUsagePercent");
     }
 
     public boolean isVerbose() {
@@ -85,7 +77,6 @@ public class MemoryMetrics {
     }
 
     // Gson cannot read private fields of java.lang.management.MemoryUsage
-    // Using our own class, we can also define custom default values for each field
     static class CustomMemoryUsage {
         private final long init;
         private final long used;
