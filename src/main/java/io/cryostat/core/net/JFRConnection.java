@@ -71,7 +71,7 @@ public interface JFRConnection extends AutoCloseable {
 
     public String getJvmId() throws IDException, IOException;
 
-    public JMXMetrics getJMXMetrics()
+    public MBeanMetrics getMBeanMetrics()
             throws ConnectionException, IOException, InstanceNotFoundException,
                     IntrospectionException, ReflectionException;
 

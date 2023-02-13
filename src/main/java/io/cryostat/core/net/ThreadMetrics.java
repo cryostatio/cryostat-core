@@ -40,39 +40,39 @@ package io.cryostat.core.net;
 import java.util.Collections;
 import java.util.Map;
 
-public class ThreadDetails {
+public class ThreadMetrics {
     private final Map<String, Object> attributes;
 
-    public ThreadDetails(Map<String, Object> attributes) {
+    public ThreadMetrics(Map<String, Object> attributes) {
         this.attributes = Collections.unmodifiableMap(attributes);
     }
 
     public long[] getAllThreadIds() {
-        return (long[]) attributes.get("AllThreadIds");
+        return (long[]) attributes.getOrDefault("AllThreadIds", new long[0]);
     }
 
     public long getCurrentThreadCpuTime() {
-        return (long) attributes.get("CurrentThreadCpuTime");
+        return (long) attributes.getOrDefault("CurrentThreadCpuTime", Long.MIN_VALUE);
     }
 
     public long getCurrentThreadUserTime() {
-        return (long) attributes.get("CurrentThreadUserTime");
+        return (long) attributes.getOrDefault("CurrentThreadUserTime", Long.MIN_VALUE);
     }
 
     public int getDaemonThreadCount() {
-        return (int) attributes.get("DaemonThreadCount");
+        return (int) attributes.getOrDefault("DaemonThreadCount", Integer.MIN_VALUE);
     }
 
     public int getPeakThreadCount() {
-        return (int) attributes.get("PeakThreadCount");
+        return (int) attributes.getOrDefault("PeakThreadCount", Integer.MIN_VALUE);
     }
 
     public int getThreadCount() {
-        return (int) attributes.get("ThreadCount");
+        return (int) attributes.getOrDefault("ThreadCount", Integer.MIN_VALUE);
     }
 
     public long getTotalStartedThreadCount() {
-        return (long) attributes.get("TotalStartedThreadCount");
+        return (long) attributes.getOrDefault("TotalStartedThreadCount", Long.MIN_VALUE);
     }
 
     public boolean isCurrentThreadCpuTimeSupported() {

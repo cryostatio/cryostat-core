@@ -37,36 +37,36 @@
  */
 package io.cryostat.core.net;
 
-public class JMXMetrics {
-    private final RuntimeDetails runtimeDetails;
-    private final MemoryDetails memoryDetails;
-    private final ThreadDetails threadDetails;
-    private final OperatingSystemDetails operatingSystemDetails;
+public class MBeanMetrics {
+    private final RuntimeMetrics runtimeDetails;
+    private final MemoryMetrics memoryDetails;
+    private final ThreadMetrics threadDetails;
+    private final OperatingSystemMetrics operatingSystemDetails;
 
-    public JMXMetrics(
-            RuntimeDetails runtimeDetails,
-            MemoryDetails memoryDetails,
-            ThreadDetails threadDetails,
-            OperatingSystemDetails operatingSystemDetails) {
+    public MBeanMetrics(
+            RuntimeMetrics runtimeDetails,
+            MemoryMetrics memoryDetails,
+            ThreadMetrics threadDetails,
+            OperatingSystemMetrics operatingSystemDetails) {
         this.runtimeDetails = runtimeDetails;
         this.memoryDetails = memoryDetails;
         this.threadDetails = threadDetails;
         this.operatingSystemDetails = operatingSystemDetails;
     }
 
-    public RuntimeDetails getRuntime() {
+    public RuntimeMetrics getRuntime() {
         return runtimeDetails;
     }
 
-    public MemoryDetails getMemory() {
+    public MemoryMetrics getMemory() {
         return memoryDetails;
     }
 
-    public ThreadDetails getThread() {
+    public ThreadMetrics getThread() {
         return threadDetails;
     }
 
-    public OperatingSystemDetails getOs() {
+    public OperatingSystemMetrics getOs() {
         return operatingSystemDetails;
     }
 }

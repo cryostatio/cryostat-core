@@ -40,6 +40,7 @@ package io.cryostat.core.net;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.lang.management.MemoryUsage;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,7 +59,6 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
-import javax.management.openmbean.TabularDataSupport;
 import javax.management.remote.JMXServiceURL;
 
 import org.openjdk.jmc.rjmx.ConnectionException;
@@ -76,6 +76,7 @@ import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceV2;
 import org.openjdk.jmc.rjmx.subscription.MRI;
 import org.openjdk.jmc.rjmx.subscription.MRI.Type;
 
+import io.cryostat.core.net.MemoryMetrics.CustomMemoryUsage;
 import io.cryostat.core.sys.Clock;
 import io.cryostat.core.sys.Environment;
 import io.cryostat.core.sys.FileSystem;
@@ -223,8 +224,6 @@ public class JFRJMXConnection implements JFRConnection {
             Object value = compositeData.get(key);
             if (value instanceof CompositeData) {
                 map.put(key, parseCompositeData((CompositeData) value));
-            } else if (value instanceof TabularDataSupport) {
-                map.put(key, stringifyArray(value));
             } else {
                 map.put(key, value);
             }
@@ -256,8 +255,13 @@ public class JFRJMXConnection implements JFRConnection {
     }
 
     private Object parseObject(Object obj) {
-        if (obj instanceof CompositeData) {
-            return parseCompositeData((CompositeData) obj);
+        if (obj instanceof MemoryUsage) {
+            return obj;
+        } else if (obj instanceof CompositeData) {
+            CompositeData cd = (CompositeData) obj;
+            if (cd.getCompositeType().getTypeName().equals("java.lang.management.MemoryUsage"))
+                return CustomMemoryUsage.fromMemoryUsage(MemoryUsage.from(cd));
+            return parseCompositeData(cd);
         } else if (obj instanceof TabularData) {
             return parseTabularData((TabularData) obj);
         } else {
@@ -294,7 +298,7 @@ public class JFRJMXConnection implements JFRConnection {
         return attrMap;
     }
 
-    public synchronized JMXMetrics getJMXMetrics()
+    public synchronized MBeanMetrics getMBeanMetrics()
             throws IOException, InstanceNotFoundException, IntrospectionException,
                     ReflectionException {
         if (!isConnected()) {
@@ -306,11 +310,11 @@ public class JFRJMXConnection implements JFRConnection {
         Map<String, Object> threadMap = getAttributeMap(ConnectionToolkit.THREAD_BEAN_NAME);
         Map<String, Object> osMap = getAttributeMap(ConnectionToolkit.OPERATING_SYSTEM_BEAN_NAME);
 
-        return new JMXMetrics(
-                new RuntimeDetails(runtimeMap),
-                new MemoryDetails(memoryMap),
-                new ThreadDetails(threadMap),
-                new OperatingSystemDetails(osMap));
+        return new MBeanMetrics(
+                new RuntimeMetrics(runtimeMap),
+                new MemoryMetrics(memoryMap),
+                new ThreadMetrics(threadMap),
+                new OperatingSystemMetrics(osMap));
     }
 
     private String stringifyArray(Object arrayObject) {

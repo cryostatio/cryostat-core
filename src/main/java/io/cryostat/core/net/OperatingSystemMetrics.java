@@ -40,74 +40,64 @@ package io.cryostat.core.net;
 import java.util.Collections;
 import java.util.Map;
 
-public class RuntimeDetails {
+import org.apache.commons.lang3.StringUtils;
+
+public class OperatingSystemMetrics {
     private final Map<String, Object> attributes;
 
-    public RuntimeDetails(Map<String, Object> attributes) {
+    public OperatingSystemMetrics(Map<String, Object> attributes) {
         this.attributes = Collections.unmodifiableMap(attributes);
     }
 
-    public String getBootClassPath() {
-        return (String) attributes.get("BootClassPath");
+    public String getArch() {
+        return (String) attributes.getOrDefault("Arch", StringUtils.EMPTY);
     }
 
-    public String getClassPath() {
-        return (String) attributes.get("ClassPath");
-    }
-
-    public String[] getInputArguments() {
-        return (String[]) attributes.get("InputArguments");
-    }
-
-    public String getLibraryPath() {
-        return (String) attributes.get("LibraryPath");
-    }
-
-    public String getManagementSpecVersion() {
-        return (String) attributes.get("ManagementSpecVersion");
+    public int getAvailableProcessors() {
+        return (int) attributes.getOrDefault("AvailableProcessors", Integer.MIN_VALUE);
     }
 
     public String getName() {
-        return (String) attributes.get("Name");
+        return (String) attributes.getOrDefault("Name", StringUtils.EMPTY);
     }
 
-    public String getSpecName() {
-        return (String) attributes.get("SpecName");
+    public double getSystemLoadAverage() {
+        return (double) attributes.getOrDefault("SystemLoadAverage", Double.MIN_VALUE);
     }
 
-    public String getSpecVendor() {
-        return (String) attributes.get("SpecVendor");
+    public String getVersion() {
+        return (String) attributes.getOrDefault("Version", StringUtils.EMPTY);
     }
 
-    public String getSpecVersion() {
-        return (String) attributes.get("SpecVersion");
+    public long getCommittedVirtualMemorySize() {
+        return (long) attributes.getOrDefault("CommittedVirtualMemorySize", Long.MIN_VALUE);
     }
 
-    public long getStartTime() {
-        return (long) attributes.get("StartTime");
+    public long getFreePhysicalMemorySize() {
+        return (long) attributes.getOrDefault("FreePhysicalMemorySize", Long.MIN_VALUE);
     }
 
-    public Map<String, String> getSystemProperties() {
-        return (Map<String, String>) attributes.get("SystemProperties");
+    public long getFreeSwapSpaceSize() {
+        return (long) attributes.getOrDefault("FreeSwapSpaceSize", Long.MIN_VALUE);
     }
 
-    public long getUptime() {
-        return (long) attributes.get("Uptime");
+    public double getProcessCpuLoad() {
+        return (double) attributes.getOrDefault("ProcessCpuLoad", Double.MIN_VALUE);
     }
 
-    public String getVmName() {
-        return (String) attributes.get("VmName");
+    public long getProcessCpuTime() {
+        return (long) attributes.getOrDefault("ProcessCpuTime", Long.MIN_VALUE);
     }
 
-    public String getVmVendor() {
-        return (String) attributes.get("VmVendor");
+    public double getSystemCpuLoad() {
+        return (double) attributes.getOrDefault("SystemCpuLoad", Double.MIN_VALUE);
     }
 
-    public String getVmVersion() {
-        return (String) attributes.get("VmVersion");
+    public long getTotalPhysicalMemorySize() {
+        return (long) attributes.getOrDefault("TotalPhysicalMemorySize", Long.MIN_VALUE);
     }
 
-    public boolean isBootClassPathSupported() {
-        return (boolean) attributes.get("BootClassPathSupported");
+    public double getTotalSwapSpaceSize() {
+        return (double) attributes.getOrDefault("TotalSwapSpaceSize", Double.MIN_VALUE);
     }
 }

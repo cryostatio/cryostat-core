@@ -37,42 +37,80 @@
  */
 package io.cryostat.core.net;
 
-import java.lang.management.MemoryUsage;
 import java.util.Collections;
 import java.util.Map;
 
-public class MemoryDetails {
+import org.apache.commons.lang3.StringUtils;
+
+public class RuntimeMetrics {
     private final Map<String, Object> attributes;
 
-    public MemoryDetails(Map<String, Object> attributes) {
+    public RuntimeMetrics(Map<String, Object> attributes) {
         this.attributes = Collections.unmodifiableMap(attributes);
     }
 
-    public MemoryUsage getHeapMemoryUsage() {
-        return (MemoryUsage) attributes.get("HeapMemoryUsage");
+    public String getBootClassPath() {
+        return (String) attributes.getOrDefault("BootClassPath", StringUtils.EMPTY);
     }
 
-    public MemoryUsage getNonHeapMemoryUsage() {
-        return (MemoryUsage) attributes.get("NonHeapMemoryUsage");
+    public String getClassPath() {
+        return (String) attributes.getOrDefault("ClassPath", StringUtils.EMPTY);
     }
 
-    public long getObjectPendingFinalizationCount() {
-        return (long) attributes.get("ObjectPendingFinalizationCount");
+    public String[] getInputArguments() {
+        return (String[]) attributes.getOrDefault("InputArguments", new String[0]);
     }
 
-    public long getFreeHeapMemory() {
-        return (long) attributes.get("FreeHeapMemory");
+    public String getLibraryPath() {
+        return (String) attributes.getOrDefault("LibraryPath", StringUtils.EMPTY);
     }
 
-    public long getFreeNonHeapMemory() {
-        return (long) attributes.get("FreeNonHeapMemory");
+    public String getManagementSpecVersion() {
+        return (String) attributes.getOrDefault("ManagementSpecVersion", StringUtils.EMPTY);
     }
 
-    public long getHeapMemoryUsagePercent() {
-        return (long) attributes.get("HeapMemoryUsagePercent");
+    public String getName() {
+        return (String) attributes.getOrDefault("Name", StringUtils.EMPTY);
     }
 
-    public boolean isVerbose() {
-        return (boolean) attributes.get("Verbose");
+    public String getSpecName() {
+        return (String) attributes.getOrDefault("SpecName", StringUtils.EMPTY);
+    }
+
+    public String getSpecVendor() {
+        return (String) attributes.getOrDefault("SpecVendor", StringUtils.EMPTY);
+    }
+
+    public String getSpecVersion() {
+        return (String) attributes.getOrDefault("SpecVersion", StringUtils.EMPTY);
+    }
+
+    public long getStartTime() {
+        return (long) attributes.getOrDefault("StartTime", Long.MIN_VALUE);
+    }
+
+    public Map<String, String> getSystemProperties() {
+        return (Map<String, String>)
+                attributes.getOrDefault("SystemProperties", Collections.emptyMap());
+    }
+
+    public long getUptime() {
+        return (long) attributes.getOrDefault("Uptime", Long.MIN_VALUE);
+    }
+
+    public String getVmName() {
+        return (String) attributes.getOrDefault("VmName", StringUtils.EMPTY);
+    }
+
+    public String getVmVendor() {
+        return (String) attributes.getOrDefault("VmVendor", StringUtils.EMPTY);
+    }
+
+    public String getVmVersion() {
+        return (String) attributes.getOrDefault("VmVersion", StringUtils.EMPTY);
+    }
+
+    public boolean isBootClassPathSupported() {
+        return (boolean) attributes.get("BootClassPathSupported");
     }
 }
