@@ -38,35 +38,35 @@
 package io.cryostat.core.net;
 
 public class MBeanMetrics {
-    private final RuntimeMetrics runtimeDetails;
-    private final MemoryMetrics memoryDetails;
-    private final ThreadMetrics threadDetails;
-    private final OperatingSystemMetrics operatingSystemDetails;
+    private final RuntimeMetrics runtime;
+    private final MemoryMetrics memory;
+    private final ThreadMetrics thread;
+    private final OperatingSystemMetrics os;
 
     public MBeanMetrics(
             RuntimeMetrics runtimeDetails,
             MemoryMetrics memoryDetails,
             ThreadMetrics threadDetails,
             OperatingSystemMetrics operatingSystemDetails) {
-        this.runtimeDetails = runtimeDetails;
-        this.memoryDetails = memoryDetails;
-        this.threadDetails = threadDetails;
-        this.operatingSystemDetails = operatingSystemDetails;
+        this.runtime = runtimeDetails;
+        this.memory = memoryDetails;
+        this.thread = threadDetails;
+        this.os = operatingSystemDetails;
     }
 
     public RuntimeMetrics getRuntime() {
-        return runtimeDetails;
+        return runtime;
     }
 
     public MemoryMetrics getMemory() {
-        return memoryDetails;
+        return memory;
     }
 
     public ThreadMetrics getThread() {
-        return threadDetails;
+        return thread;
     }
 
     public OperatingSystemMetrics getOs() {
-        return operatingSystemDetails;
+        return os;
     }
 }

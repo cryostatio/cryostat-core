@@ -84,8 +84,8 @@ public class MemoryMetrics {
         return (boolean) attributes.get("Verbose");
     }
 
-    // Gson cannot read private fields of java.lang.management.MemoryUsage mu
-    // We can also now define custom default values for each field
+    // Gson cannot read private fields of java.lang.management.MemoryUsage
+    // Using our own class, we can also define custom default values for each field
     static class CustomMemoryUsage {
         private final long init;
         private final long used;
