@@ -45,7 +45,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +84,6 @@ import io.cryostat.core.templates.TemplateService;
 import io.cryostat.core.tui.ClientWriter;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang3.StringUtils;
 
 public class JFRJMXConnection implements JFRConnection {
 
@@ -269,33 +267,6 @@ public class JFRJMXConnection implements JFRConnection {
         }
     }
 
-    private Object defaultValue(String type) {
-        switch (type) {
-            case "boolean":
-                return null;
-            case "int":
-                return Integer.MIN_VALUE;
-            case "long":
-                return Long.MIN_VALUE;
-            case "double":
-                return Double.MIN_VALUE;
-            case "float":
-                return Float.MIN_VALUE;
-            case "java.lang.String":
-                return StringUtils.EMPTY;
-            case "[Ljava.lang.String;":
-                return new String[0];
-            case "[J":
-                return new long[0];
-            case "javax.management.openmbean.CompositeData":
-                return Collections.emptyMap();
-            case "javax.management.openmbean.TabularData":
-                return Collections.emptyMap();
-            default:
-                return null;
-        }
-    }
-
     private Map<String, Object> getAttributeMap(ObjectName beanName)
             throws InstanceNotFoundException, IntrospectionException, ReflectionException,
                     IOException {
@@ -319,7 +290,6 @@ public class JFRJMXConnection implements JFRConnection {
                             String.format(
                                     "Could not read attribute: [%s], message: [%s]",
                                     attr.getName(), e.getMessage()));
-                    attrMap.put(attr.getName(), defaultValue(attr.getType()));
                 }
             }
         }
