@@ -37,6 +37,7 @@
  */
 package io.cryostat.core.net;
 
+import java.lang.management.MemoryUsage;
 import java.util.Map;
 
 public class MemoryMetrics {
@@ -50,9 +51,12 @@ public class MemoryMetrics {
 
     public MemoryMetrics(Map<String, Object> attributes) {
         this.heapMemoryUsage =
-                (MemoryUsage) attributes.getOrDefault("HeapMemoryUsage", new MemoryUsage());
+                (MemoryUsage)
+                        attributes.getOrDefault("HeapMemoryUsage", new MemoryUsage(-1, 0, 0, -1));
         this.nonHeapMemoryUsage =
-                (MemoryUsage) attributes.getOrDefault("NonHeapMemoryUsage", new MemoryUsage());
+                (MemoryUsage)
+                        attributes.getOrDefault(
+                                "NonHeapMemoryUsage", new MemoryUsage(-1, 0, 0, -1));
         this.objectPendingFinalizationCount =
                 (int) attributes.getOrDefault("ObjectPendingFinalizationCount", Integer.MIN_VALUE);
         this.freeHeapMemory = (long) attributes.getOrDefault("FreeHeapMemory", Long.MIN_VALUE);
@@ -109,49 +113,5 @@ public class MemoryMetrics {
                 + ", verbose="
                 + verbose
                 + '}';
-    }
-    // Gson cannot read private fields of java.lang.management.MemoryUsage
-    static class MemoryUsage {
-        private final long init;
-        private final long used;
-        private final long committed;
-        private final long max;
-
-        public MemoryUsage() {
-            this.init = Long.MIN_VALUE;
-            this.used = Long.MIN_VALUE;
-            this.committed = Long.MIN_VALUE;
-            this.max = Long.MIN_VALUE;
-        }
-
-        public MemoryUsage(long init, long used, long committed, long max) {
-            this.init = init;
-            this.used = used;
-            this.committed = committed;
-            this.max = max;
-        }
-
-        public long getInit() {
-            return init;
-        }
-
-        public long getUsed() {
-            return used;
-        }
-
-        public long getCommitted() {
-            return committed;
-        }
-
-        public long getMax() {
-            return max;
-        }
-
-        public static MemoryUsage fromMemoryUsage(java.lang.management.MemoryUsage mu) {
-            if (mu == null) {
-                return new MemoryUsage();
-            }
-            return new MemoryUsage(mu.getInit(), mu.getUsed(), mu.getCommitted(), mu.getMax());
-        }
     }
 }
