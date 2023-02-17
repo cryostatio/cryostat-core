@@ -37,77 +37,163 @@
  */
 package io.cryostat.core.net;
 
-import java.util.Collections;
 import java.util.Map;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.commons.lang3.StringUtils;
+
 public class RuntimeMetrics {
-    private final Map<String, Object> attributes;
+    private final String bootClassPath;
+    private final String classPath;
+    private final String[] inputArguments;
+    private final String libraryPath;
+    private final String managementSpecVersion;
+    private final String name;
+    private final String specName;
+    private final String specVendor;
+    private final String specVersion;
+    private final Map<String, String> systemProperties;
+    private final long startTime;
+    private final long uptime;
+    private final String vmName;
+    private final String vmVendor;
+    private final String vmVersion;
+    private final boolean bootClassPathSupported;
 
     public RuntimeMetrics(Map<String, Object> attributes) {
-        this.attributes = Collections.unmodifiableMap(attributes);
+        this.bootClassPath = (String) attributes.getOrDefault("BootClassPath", StringUtils.EMPTY);
+        this.classPath = (String) attributes.getOrDefault("ClassPath", StringUtils.EMPTY);
+        this.inputArguments = (String[]) attributes.getOrDefault("InputArguments", new String[0]);
+        this.libraryPath = (String) attributes.getOrDefault("LibraryPath", StringUtils.EMPTY);
+        this.managementSpecVersion =
+                (String) attributes.getOrDefault("ManagementSpecVersion", StringUtils.EMPTY);
+        this.name = (String) attributes.getOrDefault("Name", StringUtils.EMPTY);
+        this.specName = (String) attributes.getOrDefault("SpecName", StringUtils.EMPTY);
+        this.specVendor = (String) attributes.getOrDefault("SpecVendor", StringUtils.EMPTY);
+        this.specVersion = (String) attributes.getOrDefault("SpecVersion", StringUtils.EMPTY);
+        this.systemProperties =
+                (Map<String, String>) attributes.getOrDefault("SystemProperties", Map.of());
+        this.startTime = (long) attributes.getOrDefault("StartTime", Long.MIN_VALUE);
+        this.uptime = (long) attributes.getOrDefault("Uptime", Long.MIN_VALUE);
+        this.vmName = (String) attributes.getOrDefault("VmName", StringUtils.EMPTY);
+        this.vmVendor = (String) attributes.getOrDefault("VmVendor", StringUtils.EMPTY);
+        this.vmVersion = (String) attributes.getOrDefault("VmVersion", StringUtils.EMPTY);
+        this.bootClassPathSupported =
+                (boolean) attributes.getOrDefault("BootClassPathSupported", false);
     }
 
     public String getBootClassPath() {
-        return (String) attributes.get("BootClassPath");
+        return bootClassPath;
     }
 
     public String getClassPath() {
-        return (String) attributes.get("ClassPath");
+        return classPath;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public String[] getInputArguments() {
-        return (String[]) attributes.get("InputArguments");
+        return inputArguments;
     }
 
     public String getLibraryPath() {
-        return (String) attributes.get("LibraryPath");
+        return libraryPath;
     }
 
     public String getManagementSpecVersion() {
-        return (String) attributes.get("ManagementSpecVersion");
+        return managementSpecVersion;
     }
 
     public String getName() {
-        return (String) attributes.get("Name");
+        return name;
     }
 
     public String getSpecName() {
-        return (String) attributes.get("SpecName");
+        return specName;
     }
 
     public String getSpecVendor() {
-        return (String) attributes.get("SpecVendor");
+        return specVendor;
     }
 
     public String getSpecVersion() {
-        return (String) attributes.get("SpecVersion");
+        return specVersion;
     }
 
     public long getStartTime() {
-        return (long) attributes.get("StartTime");
+        return startTime;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public Map<String, String> getSystemProperties() {
-        return (Map<String, String>) attributes.get("SystemProperties");
+        return systemProperties;
     }
 
     public long getUptime() {
-        return (long) attributes.get("Uptime");
+        return uptime;
     }
 
     public String getVmName() {
-        return (String) attributes.get("VmName");
+        return vmName;
     }
 
     public String getVmVendor() {
-        return (String) attributes.get("VmVendor");
+        return vmVendor;
     }
 
     public String getVmVersion() {
-        return (String) attributes.get("VmVersion");
+        return vmVersion;
     }
 
     public boolean isBootClassPathSupported() {
-        return (boolean) attributes.get("BootClassPathSupported");
+        return bootClassPathSupported;
+    }
+
+    @Override
+    public String toString() {
+        return "RuntimeMetrics{"
+                + "bootClassPath='"
+                + bootClassPath
+                + '\''
+                + ", classPath='"
+                + classPath
+                + '\''
+                + ", inputArguments="
+                + inputArguments
+                + ", libraryPath='"
+                + libraryPath
+                + '\''
+                + ", managementSpecVersion='"
+                + managementSpecVersion
+                + '\''
+                + ", name='"
+                + name
+                + '\''
+                + ", specName='"
+                + specName
+                + '\''
+                + ", specVendor='"
+                + specVendor
+                + '\''
+                + ", specVersion='"
+                + specVersion
+                + '\''
+                + ", systemProperties="
+                + systemProperties
+                + ", startTime="
+                + startTime
+                + ", uptime="
+                + uptime
+                + ", vmName='"
+                + vmName
+                + '\''
+                + ", vmVendor='"
+                + vmVendor
+                + '\''
+                + ", vmVersion='"
+                + vmVersion
+                + '\''
+                + ", bootClassPathSupported="
+                + bootClassPathSupported
+                + '}';
     }
 }

@@ -37,65 +37,132 @@
  */
 package io.cryostat.core.net;
 
-import java.util.Collections;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class OperatingSystemMetrics {
-    private final Map<String, Object> attributes;
+    private final String arch;
+    private final int availableProcessors;
+    private final String name;
+    private final double systemLoadAverage;
+    private final String version;
+    private final long committedVirtualMemorySize;
+    private final long freePhysicalMemorySize;
+    private final long freeSwapSpaceSize;
+    private final double processCpuLoad;
+    private final long processCpuTime;
+    private final double systemCpuLoad;
+    private final long totalPhysicalMemorySize;
+    private final long totalSwapSpaceSize;
 
     public OperatingSystemMetrics(Map<String, Object> attributes) {
-        this.attributes = Collections.unmodifiableMap(attributes);
+        this.arch = (String) attributes.getOrDefault("Arch", StringUtils.EMPTY);
+        this.availableProcessors =
+                (int) attributes.getOrDefault("AvailableProcessors", Integer.MIN_VALUE);
+        this.name = (String) attributes.getOrDefault("Name", StringUtils.EMPTY);
+        this.systemLoadAverage =
+                (double) attributes.getOrDefault("SystemLoadAverage", Double.MIN_VALUE);
+        this.version = (String) attributes.getOrDefault("Version", StringUtils.EMPTY);
+        this.committedVirtualMemorySize =
+                (long) attributes.getOrDefault("CommittedVirtualMemorySize", Long.MIN_VALUE);
+        this.freePhysicalMemorySize =
+                (long) attributes.getOrDefault("FreePhysicalMemorySize", Long.MIN_VALUE);
+        this.freeSwapSpaceSize =
+                (long) attributes.getOrDefault("FreeSwapSpaceSize", Long.MIN_VALUE);
+        this.processCpuLoad = (double) attributes.getOrDefault("ProcessCpuLoad", Double.MIN_VALUE);
+        this.processCpuTime = (long) attributes.getOrDefault("ProcessCpuTime", Long.MIN_VALUE);
+        this.systemCpuLoad = (double) attributes.getOrDefault("SystemCpuLoad", Double.MIN_VALUE);
+        this.totalPhysicalMemorySize =
+                (long) attributes.getOrDefault("TotalPhysicalMemorySize", Long.MIN_VALUE);
+        this.totalSwapSpaceSize =
+                (long) attributes.getOrDefault("TotalSwapSpaceSize", Long.MIN_VALUE);
     }
 
     public String getArch() {
-        return (String) attributes.get("Arch");
+        return arch;
     }
 
     public int getAvailableProcessors() {
-        return (int) attributes.get("AvailableProcessors");
+        return availableProcessors;
     }
 
     public String getName() {
-        return (String) attributes.get("Name");
+        return name;
     }
 
     public double getSystemLoadAverage() {
-        return (double) attributes.get("SystemLoadAverage");
+        return systemLoadAverage;
     }
 
     public String getVersion() {
-        return (String) attributes.get("Version");
+        return version;
     }
 
     public long getCommittedVirtualMemorySize() {
-        return (long) attributes.get("CommittedVirtualMemorySize");
+        return committedVirtualMemorySize;
     }
 
     public long getFreePhysicalMemorySize() {
-        return (long) attributes.get("FreePhysicalMemorySize");
+        return freePhysicalMemorySize;
     }
 
     public long getFreeSwapSpaceSize() {
-        return (long) attributes.get("FreeSwapSpaceSize");
+        return freeSwapSpaceSize;
     }
 
     public double getProcessCpuLoad() {
-        return (double) attributes.get("ProcessCpuLoad");
+        return processCpuLoad;
     }
 
     public long getProcessCpuTime() {
-        return (long) attributes.get("ProcessCpuTime");
+        return processCpuTime;
     }
 
     public double getSystemCpuLoad() {
-        return (double) attributes.get("SystemCpuLoad");
+        return systemCpuLoad;
     }
 
     public long getTotalPhysicalMemorySize() {
-        return (long) attributes.get("TotalPhysicalMemorySize");
+        return totalPhysicalMemorySize;
     }
 
-    public double getTotalSwapSpaceSize() {
-        return (double) attributes.get("TotalSwapSpaceSize");
+    public long getTotalSwapSpaceSize() {
+        return totalSwapSpaceSize;
+    }
+
+    @Override
+    public String toString() {
+        return "OperatingSystemMetrics{"
+                + "arch='"
+                + arch
+                + '\''
+                + ", availableProcessors="
+                + availableProcessors
+                + ", name='"
+                + name
+                + '\''
+                + ", systemLoadAverage="
+                + systemLoadAverage
+                + ", version='"
+                + version
+                + '\''
+                + ", committedVirtualMemorySize="
+                + committedVirtualMemorySize
+                + ", freePhysicalMemorySize="
+                + freePhysicalMemorySize
+                + ", freeSwapSpaceSize="
+                + freeSwapSpaceSize
+                + ", processCpuTime="
+                + processCpuTime
+                + ", totalPhysicalMemorySize="
+                + totalPhysicalMemorySize
+                + ", totalSwapSpaceSize="
+                + totalSwapSpaceSize
+                + ", processCpuLoad="
+                + processCpuLoad
+                + ", systemCpuLoad="
+                + systemCpuLoad
+                + '}';
     }
 }

@@ -77,7 +77,6 @@ import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceV2;
 import org.openjdk.jmc.rjmx.subscription.MRI;
 import org.openjdk.jmc.rjmx.subscription.MRI.Type;
 
-import io.cryostat.core.net.MemoryMetrics.CustomMemoryUsage;
 import io.cryostat.core.sys.Clock;
 import io.cryostat.core.sys.Environment;
 import io.cryostat.core.sys.FileSystem;
@@ -260,7 +259,8 @@ public class JFRJMXConnection implements JFRConnection {
         if (obj instanceof CompositeData) {
             CompositeData cd = (CompositeData) obj;
             if (cd.getCompositeType().getTypeName().equals("java.lang.management.MemoryUsage"))
-                return CustomMemoryUsage.fromMemoryUsage(MemoryUsage.from(cd));
+                return io.cryostat.core.net.MemoryMetrics.MemoryUsage.fromMemoryUsage(
+                        MemoryUsage.from(cd));
             return parseCompositeData(cd);
         } else if (obj instanceof TabularData) {
             return parseTabularData((TabularData) obj);

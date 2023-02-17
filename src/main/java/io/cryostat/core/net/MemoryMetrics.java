@@ -37,53 +37,94 @@
  */
 package io.cryostat.core.net;
 
-import java.lang.management.MemoryUsage;
-import java.util.Collections;
 import java.util.Map;
 
 public class MemoryMetrics {
-    private final Map<String, Object> attributes;
+    private final MemoryUsage heapMemoryUsage;
+    private final MemoryUsage nonHeapMemoryUsage;
+    private final long objectPendingFinalizationCount;
+    private final long freeHeapMemory;
+    private final long freeNonHeapMemory;
+    private final double heapMemoryUsagePercent;
+    private final boolean verbose;
 
     public MemoryMetrics(Map<String, Object> attributes) {
-        this.attributes = Collections.unmodifiableMap(attributes);
+        this.heapMemoryUsage =
+                (MemoryUsage) attributes.getOrDefault("HeapMemoryUsage", new MemoryUsage());
+        this.nonHeapMemoryUsage =
+                (MemoryUsage) attributes.getOrDefault("NonHeapMemoryUsage", new MemoryUsage());
+        this.objectPendingFinalizationCount =
+                (int) attributes.getOrDefault("ObjectPendingFinalizationCount", Integer.MIN_VALUE);
+        this.freeHeapMemory = (long) attributes.getOrDefault("FreeHeapMemory", Long.MIN_VALUE);
+        this.freeNonHeapMemory =
+                (long) attributes.getOrDefault("FreeNonHeapMemory", Long.MIN_VALUE);
+        this.heapMemoryUsagePercent =
+                (double) attributes.getOrDefault("HeapMemoryUsagePercent", Double.MIN_VALUE);
+        this.verbose = (boolean) attributes.getOrDefault("Verbose", false);
     }
 
-    public CustomMemoryUsage getHeapMemoryUsage() {
-        return (CustomMemoryUsage) attributes.get("HeapMemoryUsage");
+    public MemoryUsage getHeapMemoryUsage() {
+        return heapMemoryUsage;
     }
 
-    public CustomMemoryUsage getNonHeapMemoryUsage() {
-        return (CustomMemoryUsage) attributes.get("NonHeapMemoryUsage");
+    public MemoryUsage getNonHeapMemoryUsage() {
+        return nonHeapMemoryUsage;
     }
 
     public long getObjectPendingFinalizationCount() {
-        return (long) attributes.get("ObjectPendingFinalizationCount");
+        return objectPendingFinalizationCount;
     }
 
     public long getFreeHeapMemory() {
-        return (long) attributes.get("FreeHeapMemory");
+        return freeHeapMemory;
     }
 
     public long getFreeNonHeapMemory() {
-        return (long) attributes.get("FreeNonHeapMemory");
+        return freeNonHeapMemory;
     }
 
     public double getHeapMemoryUsagePercent() {
-        return (double) attributes.get("HeapMemoryUsagePercent");
+        return heapMemoryUsagePercent;
     }
 
     public boolean isVerbose() {
-        return (boolean) attributes.get("Verbose");
+        return verbose;
     }
 
+    @Override
+    public String toString() {
+        return "MemoryMetrics{"
+                + ", heapMemoryUsage="
+                + heapMemoryUsage
+                + ", nonHeapMemoryUsage="
+                + nonHeapMemoryUsage
+                + ", objectPendingFinalizationCount="
+                + objectPendingFinalizationCount
+                + ", freeHeapMemory="
+                + freeHeapMemory
+                + ", freeNonHeapMemory="
+                + freeNonHeapMemory
+                + ", heapMemoryUsagePercent="
+                + heapMemoryUsagePercent
+                + ", verbose="
+                + verbose
+                + '}';
+    }
     // Gson cannot read private fields of java.lang.management.MemoryUsage
-    static class CustomMemoryUsage {
+    static class MemoryUsage {
         private final long init;
         private final long used;
         private final long committed;
         private final long max;
 
-        public CustomMemoryUsage(long init, long used, long committed, long max) {
+        public MemoryUsage() {
+            this.init = Long.MIN_VALUE;
+            this.used = Long.MIN_VALUE;
+            this.committed = Long.MIN_VALUE;
+            this.max = Long.MIN_VALUE;
+        }
+
+        public MemoryUsage(long init, long used, long committed, long max) {
             this.init = init;
             this.used = used;
             this.committed = committed;
@@ -106,9 +147,11 @@ public class MemoryMetrics {
             return max;
         }
 
-        public static CustomMemoryUsage fromMemoryUsage(MemoryUsage mu) {
-            return new CustomMemoryUsage(
-                    mu.getInit(), mu.getUsed(), mu.getCommitted(), mu.getMax());
+        public static MemoryUsage fromMemoryUsage(java.lang.management.MemoryUsage mu) {
+            if (mu == null) {
+                return new MemoryUsage();
+            }
+            return new MemoryUsage(mu.getInit(), mu.getUsed(), mu.getCommitted(), mu.getMax());
         }
     }
 }

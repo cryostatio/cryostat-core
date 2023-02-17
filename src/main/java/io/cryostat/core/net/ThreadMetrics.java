@@ -37,69 +37,142 @@
  */
 package io.cryostat.core.net;
 
-import java.util.Collections;
 import java.util.Map;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class ThreadMetrics {
-    private final Map<String, Object> attributes;
+    private final long[] allThreadIds;
+    private final long currentThreadCpuTime;
+    private final long currentThreadUserTime;
+    private final int daemonThreadCount;
+    private final int peakThreadCount;
+    private final int threadCount;
+    private final long totalStartedThreadCount;
+    private final boolean currentThreadCpuTimeSupported;
+    private final boolean objectMonitorUsageSupported;
+    private final boolean synchronizerUsageSupported;
+    private final boolean threadContentionMonitoringEnabled;
+    private final boolean threadContentionMonitoringSupported;
+    private final boolean threadCpuTimeEnabled;
+    private final boolean threadCpuTimeSupported;
 
     public ThreadMetrics(Map<String, Object> attributes) {
-        this.attributes = Collections.unmodifiableMap(attributes);
+        this.allThreadIds = (long[]) attributes.getOrDefault("AllThreadIds", new long[0]);
+        this.currentThreadCpuTime =
+                (long) attributes.getOrDefault("CurrentThreadCpuTime", Long.MIN_VALUE);
+        this.currentThreadUserTime =
+                (long) attributes.getOrDefault("CurrentThreadUserTime", Long.MIN_VALUE);
+        this.daemonThreadCount =
+                (int) attributes.getOrDefault("DaemonThreadCount", Integer.MIN_VALUE);
+        this.peakThreadCount = (int) attributes.getOrDefault("PeakThreadCount", Integer.MIN_VALUE);
+        this.threadCount = (int) attributes.getOrDefault("ThreadCount", Integer.MIN_VALUE);
+        this.totalStartedThreadCount =
+                (long) attributes.getOrDefault("TotalStartedThreadCount", Long.MIN_VALUE);
+        this.currentThreadCpuTimeSupported =
+                (boolean) attributes.getOrDefault("CurrentThreadCpuTimeSupported", false);
+        this.objectMonitorUsageSupported =
+                (boolean) attributes.getOrDefault("ObjectMonitorUsageSupported", false);
+        this.synchronizerUsageSupported =
+                (boolean) attributes.getOrDefault("SynchronizerUsageSupported", false);
+        this.threadContentionMonitoringEnabled =
+                (boolean) attributes.getOrDefault("ThreadContentionMonitoringEnabled", false);
+        this.threadContentionMonitoringSupported =
+                (boolean) attributes.getOrDefault("ThreadContentionMonitoringSupported", false);
+        this.threadCpuTimeEnabled =
+                (boolean) attributes.getOrDefault("ThreadCpuTimeEnabled", false);
+        this.threadCpuTimeSupported =
+                (boolean) attributes.getOrDefault("ThreadCpuTimeSupported", false);
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public long[] getAllThreadIds() {
-        return (long[]) attributes.get("AllThreadIds");
+        return allThreadIds;
     }
 
     public long getCurrentThreadCpuTime() {
-        return (long) attributes.get("CurrentThreadCpuTime");
+        return currentThreadCpuTime;
     }
 
     public long getCurrentThreadUserTime() {
-        return (long) attributes.get("CurrentThreadUserTime");
+        return currentThreadUserTime;
     }
 
     public int getDaemonThreadCount() {
-        return (int) attributes.get("DaemonThreadCount");
+        return daemonThreadCount;
     }
 
     public int getPeakThreadCount() {
-        return (int) attributes.get("PeakThreadCount");
+        return peakThreadCount;
     }
 
     public int getThreadCount() {
-        return (int) attributes.get("ThreadCount");
+        return threadCount;
     }
 
     public long getTotalStartedThreadCount() {
-        return (long) attributes.get("TotalStartedThreadCount");
+        return totalStartedThreadCount;
     }
 
     public boolean isCurrentThreadCpuTimeSupported() {
-        return (boolean) attributes.get("CurrentThreadCpuTimeSupported");
+        return currentThreadCpuTimeSupported;
     }
 
     public boolean isObjectMonitorUsageSupported() {
-        return (boolean) attributes.get("ObjectMonitorUsageSupported");
+        return objectMonitorUsageSupported;
     }
 
     public boolean isSynchronizerUsageSupported() {
-        return (boolean) attributes.get("SynchronizerUsageSupported");
+        return synchronizerUsageSupported;
     }
 
     public boolean isThreadContentionMonitoringEnabled() {
-        return (boolean) attributes.get("ThreadContentionMonitoringEnabled");
+        return threadContentionMonitoringEnabled;
     }
 
     public boolean isThreadContentionMonitoringSupported() {
-        return (boolean) attributes.get("ThreadContentionMonitoringSupported");
+        return threadContentionMonitoringSupported;
     }
 
     public boolean isThreadCpuTimeEnabled() {
-        return (boolean) attributes.get("ThreadCpuTimeEnabled");
+        return threadCpuTimeEnabled;
     }
 
     public boolean isThreadCpuTimeSupported() {
-        return (boolean) attributes.get("ThreadCpuTimeSupported");
+        return threadCpuTimeSupported;
+    }
+
+    @Override
+    public String toString() {
+        return "ThreadMetrics{"
+                + "allThreadIds="
+                + allThreadIds
+                + ", currentThreadCpuTime="
+                + currentThreadCpuTime
+                + ", currentThreadUserTime="
+                + currentThreadUserTime
+                + ", daemonThreadCount="
+                + daemonThreadCount
+                + ", peakThreadCount="
+                + peakThreadCount
+                + ", threadCount="
+                + threadCount
+                + ", totalStartedThreadCount="
+                + totalStartedThreadCount
+                + ", currentThreadCpuTimeSupported="
+                + currentThreadCpuTimeSupported
+                + ", objectMonitorUsageSupported="
+                + objectMonitorUsageSupported
+                + ", synchronizerUsageSupported="
+                + synchronizerUsageSupported
+                + ", threadContentionMonitoringEnabled="
+                + threadContentionMonitoringEnabled
+                + ", threadContentionMonitoringSupported="
+                + threadContentionMonitoringSupported
+                + ", threadCpuTimeEnabled="
+                + threadCpuTimeEnabled
+                + ", threadCpuTimeSupported="
+                + threadCpuTimeSupported
+                + '}';
     }
 }
