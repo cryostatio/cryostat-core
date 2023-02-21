@@ -256,7 +256,7 @@ public class JFRJMXConnection implements JFRConnection {
     private Object parseObject(Object obj) {
         if (obj instanceof CompositeData) {
             CompositeData cd = (CompositeData) obj;
-            if (cd.getCompositeType().getTypeName().equals("java.lang.management.MemoryUsage"))
+            if (cd.getCompositeType().getTypeName().equals(MemoryUsage.class.getName()))
                 return MemoryUsage.from(cd);
             return parseCompositeData(cd);
         } else if (obj instanceof TabularData) {
