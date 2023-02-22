@@ -40,17 +40,25 @@ package io.cryostat.core.net;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.lang.management.MemoryUsage;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
+import javax.management.IntrospectionException;
 import javax.management.MBeanException;
+import javax.management.ObjectName;
 import javax.management.ReflectionException;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.TabularData;
 import javax.management.remote.JMXServiceURL;
 
 import org.openjdk.jmc.rjmx.ConnectionException;
@@ -171,6 +179,26 @@ public class JFRJMXConnection implements JFRConnection {
         }
     }
 
+    public synchronized String getJvmId(RuntimeMetrics metrics) throws IOException {
+        if (!isConnected()) {
+            connect();
+        }
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
+                DataOutputStream dos = new DataOutputStream(baos)) {
+            dos.writeUTF(metrics.getClassPath());
+            dos.writeUTF(metrics.getName());
+            dos.writeUTF(stringifyArray(metrics.getInputArguments()));
+            dos.writeUTF(metrics.getLibraryPath());
+            dos.writeUTF(metrics.getVmVendor());
+            dos.writeUTF(metrics.getVmVersion());
+            dos.writeLong(metrics.getStartTime());
+            byte[] hash = DigestUtils.sha256(baos.toByteArray());
+            return new String(Base64.getUrlEncoder().encode(hash), StandardCharsets.UTF_8).trim();
+        } catch (IOException e) {
+            throw new IDException(e);
+        }
+    }
+
     public synchronized String getJvmId() throws IDException, IOException {
         if (!isConnected()) {
             connect();
@@ -195,6 +223,8 @@ public class JFRJMXConnection implements JFRConnection {
                 if (attrObject.getClass().isArray()) {
                     String stringified = stringifyArray(attrObject);
                     dos.writeUTF(stringified);
+                } else if (attrObject instanceof Long) {
+                    dos.writeLong((Long) attrObject);
                 } else {
                     dos.writeUTF(attrObject.toString());
                 }
@@ -207,6 +237,105 @@ public class JFRJMXConnection implements JFRConnection {
                 | ReflectionException e) {
             throw new IDException(e);
         }
+    }
+
+    private Map<String, Object> parseCompositeData(CompositeData compositeData) {
+        Map<String, Object> map = new HashMap<>();
+        for (String key : compositeData.getCompositeType().keySet()) {
+            Object value = compositeData.get(key);
+            if (value instanceof CompositeData) {
+                map.put(key, parseCompositeData((CompositeData) value));
+            } else {
+                map.put(key, value);
+            }
+        }
+        return map;
+    }
+
+    private Map<Object, Object> parseTabularData(TabularData tabularData) {
+        Set<List<?>> keySet = (Set<List<?>>) tabularData.keySet();
+        Map<Object, Object> tdMap = new HashMap<>();
+        for (List<?> keys : keySet) {
+            CompositeData compositeData = tabularData.get(keys.toArray());
+            var cd = parseCompositeData(compositeData);
+            if (keys.size() == 1 && cd.size() == 2) {
+                Object actualKey = keys.get(0);
+                Map<?, ?> valueMap = (Map<?, ?>) cd;
+                if (valueMap.containsKey("key")
+                        && valueMap.containsKey("value")
+                        && valueMap.get("key").equals(actualKey)) {
+                    tdMap.put(valueMap.get("key"), valueMap.get("value"));
+                } else {
+                    tdMap.put(keys.get(0), cd);
+                }
+            } else {
+                tdMap.put(keys, cd);
+            }
+        }
+        return tdMap;
+    }
+
+    private Object parseObject(Object obj) {
+        if (obj instanceof CompositeData) {
+            CompositeData cd = (CompositeData) obj;
+            if (cd.getCompositeType().getTypeName().equals(MemoryUsage.class.getName()))
+                return MemoryUsage.from(cd);
+            return parseCompositeData(cd);
+        } else if (obj instanceof TabularData) {
+            return parseTabularData((TabularData) obj);
+        } else {
+            return obj;
+        }
+    }
+
+    private Map<String, Object> getAttributeMap(ObjectName beanName)
+            throws InstanceNotFoundException, IntrospectionException, ReflectionException,
+                    IOException {
+        Map<String, Object> attrMap = new HashMap<>();
+
+        var attrs = rjmxConnection.getMBeanInfo(beanName).getAttributes();
+
+        for (var attr : attrs) {
+            if (attr.isReadable() && !attr.getName().equals("ObjectName")) {
+                try {
+                    Object attrObject =
+                            this.rjmxConnection.getAttributeValue(
+                                    new MRI(Type.ATTRIBUTE, beanName, attr.getName()));
+                    attrMap.put(attr.getName(), parseObject(attrObject));
+                } catch (AttributeNotFoundException
+                        | InstanceNotFoundException
+                        | MBeanException
+                        | ReflectionException
+                        | IOException e) {
+                    cw.println(
+                            String.format(
+                                    "Could not read attribute: [%s], message: [%s]",
+                                    attr.getName(), e.getMessage()));
+                }
+            }
+        }
+        return attrMap;
+    }
+
+    public synchronized MBeanMetrics getMBeanMetrics()
+            throws IOException, InstanceNotFoundException, IntrospectionException,
+                    ReflectionException {
+        if (!isConnected()) {
+            connect();
+        }
+
+        Map<String, Object> runtimeMap = getAttributeMap(ConnectionToolkit.RUNTIME_BEAN_NAME);
+        Map<String, Object> memoryMap = getAttributeMap(ConnectionToolkit.MEMORY_BEAN_NAME);
+        Map<String, Object> threadMap = getAttributeMap(ConnectionToolkit.THREAD_BEAN_NAME);
+        Map<String, Object> osMap = getAttributeMap(ConnectionToolkit.OPERATING_SYSTEM_BEAN_NAME);
+
+        RuntimeMetrics runtimeMetrics = new RuntimeMetrics(runtimeMap);
+        return new MBeanMetrics(
+                runtimeMetrics,
+                new MemoryMetrics(memoryMap),
+                new ThreadMetrics(threadMap),
+                new OperatingSystemMetrics(osMap),
+                getJvmId(runtimeMetrics));
     }
 
     private String stringifyArray(Object arrayObject) {

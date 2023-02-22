@@ -37,47 +37,43 @@
  */
 package io.cryostat.core.net;
 
-import java.io.IOException;
+public class MBeanMetrics {
+    private final RuntimeMetrics runtime;
+    private final MemoryMetrics memory;
+    private final ThreadMetrics thread;
+    private final OperatingSystemMetrics os;
+    private final String jvmId;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.IntrospectionException;
-import javax.management.ReflectionException;
-import javax.management.remote.JMXServiceURL;
+    public MBeanMetrics(
+            RuntimeMetrics runtimeDetails,
+            MemoryMetrics memoryDetails,
+            ThreadMetrics threadDetails,
+            OperatingSystemMetrics operatingSystemDetails,
+            String jvmId) {
+        this.runtime = runtimeDetails;
+        this.memory = memoryDetails;
+        this.thread = threadDetails;
+        this.os = operatingSystemDetails;
+        this.jvmId = jvmId;
+    }
 
-import org.openjdk.jmc.rjmx.ConnectionException;
-import org.openjdk.jmc.rjmx.IConnectionHandle;
-import org.openjdk.jmc.rjmx.ServiceNotAvailableException;
-import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
+    public RuntimeMetrics getRuntime() {
+        return runtime;
+    }
 
-import io.cryostat.core.sys.Clock;
-import io.cryostat.core.templates.TemplateService;
+    public MemoryMetrics getMemory() {
+        return memory;
+    }
 
-public interface JFRConnection extends AutoCloseable {
+    public ThreadMetrics getThread() {
+        return thread;
+    }
 
-    public IConnectionHandle getHandle() throws ConnectionException, IOException;
+    public OperatingSystemMetrics getOs() {
+        return os;
+    }
 
-    public IFlightRecorderService getService()
-            throws ConnectionException, IOException, ServiceNotAvailableException;
-
-    public TemplateService getTemplateService();
-
-    public long getApproximateServerTime(Clock clock);
-
-    public JMXServiceURL getJMXURL() throws IOException;
-
-    public String getHost();
-
-    public int getPort();
-
-    public String getJvmId() throws IDException, IOException;
-
-    public MBeanMetrics getMBeanMetrics()
-            throws ConnectionException, IOException, InstanceNotFoundException,
-                    IntrospectionException, ReflectionException;
-
-    public boolean isConnected();
-
-    public void connect() throws ConnectionException;
-
-    public void disconnect();
+    public String getJvmId() {
+        return jvmId;
+    }
 }
