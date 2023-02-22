@@ -44,7 +44,7 @@
   <org.apache.commons.codec.version>1.15</org.apache.commons.codec.version>
   <org.apache.commons.io.version>2.11.0</org.apache.commons.io.version>
   <org.apache.commons.text.version>1.10.0</org.apache.commons.text.version>
-  <org.jsoup.version>1.15.3</org.jsoup.version>
+  <org.jsoup.version>1.15.4</org.jsoup.version>
 
   <com.github.spotbugs.version>4.7.1</com.github.spotbugs.version>
   <com.github.spotbugs.plugin.version>4.7.0.0</com.github.spotbugs.plugin.version>
