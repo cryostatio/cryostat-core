@@ -40,6 +40,7 @@ package io.cryostat.core.net;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class OperatingSystemMetrics {
     private final String arch;
@@ -133,36 +134,20 @@ public class OperatingSystemMetrics {
 
     @Override
     public String toString() {
-        return "OperatingSystemMetrics{"
-                + "arch='"
-                + arch
-                + '\''
-                + ", availableProcessors="
-                + availableProcessors
-                + ", name='"
-                + name
-                + '\''
-                + ", systemLoadAverage="
-                + systemLoadAverage
-                + ", version='"
-                + version
-                + '\''
-                + ", committedVirtualMemorySize="
-                + committedVirtualMemorySize
-                + ", freePhysicalMemorySize="
-                + freePhysicalMemorySize
-                + ", freeSwapSpaceSize="
-                + freeSwapSpaceSize
-                + ", processCpuTime="
-                + processCpuTime
-                + ", totalPhysicalMemorySize="
-                + totalPhysicalMemorySize
-                + ", totalSwapSpaceSize="
-                + totalSwapSpaceSize
-                + ", processCpuLoad="
-                + processCpuLoad
-                + ", systemCpuLoad="
-                + systemCpuLoad
-                + '}';
+        return new ToStringBuilder(this)
+                .append("arch", arch)
+                .append("availableProcessors", availableProcessors)
+                .append("name", name)
+                .append("systemLoadAverage", systemLoadAverage)
+                .append("version", version)
+                .append("committedVirtualMemorySize", committedVirtualMemorySize)
+                .append("freePhysicalMemorySize", freePhysicalMemorySize)
+                .append("freeSwapSpaceSize", freeSwapSpaceSize)
+                .append("processCpuTime", processCpuTime)
+                .append("totalPhysicalMemorySize", totalPhysicalMemorySize)
+                .append("totalSwapSpaceSize", totalSwapSpaceSize)
+                .append("processCpuLoad", processCpuLoad)
+                .append("systemCpuLoad", systemCpuLoad)
+                .build();
     }
 }

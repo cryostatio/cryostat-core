@@ -41,6 +41,7 @@ import java.util.Map;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class RuntimeMetrics {
     private final String bootClassPath;
@@ -150,50 +151,23 @@ public class RuntimeMetrics {
 
     @Override
     public String toString() {
-        return "RuntimeMetrics{"
-                + "bootClassPath='"
-                + bootClassPath
-                + '\''
-                + ", classPath='"
-                + classPath
-                + '\''
-                + ", inputArguments="
-                + inputArguments
-                + ", libraryPath='"
-                + libraryPath
-                + '\''
-                + ", managementSpecVersion='"
-                + managementSpecVersion
-                + '\''
-                + ", name='"
-                + name
-                + '\''
-                + ", specName='"
-                + specName
-                + '\''
-                + ", specVendor='"
-                + specVendor
-                + '\''
-                + ", specVersion='"
-                + specVersion
-                + '\''
-                + ", systemProperties="
-                + systemProperties
-                + ", startTime="
-                + startTime
-                + ", uptime="
-                + uptime
-                + ", vmName='"
-                + vmName
-                + '\''
-                + ", vmVendor='"
-                + vmVendor
-                + '\''
-                + ", vmVersion='"
-                + vmVersion
-                + '\''
-                + ", bootClassPathSupported="
-                + bootClassPathSupported
-                + '}';
+        return new ToStringBuilder(this)
+                .append("bootClassPath", bootClassPath)
+                .append("classPath", classPath)
+                .append("inputArguments", inputArguments)
+                .append("libraryPath", libraryPath)
+                .append("managementSpecVersion", managementSpecVersion)
+                .append("name", name)
+                .append("specName", specName)
+                .append("specVendor", specVendor)
+                .append("specVersion", specVersion)
+                .append("systemProperties", systemProperties)
+                .append("startTime", startTime)
+                .append("uptime", uptime)
+                .append("vmName", vmName)
+                .append("vmVendor", vmVendor)
+                .append("vmVersion", vmVersion)
+                .append("bootClassPathSupported", bootClassPathSupported)
+                .build();
     }
 }
