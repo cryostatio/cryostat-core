@@ -40,6 +40,7 @@ package io.cryostat.core.net;
 import java.util.Map;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class ThreadMetrics {
     private final long[] allThreadIds;
@@ -144,35 +145,21 @@ public class ThreadMetrics {
 
     @Override
     public String toString() {
-        return "ThreadMetrics{"
-                + "allThreadIds="
-                + allThreadIds
-                + ", currentThreadCpuTime="
-                + currentThreadCpuTime
-                + ", currentThreadUserTime="
-                + currentThreadUserTime
-                + ", daemonThreadCount="
-                + daemonThreadCount
-                + ", peakThreadCount="
-                + peakThreadCount
-                + ", threadCount="
-                + threadCount
-                + ", totalStartedThreadCount="
-                + totalStartedThreadCount
-                + ", currentThreadCpuTimeSupported="
-                + currentThreadCpuTimeSupported
-                + ", objectMonitorUsageSupported="
-                + objectMonitorUsageSupported
-                + ", synchronizerUsageSupported="
-                + synchronizerUsageSupported
-                + ", threadContentionMonitoringEnabled="
-                + threadContentionMonitoringEnabled
-                + ", threadContentionMonitoringSupported="
-                + threadContentionMonitoringSupported
-                + ", threadCpuTimeEnabled="
-                + threadCpuTimeEnabled
-                + ", threadCpuTimeSupported="
-                + threadCpuTimeSupported
-                + '}';
+        return new ToStringBuilder(this)
+                .append("allThreadIds", allThreadIds)
+                .append("currentThreadCpuTime", currentThreadCpuTime)
+                .append("currentThreadUserTime", currentThreadUserTime)
+                .append("daemonThreadCount", daemonThreadCount)
+                .append("peakThreadCount", peakThreadCount)
+                .append("threadCount", threadCount)
+                .append("totalStartedThreadCount", totalStartedThreadCount)
+                .append("currentThreadCpuTimeSupported", currentThreadCpuTimeSupported)
+                .append("objectMonitorUsageSupported", objectMonitorUsageSupported)
+                .append("synchronizerUsageSupported", synchronizerUsageSupported)
+                .append("threadContentionMonitoringEnabled", threadContentionMonitoringEnabled)
+                .append("threadContentionMonitoringSupported", threadContentionMonitoringSupported)
+                .append("threadCpuTimeEnabled", threadCpuTimeEnabled)
+                .append("threadCpuTimeSupported", threadCpuTimeSupported)
+                .build();
     }
 }

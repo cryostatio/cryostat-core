@@ -40,6 +40,8 @@ package io.cryostat.core.net;
 import java.lang.management.MemoryUsage;
 import java.util.Map;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 public class MemoryMetrics {
     private final MemoryUsage heapMemoryUsage;
     private final MemoryUsage nonHeapMemoryUsage;
@@ -97,21 +99,14 @@ public class MemoryMetrics {
 
     @Override
     public String toString() {
-        return "MemoryMetrics{"
-                + ", heapMemoryUsage="
-                + heapMemoryUsage
-                + ", nonHeapMemoryUsage="
-                + nonHeapMemoryUsage
-                + ", objectPendingFinalizationCount="
-                + objectPendingFinalizationCount
-                + ", freeHeapMemory="
-                + freeHeapMemory
-                + ", freeNonHeapMemory="
-                + freeNonHeapMemory
-                + ", heapMemoryUsagePercent="
-                + heapMemoryUsagePercent
-                + ", verbose="
-                + verbose
-                + '}';
+        return new ToStringBuilder(this)
+                .append("heapMemoryUsage", heapMemoryUsage)
+                .append("nonHeapMemoryUsage", nonHeapMemoryUsage)
+                .append("objectPendingFinalizationCount", objectPendingFinalizationCount)
+                .append("freeHeapMemory", freeHeapMemory)
+                .append("freeNonHeapMemory", freeNonHeapMemory)
+                .append("heapMemoryUsagePercent", heapMemoryUsagePercent)
+                .append("verbose", verbose)
+                .build();
     }
 }
