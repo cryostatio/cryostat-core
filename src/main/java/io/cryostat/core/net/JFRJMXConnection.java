@@ -179,6 +179,26 @@ public class JFRJMXConnection implements JFRConnection {
         }
     }
 
+    public synchronized String getJvmId(RuntimeMetrics metrics) throws IOException {
+        if (!isConnected()) {
+            connect();
+        }
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
+                DataOutputStream dos = new DataOutputStream(baos)) {
+            dos.writeUTF(metrics.getClassPath());
+            dos.writeUTF(metrics.getName());
+            dos.writeUTF(stringifyArray(metrics.getInputArguments()));
+            dos.writeUTF(metrics.getLibraryPath());
+            dos.writeUTF(metrics.getVmVendor());
+            dos.writeUTF(metrics.getVmVersion());
+            dos.writeLong(metrics.getStartTime());
+            byte[] hash = DigestUtils.sha256(baos.toByteArray());
+            return new String(Base64.getUrlEncoder().encode(hash), StandardCharsets.UTF_8).trim();
+        } catch (IOException e) {
+            throw new IDException(e);
+        }
+    }
+
     public synchronized String getJvmId() throws IDException, IOException {
         if (!isConnected()) {
             connect();
@@ -307,11 +327,13 @@ public class JFRJMXConnection implements JFRConnection {
         Map<String, Object> threadMap = getAttributeMap(ConnectionToolkit.THREAD_BEAN_NAME);
         Map<String, Object> osMap = getAttributeMap(ConnectionToolkit.OPERATING_SYSTEM_BEAN_NAME);
 
+        RuntimeMetrics runtimeMetrics = new RuntimeMetrics(runtimeMap);
         return new MBeanMetrics(
-                new RuntimeMetrics(runtimeMap),
+                runtimeMetrics,
                 new MemoryMetrics(memoryMap),
                 new ThreadMetrics(threadMap),
-                new OperatingSystemMetrics(osMap));
+                new OperatingSystemMetrics(osMap),
+                getJvmId(runtimeMetrics));
     }
 
     private String stringifyArray(Object arrayObject) {

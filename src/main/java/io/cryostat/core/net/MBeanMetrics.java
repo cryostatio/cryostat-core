@@ -42,16 +42,19 @@ public class MBeanMetrics {
     private final MemoryMetrics memory;
     private final ThreadMetrics thread;
     private final OperatingSystemMetrics os;
+    private final String jvmId;
 
     public MBeanMetrics(
             RuntimeMetrics runtimeDetails,
             MemoryMetrics memoryDetails,
             ThreadMetrics threadDetails,
-            OperatingSystemMetrics operatingSystemDetails) {
+            OperatingSystemMetrics operatingSystemDetails,
+            String jvmId) {
         this.runtime = runtimeDetails;
         this.memory = memoryDetails;
         this.thread = threadDetails;
         this.os = operatingSystemDetails;
+        this.jvmId = jvmId;
     }
 
     public RuntimeMetrics getRuntime() {
@@ -68,5 +71,9 @@ public class MBeanMetrics {
 
     public OperatingSystemMetrics getOs() {
         return os;
+    }
+
+    public String getJvmId() {
+        return jvmId;
     }
 }
