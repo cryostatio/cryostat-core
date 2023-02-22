@@ -223,6 +223,8 @@ public class JFRJMXConnection implements JFRConnection {
                 if (attrObject.getClass().isArray()) {
                     String stringified = stringifyArray(attrObject);
                     dos.writeUTF(stringified);
+                } else if (attrObject instanceof Long) {
+                    dos.writeLong((Long) attrObject);
                 } else {
                     dos.writeUTF(attrObject.toString());
                 }
