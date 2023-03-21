@@ -37,7 +37,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Level;
 
+import org.openjdk.jmc.ui.common.CorePlugin;
 import org.openjdk.jmc.ui.common.jvm.JVMCommandLineToolkit;
 import org.openjdk.jmc.ui.common.jvm.JVMDescriptor;
 import org.openjdk.jmc.ui.common.resource.Resource;
@@ -143,7 +145,7 @@ public final class NameConverter {
 	 */
 	public void addNamingRule(NamingRule rule) {
 		rules.add(rule);
-		Collections.sort(rules, COMPARATOR);
+		rules.sort(COMPARATOR);
 	}
 
 	/**
