@@ -50,6 +50,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FileSystem {
 
@@ -95,7 +96,9 @@ public class FileSystem {
     }
 
     public List<String> listDirectoryChildren(Path path) throws IOException {
-        return Files.list(path).map(p -> p.getFileName().toString()).collect(Collectors.toList());
+        try (Stream<Path> stream = Files.list(path)) {
+            return stream.map(p -> p.getFileName().toString()).collect(Collectors.toList());
+        }
     }
 
     public boolean deleteIfExists(Path path) throws IOException {
