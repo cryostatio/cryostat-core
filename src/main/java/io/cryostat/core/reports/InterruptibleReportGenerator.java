@@ -186,7 +186,7 @@ public class InterruptibleReportGenerator {
                             evalMap.put(
                                     eval.getRule().getId(),
                                     new RuleEvaluation(
-                                            eval.getSeverity(),
+                                            eval.getSeverity().getLimit(),
                                             eval.getRule().getName(),
                                             eval.getRule().getTopic(),
                                             eval.getExplanation()));
@@ -198,7 +198,7 @@ public class InterruptibleReportGenerator {
                             | CouldNotLoadRecordingException e) {
                         return Map.of(
                                 e.getClass().toString(),
-                                new RuleEvaluation(Severity.NA, "", "", e.getMessage()));
+                                new RuleEvaluation(Severity.NA.getLimit(), "", "", e.getMessage()));
                     }
                 });
     }
@@ -262,20 +262,20 @@ public class InterruptibleReportGenerator {
     }
 
     public static class RuleEvaluation {
-        private Severity severity;
+        private double score;
         private String name;
         private String topic;
         private String description;
 
-        RuleEvaluation(Severity severity, String name, String topic, String description) {
-            this.severity = severity;
+        RuleEvaluation(double score, String name, String topic, String description) {
+            this.score = score;
             this.name = name;
             this.topic = topic;
             this.description = description;
         }
 
-        public Severity getSeverity() {
-            return severity;
+        public double getScore() {
+            return score;
         }
 
         public String getName() {
