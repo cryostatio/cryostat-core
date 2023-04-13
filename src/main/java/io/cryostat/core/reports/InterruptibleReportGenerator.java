@@ -401,14 +401,11 @@ public class InterruptibleReportGenerator {
         if (dependency != null) {
             Class<? extends IRule> dependencyType = dependency.value();
             if (dependencyType != null) {
-                while (true) {
-                    if (evaluatedRules.containsKey(dependencyType)) {
-                        if (evaluatedRules.get(dependencyType).compareTo(dependency.severity())
-                                < 0) {
-                            return false;
-                        }
-                        return true;
+                if (evaluatedRules.containsKey(dependencyType)) {
+                    if (evaluatedRules.get(dependencyType).compareTo(dependency.severity()) < 0) {
+                        return false;
                     }
+                    return true;
                 }
             }
         }
