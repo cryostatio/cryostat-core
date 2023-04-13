@@ -572,6 +572,7 @@ public class InterruptibleReportGenerator {
 
         ReportResult(String html) {
             this.html = html;
+            this.reportStats = new ReportStats(0, 0, 0);
         }
 
         ReportResult(String html, ReportStats reportStats) {
