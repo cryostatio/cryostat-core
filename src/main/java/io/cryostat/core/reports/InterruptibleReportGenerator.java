@@ -68,6 +68,7 @@ import org.openjdk.jmc.flightrecorder.rules.IResult;
 import org.openjdk.jmc.flightrecorder.rules.IRule;
 import org.openjdk.jmc.flightrecorder.rules.ResultBuilder;
 import org.openjdk.jmc.flightrecorder.rules.ResultProvider;
+import org.openjdk.jmc.flightrecorder.rules.ResultToolkit;
 import org.openjdk.jmc.flightrecorder.rules.RuleRegistry;
 import org.openjdk.jmc.flightrecorder.rules.Severity;
 import org.openjdk.jmc.flightrecorder.rules.report.html.internal.HtmlResultGroup;
@@ -83,6 +84,7 @@ import jdk.jfr.Event;
 import jdk.jfr.Label;
 import jdk.jfr.Name;
 import org.apache.commons.io.input.CountingInputStream;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -189,7 +191,7 @@ public class InterruptibleReportGenerator {
                                             eval.getSeverity().getLimit(),
                                             eval.getRule().getName(),
                                             eval.getRule().getTopic(),
-                                            eval.getExplanation()));
+                                            getTextDescription(eval)));
                         }
                         return evalMap;
                     } catch (InterruptedException
@@ -198,9 +200,49 @@ public class InterruptibleReportGenerator {
                             | CouldNotLoadRecordingException e) {
                         return Map.of(
                                 e.getClass().toString(),
-                                new RuleEvaluation(Severity.NA.getLimit(), "", "", e.getMessage()));
+                                new RuleEvaluation(
+                                        Severity.NA.getLimit(),
+                                        e.getClass().getSimpleName(),
+                                        "report_failure",
+                                        e.getMessage()));
                     }
                 });
+    }
+
+    private String getTextDescription(IResult result) {
+        StringBuilder sb = new StringBuilder();
+
+        if (StringUtils.isNotBlank(result.getSummary())) {
+            sb.append("Summary:\n");
+            sb.append(ResultToolkit.populateMessage(result, result.getSummary(), false));
+            sb.append("\n\n");
+        }
+
+        if (StringUtils.isNotBlank(result.getExplanation())) {
+            sb.append("Explanation:\n");
+            sb.append(ResultToolkit.populateMessage(result, result.getExplanation(), false));
+            sb.append("\n\n");
+        }
+
+        if (StringUtils.isNotBlank(result.getSolution())) {
+            sb.append("Solution:\n");
+            sb.append(ResultToolkit.populateMessage(result, result.getSolution(), false));
+            sb.append("\n\n");
+        }
+
+        if (!result.suggestRecordingSettings().isEmpty()) {
+            sb.append("Suggested settings:\n");
+            for (var suggestion : result.suggestRecordingSettings()) {
+                sb.append(
+                        String.format(
+                                "%s %s=%s",
+                                suggestion.getSettingFor(),
+                                suggestion.getSettingName(),
+                                suggestion.getSettingValue()));
+            }
+        }
+
+        return sb.toString().strip();
     }
 
     private Pair<Collection<IResult>, Long> generateResultHelper(
