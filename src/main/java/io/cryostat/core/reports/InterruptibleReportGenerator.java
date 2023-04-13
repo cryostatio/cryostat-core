@@ -63,12 +63,17 @@ import org.openjdk.jmc.common.util.Pair;
 import org.openjdk.jmc.common.util.XmlToolkit;
 import org.openjdk.jmc.flightrecorder.CouldNotLoadRecordingException;
 import org.openjdk.jmc.flightrecorder.JfrLoaderToolkit;
+import org.openjdk.jmc.flightrecorder.rules.DependsOn;
+import org.openjdk.jmc.flightrecorder.rules.IResult;
 import org.openjdk.jmc.flightrecorder.rules.IRule;
-import org.openjdk.jmc.flightrecorder.rules.Result;
+import org.openjdk.jmc.flightrecorder.rules.ResultBuilder;
+import org.openjdk.jmc.flightrecorder.rules.ResultProvider;
 import org.openjdk.jmc.flightrecorder.rules.RuleRegistry;
+import org.openjdk.jmc.flightrecorder.rules.Severity;
 import org.openjdk.jmc.flightrecorder.rules.report.html.internal.HtmlResultGroup;
 import org.openjdk.jmc.flightrecorder.rules.report.html.internal.HtmlResultProvider;
 import org.openjdk.jmc.flightrecorder.rules.report.html.internal.RulesHtmlToolkit;
+import org.openjdk.jmc.flightrecorder.rules.util.RulesToolkit;
 
 import io.cryostat.core.log.Logger;
 
@@ -126,9 +131,9 @@ public class InterruptibleReportGenerator {
                     // but calling our cancellable evaluate() method rather than the
                     // RulesToolkit.evaluateParallel as explained further down.
                     try {
-                        Pair<Collection<Result>, Long> helperPair =
+                        Pair<Collection<IResult>, Long> helperPair =
                                 generateResultHelper(recording, predicate);
-                        Collection<Result> results = helperPair.left;
+                        Collection<IResult> results = helperPair.left;
                         List<HtmlResultGroup> groups = loadResultGroups();
 
                         String html =
@@ -142,12 +147,9 @@ public class InterruptibleReportGenerator {
                         int rulesEvaluated = results.size();
                         int rulesApplicable =
                                 results.stream()
-                                        .filter(
-                                                result ->
-                                                        result.getScore() != Result.NOT_APPLICABLE)
+                                        .filter(result -> result.getSeverity() != Severity.NA)
                                         .collect(Collectors.toList())
                                         .size();
-
                         return new ReportResult(
                                 html,
                                 new ReportStats(
@@ -177,17 +179,17 @@ public class InterruptibleReportGenerator {
         return qThread.submit(
                 () -> {
                     try {
-                        Collection<Result> results =
+                        Collection<IResult> results =
                                 generateResultHelper(recording, predicate).left;
                         Map<String, RuleEvaluation> evalMap = new HashMap<String, RuleEvaluation>();
                         for (var eval : results) {
                             evalMap.put(
                                     eval.getRule().getId(),
                                     new RuleEvaluation(
-                                            eval.getScore(),
+                                            eval.getSeverity(),
                                             eval.getRule().getName(),
                                             eval.getRule().getTopic(),
-                                            eval.getShortDescription()));
+                                            eval.getExplanation()));
                         }
                         return evalMap;
                     } catch (InterruptedException
@@ -196,16 +198,16 @@ public class InterruptibleReportGenerator {
                             | CouldNotLoadRecordingException e) {
                         return Map.of(
                                 e.getClass().toString(),
-                                new RuleEvaluation(Double.NaN, "", "", e.getMessage()));
+                                new RuleEvaluation(Severity.NA, "", "", e.getMessage()));
                     }
                 });
     }
 
-    private Pair<Collection<Result>, Long> generateResultHelper(
+    private Pair<Collection<IResult>, Long> generateResultHelper(
             InputStream recording, Predicate<IRule> predicate)
             throws InterruptedException, IOException, ExecutionException,
                     CouldNotLoadRecordingException {
-        List<Future<Result>> resultFutures = new ArrayList<>();
+        List<Future<IResult>> resultFutures = new ArrayList<>();
         try (CountingInputStream countingRecordingStream = new CountingInputStream(recording)) {
             Collection<IRule> rules =
                     RuleRegistry.getRules().stream().filter(predicate).collect(Collectors.toList());
@@ -213,12 +215,12 @@ public class InterruptibleReportGenerator {
                     evaluate(rules, JfrLoaderToolkit.loadEvents(countingRecordingStream)).stream()
                             .map(executor::submit)
                             .collect(Collectors.toList()));
-            Collection<Result> results = new HashSet<>();
-            for (Future<Result> future : resultFutures) {
+            Collection<IResult> results = new HashSet<>();
+            for (Future<IResult> future : resultFutures) {
                 results.add(future.get());
             }
             long recordingSizeBytes = countingRecordingStream.getByteCount();
-            return new Pair<Collection<Result>, Long>(results, recordingSizeBytes);
+            return new Pair<Collection<IResult>, Long>(results, recordingSizeBytes);
         } catch (InterruptedException
                 | IOException
                 | ExecutionException
@@ -260,20 +262,20 @@ public class InterruptibleReportGenerator {
     }
 
     public static class RuleEvaluation {
-        private double score;
+        private Severity severity;
         private String name;
         private String topic;
         private String description;
 
-        RuleEvaluation(double score, String name, String topic, String description) {
-            this.score = score;
+        RuleEvaluation(Severity severity, String name, String topic, String description) {
+            this.severity = severity;
             this.name = name;
             this.topic = topic;
             this.description = description;
         }
 
-        public double getScore() {
-            return score;
+        public Severity getSeverity() {
+            return severity;
         }
 
         public String getName() {
@@ -336,43 +338,95 @@ public class InterruptibleReportGenerator {
         return groups;
     }
 
-    private List<Callable<Result>> evaluate(Collection<IRule> rules, IItemCollection items) {
-        List<Callable<Result>> callables = new ArrayList<>(rules.size());
+    private List<Callable<IResult>> evaluate(Collection<IRule> rules, IItemCollection items) {
+        List<Callable<IResult>> callables = new ArrayList<>(rules.size());
+        ResultProvider rp = new ResultProvider();
+        Map<Class<? extends IRule>, Severity> evaluatedRules = new HashMap<>();
         for (IRule rule : rules) {
-            RunnableFuture<Result> result =
-                    rule.evaluate(items, IPreferenceValueProvider.DEFAULT_VALUES);
+            RunnableFuture<IResult> resultFuture =
+                    rule.createEvaluation(items, IPreferenceValueProvider.DEFAULT_VALUES, rp);
             callables.add(
                     () -> {
-                        logger.trace("Processing rule {}", rule.getName());
-                        ReportRuleEvalEvent evt = new ReportRuleEvalEvent(rule.getName());
-                        evt.begin();
-
-                        try {
-                            result.run();
-                            return result.get();
-                        } finally {
-                            evt.end();
-                            if (evt.shouldCommit()) {
-                                evt.commit();
+                        // Check that we can evaluate this rule first, some rules have dependencies
+                        // on other rules
+                        // and trying to run them too early will throw an NPE from trying to
+                        // access entries in the ResultProvider
+                        if (shouldEvaluate(evaluatedRules, rule)) {
+                            IResult result;
+                            logger.trace("Processing rule {}", rule.getName());
+                            ReportRuleEvalEvent evt = new ReportRuleEvalEvent(rule.getName());
+                            evt.begin();
+                            try {
+                                // Check that the rule has all of the events it needs to evaluate
+                                // first
+                                if (!RulesToolkit.matchesEventAvailabilityMap(
+                                        items, rule.getRequiredEvents())) {
+                                    logger.warn(
+                                            "Rule missing required events: {} ", rule.getName());
+                                    result =
+                                            ResultBuilder.createFor(
+                                                            rule,
+                                                            IPreferenceValueProvider.DEFAULT_VALUES)
+                                                    .setSeverity(Severity.NA)
+                                                    .build();
+                                } else {
+                                    resultFuture.run();
+                                    result = resultFuture.get();
+                                }
+                                evaluatedRules.put(rule.getClass(), result.getSeverity());
+                                rp.addResults(result);
+                                return result;
+                            } finally {
+                                evt.end();
+                                if (evt.shouldCommit()) {
+                                    evt.commit();
+                                }
                             }
+                        } else {
+                            logger.warn("Rule is missing dependencies: {} ", rule.getName());
+                            return ResultBuilder.createFor(
+                                            rule, IPreferenceValueProvider.DEFAULT_VALUES)
+                                    .setSeverity(Severity.NA)
+                                    .build();
                         }
                     });
         }
         return callables;
     }
 
+    /** Brought over from org.openjdk.jmc.flightrecorder.rules.jdk.test.TestRulesWithJFR */
+    private static boolean shouldEvaluate(
+            Map<Class<? extends IRule>, Severity> evaluatedRules, IRule rule) {
+        DependsOn dependency = rule.getClass().getAnnotation(DependsOn.class);
+        if (dependency != null) {
+            Class<? extends IRule> dependencyType = dependency.value();
+            if (dependencyType != null) {
+                while (true) {
+                    if (evaluatedRules.containsKey(dependencyType)) {
+                        if (evaluatedRules.get(dependencyType).compareTo(dependency.severity())
+                                < 0) {
+                            return false;
+                        }
+                        return true;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
     private static class SimpleResultProvider implements HtmlResultProvider {
-        private Map<String, Collection<Result>> resultsByTopic = new HashMap<>();
+        private Map<String, Collection<IResult>> resultsByTopic = new HashMap<>();
         private Set<String> unmappedTopics;
 
-        public SimpleResultProvider(Collection<Result> results, List<HtmlResultGroup> groups) {
-            for (Result result : results) {
+        public SimpleResultProvider(Collection<IResult> results, List<HtmlResultGroup> groups) {
+            for (IResult result : results) {
                 String topic = result.getRule().getTopic();
                 if (topic == null) {
                     // Magic string to denote null topic
                     topic = "";
                 }
-                Collection<Result> topicResults = resultsByTopic.get(topic);
+                Collection<IResult> topicResults = resultsByTopic.get(topic);
                 if (topicResults == null) {
                     topicResults = new HashSet<>();
                     resultsByTopic.put(topic, topicResults);
@@ -395,15 +449,15 @@ public class InterruptibleReportGenerator {
         }
 
         @Override
-        public Collection<Result> getResults(Collection<String> topics) {
+        public Collection<IResult> getResults(Collection<String> topics) {
             Collection<String> topics2 = topics;
             if (topics2.contains("")) {
                 topics2 = new HashSet<>(topics);
                 topics2.addAll(unmappedTopics);
             }
-            Collection<Result> results = new HashSet<>();
+            Collection<IResult> results = new HashSet<>();
             for (String topic : topics2) {
-                Collection<Result> topicResults = resultsByTopic.get(topic);
+                Collection<IResult> topicResults = resultsByTopic.get(topic);
                 if (topicResults != null) {
                     results.addAll(topicResults);
                 }

@@ -149,7 +149,7 @@ class InterruptibleReportGeneratorTest {
             MatcherAssert.assertThat(
                     report.get().getReportStats(), Matchers.not(Matchers.nullValue()));
             MatcherAssert.assertThat(
-                    report.get().getReportStats().rulesEvaluated, Matchers.equalTo(10));
+                    report.get().getReportStats().rulesEvaluated, Matchers.equalTo(11));
         }
     }
 
@@ -180,10 +180,9 @@ class InterruptibleReportGeneratorTest {
                 MatcherAssert.assertThat(
                         entry.getKey(), Matchers.not(Matchers.emptyOrNullString()));
                 MatcherAssert.assertThat(
-                        entry.getValue().getScore(), Matchers.not(Matchers.notANumber()));
+                        entry.getValue().getName(), Matchers.not(Matchers.emptyOrNullString()));
                 MatcherAssert.assertThat(
-                        entry.getValue().getDescription(),
-                        Matchers.not(Matchers.emptyOrNullString()));
+                        entry.getValue().getTopic(), Matchers.not(Matchers.emptyOrNullString()));
             }
         }
     }
