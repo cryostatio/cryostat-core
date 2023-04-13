@@ -58,6 +58,7 @@ import java.util.stream.Collectors;
 
 import org.openjdk.jmc.common.io.IOToolkit;
 import org.openjdk.jmc.common.item.IItemCollection;
+import org.openjdk.jmc.common.unit.IQuantity;
 import org.openjdk.jmc.common.util.IPreferenceValueProvider;
 import org.openjdk.jmc.common.util.Pair;
 import org.openjdk.jmc.common.util.XmlToolkit;
@@ -71,6 +72,7 @@ import org.openjdk.jmc.flightrecorder.rules.ResultProvider;
 import org.openjdk.jmc.flightrecorder.rules.ResultToolkit;
 import org.openjdk.jmc.flightrecorder.rules.RuleRegistry;
 import org.openjdk.jmc.flightrecorder.rules.Severity;
+import org.openjdk.jmc.flightrecorder.rules.TypedResult;
 import org.openjdk.jmc.flightrecorder.rules.report.html.internal.HtmlResultGroup;
 import org.openjdk.jmc.flightrecorder.rules.report.html.internal.HtmlResultProvider;
 import org.openjdk.jmc.flightrecorder.rules.report.html.internal.RulesHtmlToolkit;
@@ -185,10 +187,17 @@ public class InterruptibleReportGenerator {
                                 generateResultHelper(recording, predicate).left;
                         Map<String, RuleEvaluation> evalMap = new HashMap<String, RuleEvaluation>();
                         for (var eval : results) {
+                            IQuantity scoreQuantity = eval.getResult(TypedResult.SCORE);
+                            double score;
+                            if (scoreQuantity != null) {
+                                score = scoreQuantity.doubleValue();
+                            } else {
+                                score = eval.getSeverity().getLimit();
+                            }
                             evalMap.put(
                                     eval.getRule().getId(),
                                     new RuleEvaluation(
-                                            eval.getSeverity().getLimit(),
+                                            score,
                                             eval.getRule().getName(),
                                             eval.getRule().getTopic(),
                                             getTextDescription(eval)));
