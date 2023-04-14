@@ -45,9 +45,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -58,17 +61,25 @@ import java.util.stream.Collectors;
 
 import org.openjdk.jmc.common.io.IOToolkit;
 import org.openjdk.jmc.common.item.IItemCollection;
+import org.openjdk.jmc.common.unit.IQuantity;
 import org.openjdk.jmc.common.util.IPreferenceValueProvider;
 import org.openjdk.jmc.common.util.Pair;
 import org.openjdk.jmc.common.util.XmlToolkit;
 import org.openjdk.jmc.flightrecorder.CouldNotLoadRecordingException;
 import org.openjdk.jmc.flightrecorder.JfrLoaderToolkit;
+import org.openjdk.jmc.flightrecorder.rules.DependsOn;
+import org.openjdk.jmc.flightrecorder.rules.IResult;
 import org.openjdk.jmc.flightrecorder.rules.IRule;
-import org.openjdk.jmc.flightrecorder.rules.Result;
+import org.openjdk.jmc.flightrecorder.rules.ResultBuilder;
+import org.openjdk.jmc.flightrecorder.rules.ResultProvider;
+import org.openjdk.jmc.flightrecorder.rules.ResultToolkit;
 import org.openjdk.jmc.flightrecorder.rules.RuleRegistry;
+import org.openjdk.jmc.flightrecorder.rules.Severity;
+import org.openjdk.jmc.flightrecorder.rules.TypedResult;
 import org.openjdk.jmc.flightrecorder.rules.report.html.internal.HtmlResultGroup;
 import org.openjdk.jmc.flightrecorder.rules.report.html.internal.HtmlResultProvider;
 import org.openjdk.jmc.flightrecorder.rules.report.html.internal.RulesHtmlToolkit;
+import org.openjdk.jmc.flightrecorder.rules.util.RulesToolkit;
 
 import io.cryostat.core.log.Logger;
 
@@ -78,6 +89,7 @@ import jdk.jfr.Event;
 import jdk.jfr.Label;
 import jdk.jfr.Name;
 import org.apache.commons.io.input.CountingInputStream;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -126,9 +138,9 @@ public class InterruptibleReportGenerator {
                     // but calling our cancellable evaluate() method rather than the
                     // RulesToolkit.evaluateParallel as explained further down.
                     try {
-                        Pair<Collection<Result>, Long> helperPair =
+                        Pair<Collection<IResult>, Long> helperPair =
                                 generateResultHelper(recording, predicate);
-                        Collection<Result> results = helperPair.left;
+                        Collection<IResult> results = helperPair.left;
                         List<HtmlResultGroup> groups = loadResultGroups();
 
                         String html =
@@ -142,12 +154,9 @@ public class InterruptibleReportGenerator {
                         int rulesEvaluated = results.size();
                         int rulesApplicable =
                                 results.stream()
-                                        .filter(
-                                                result ->
-                                                        result.getScore() != Result.NOT_APPLICABLE)
+                                        .filter(result -> result.getSeverity() != Severity.NA)
                                         .collect(Collectors.toList())
                                         .size();
-
                         return new ReportResult(
                                 html,
                                 new ReportStats(
@@ -177,17 +186,24 @@ public class InterruptibleReportGenerator {
         return qThread.submit(
                 () -> {
                     try {
-                        Collection<Result> results =
+                        Collection<IResult> results =
                                 generateResultHelper(recording, predicate).left;
                         Map<String, RuleEvaluation> evalMap = new HashMap<String, RuleEvaluation>();
                         for (var eval : results) {
+                            IQuantity scoreQuantity = eval.getResult(TypedResult.SCORE);
+                            double score;
+                            if (scoreQuantity != null) {
+                                score = scoreQuantity.doubleValue();
+                            } else {
+                                score = eval.getSeverity().getLimit();
+                            }
                             evalMap.put(
                                     eval.getRule().getId(),
                                     new RuleEvaluation(
-                                            eval.getScore(),
+                                            score,
                                             eval.getRule().getName(),
                                             eval.getRule().getTopic(),
-                                            eval.getShortDescription()));
+                                            getTextDescription(eval)));
                         }
                         return evalMap;
                     } catch (InterruptedException
@@ -196,39 +212,157 @@ public class InterruptibleReportGenerator {
                             | CouldNotLoadRecordingException e) {
                         return Map.of(
                                 e.getClass().toString(),
-                                new RuleEvaluation(Double.NaN, "", "", e.getMessage()));
+                                new RuleEvaluation(
+                                        Severity.NA.getLimit(),
+                                        e.getClass().getSimpleName(),
+                                        "report_failure",
+                                        e.getMessage()));
                     }
                 });
     }
 
-    private Pair<Collection<Result>, Long> generateResultHelper(
+    private String getTextDescription(IResult result) {
+        StringBuilder sb = new StringBuilder();
+
+        if (StringUtils.isNotBlank(result.getSummary())) {
+            sb.append("Summary:\n");
+            sb.append(ResultToolkit.populateMessage(result, result.getSummary(), false));
+            sb.append("\n\n");
+        }
+
+        if (StringUtils.isNotBlank(result.getExplanation())) {
+            sb.append("Explanation:\n");
+            sb.append(ResultToolkit.populateMessage(result, result.getExplanation(), false));
+            sb.append("\n\n");
+        }
+
+        if (StringUtils.isNotBlank(result.getSolution())) {
+            sb.append("Solution:\n");
+            sb.append(ResultToolkit.populateMessage(result, result.getSolution(), false));
+            sb.append("\n\n");
+        }
+
+        if (!result.suggestRecordingSettings().isEmpty()) {
+            sb.append("Suggested settings:\n");
+            for (var suggestion : result.suggestRecordingSettings()) {
+                sb.append(
+                        String.format(
+                                "%s %s=%s",
+                                suggestion.getSettingFor(),
+                                suggestion.getSettingName(),
+                                suggestion.getSettingValue()));
+            }
+        }
+
+        return sb.toString().strip();
+    }
+
+    private Pair<Collection<IResult>, Long> generateResultHelper(
             InputStream recording, Predicate<IRule> predicate)
             throws InterruptedException, IOException, ExecutionException,
                     CouldNotLoadRecordingException {
-        List<Future<Result>> resultFutures = new ArrayList<>();
+        Collection<IRule> rules =
+                RuleRegistry.getRules().stream().filter(predicate).collect(Collectors.toList());
+        ResultProvider resultProvider = new ResultProvider();
+        Map<IRule, Future<IResult>> resultFutures = new HashMap<>();
+        Queue<RunnableFuture<IResult>> futureQueue = new ConcurrentLinkedQueue<>();
+        // Map using the rule name as a key, and a Pair containing the rule (left) and it's
+        // dependency (right)
+        Map<String, Pair<IRule, IRule>> rulesWithDependencies = new HashMap<>();
+        Map<IRule, IResult> computedResults = new HashMap<>();
         try (CountingInputStream countingRecordingStream = new CountingInputStream(recording)) {
-            Collection<IRule> rules =
-                    RuleRegistry.getRules().stream().filter(predicate).collect(Collectors.toList());
-            resultFutures.addAll(
-                    evaluate(rules, JfrLoaderToolkit.loadEvents(countingRecordingStream)).stream()
-                            .map(executor::submit)
-                            .collect(Collectors.toList()));
-            Collection<Result> results = new HashSet<>();
-            for (Future<Result> future : resultFutures) {
+            IItemCollection items = JfrLoaderToolkit.loadEvents(countingRecordingStream);
+            for (IRule rule : rules) {
+                if (RulesToolkit.matchesEventAvailabilityMap(items, rule.getRequiredEvents())) {
+                    if (hasDependency(rule)) {
+                        IRule depRule =
+                                rules.stream()
+                                        .filter(r -> r.getId().equals(getRuleDependencyName(rule)))
+                                        .findFirst()
+                                        .orElse(null);
+                        rulesWithDependencies.put(rule.getId(), new Pair<>(rule, depRule));
+                    } else {
+                        RunnableFuture<IResult> resultFuture =
+                                rule.createEvaluation(
+                                        items,
+                                        IPreferenceValueProvider.DEFAULT_VALUES,
+                                        resultProvider);
+                        resultFutures.put(rule, resultFuture);
+                        futureQueue.add(resultFuture);
+                    }
+                } else {
+                    resultFutures.put(
+                            rule,
+                            CompletableFuture.completedFuture(
+                                    ResultBuilder.createFor(
+                                                    rule, IPreferenceValueProvider.DEFAULT_VALUES)
+                                            .setSeverity(Severity.NA)
+                                            .build()));
+                }
+            }
+            for (Entry<String, Pair<IRule, IRule>> entry : rulesWithDependencies.entrySet()) {
+                IRule rule = entry.getValue().left;
+                IRule depRule = entry.getValue().right;
+                Future<IResult> depResultFuture = resultFutures.get(depRule);
+                if (depResultFuture == null) {
+                    resultFutures.put(
+                            rule,
+                            CompletableFuture.completedFuture(
+                                    ResultBuilder.createFor(
+                                                    rule, IPreferenceValueProvider.DEFAULT_VALUES)
+                                            .setSeverity(Severity.NA)
+                                            .build()));
+                } else {
+                    IResult depResult = null;
+                    if (!depResultFuture.isDone()) {
+                        ((Runnable) depResultFuture).run();
+                        try {
+                            depResult = depResultFuture.get();
+                            resultProvider.addResults(depResult);
+                            computedResults.put(depRule, depResult);
+                        } catch (InterruptedException | ExecutionException e) {
+                            logger.warn("Error retrieving results for rule: " + depResult);
+                        }
+                    } else {
+                        depResult = computedResults.get(depRule);
+                    }
+                    if (depResult != null && shouldEvaluate(rule, depResult)) {
+                        RunnableFuture<IResult> resultFuture =
+                                rule.createEvaluation(
+                                        items,
+                                        IPreferenceValueProvider.DEFAULT_VALUES,
+                                        resultProvider);
+                        resultFutures.put(rule, resultFuture);
+                        futureQueue.add(resultFuture);
+                    } else {
+                        resultFutures.put(
+                                rule,
+                                CompletableFuture.completedFuture(
+                                        ResultBuilder.createFor(
+                                                        rule,
+                                                        IPreferenceValueProvider.DEFAULT_VALUES)
+                                                .setSeverity(Severity.NA)
+                                                .build()));
+                    }
+                }
+            }
+            RuleEvaluator re = new RuleEvaluator(futureQueue);
+            executor.submit(re);
+            Collection<IResult> results = new HashSet<IResult>();
+            for (Future<IResult> future : resultFutures.values()) {
                 results.add(future.get());
             }
-            long recordingSizeBytes = countingRecordingStream.getByteCount();
-            return new Pair<Collection<Result>, Long>(results, recordingSizeBytes);
+            return new Pair<Collection<IResult>, Long>(
+                    results, countingRecordingStream.getByteCount());
         } catch (InterruptedException
                 | IOException
                 | ExecutionException
                 | CouldNotLoadRecordingException e) {
-            resultFutures.forEach(
-                    f -> {
-                        if (!f.isDone()) {
-                            f.cancel(true);
-                        }
-                    });
+            for (Future f : resultFutures.values()) {
+                if (!f.isDone()) {
+                    f.cancel(true);
+                }
+            }
             logger.warn(e);
             throw e;
         }
@@ -336,43 +470,40 @@ public class InterruptibleReportGenerator {
         return groups;
     }
 
-    private List<Callable<Result>> evaluate(Collection<IRule> rules, IItemCollection items) {
-        List<Callable<Result>> callables = new ArrayList<>(rules.size());
-        for (IRule rule : rules) {
-            RunnableFuture<Result> result =
-                    rule.evaluate(items, IPreferenceValueProvider.DEFAULT_VALUES);
-            callables.add(
-                    () -> {
-                        logger.trace("Processing rule {}", rule.getName());
-                        ReportRuleEvalEvent evt = new ReportRuleEvalEvent(rule.getName());
-                        evt.begin();
+    private static String getRuleDependencyName(IRule rule) {
+        DependsOn dependency = rule.getClass().getAnnotation(DependsOn.class);
+        Class<? extends IRule> dependencyType = dependency.value();
+        return dependencyType.getSimpleName();
+    }
 
-                        try {
-                            result.run();
-                            return result.get();
-                        } finally {
-                            evt.end();
-                            if (evt.shouldCommit()) {
-                                evt.commit();
-                            }
-                        }
-                    });
+    private static boolean hasDependency(IRule rule) {
+        DependsOn dependency = rule.getClass().getAnnotation(DependsOn.class);
+        return dependency != null;
+    }
+
+    /** Brought over from org.openjdk.jmc.flightrecorder.rules.jdk.util.RulesToolkit */
+    private static boolean shouldEvaluate(IRule rule, IResult depResult) {
+        DependsOn dependency = rule.getClass().getAnnotation(DependsOn.class);
+        if (dependency != null) {
+            if (depResult.getSeverity().compareTo(dependency.severity()) < 0) {
+                return false;
+            }
         }
-        return callables;
+        return true;
     }
 
     private static class SimpleResultProvider implements HtmlResultProvider {
-        private Map<String, Collection<Result>> resultsByTopic = new HashMap<>();
+        private Map<String, Collection<IResult>> resultsByTopic = new HashMap<>();
         private Set<String> unmappedTopics;
 
-        public SimpleResultProvider(Collection<Result> results, List<HtmlResultGroup> groups) {
-            for (Result result : results) {
+        public SimpleResultProvider(Collection<IResult> results, List<HtmlResultGroup> groups) {
+            for (IResult result : results) {
                 String topic = result.getRule().getTopic();
                 if (topic == null) {
                     // Magic string to denote null topic
                     topic = "";
                 }
-                Collection<Result> topicResults = resultsByTopic.get(topic);
+                Collection<IResult> topicResults = resultsByTopic.get(topic);
                 if (topicResults == null) {
                     topicResults = new HashSet<>();
                     resultsByTopic.put(topic, topicResults);
@@ -395,20 +526,36 @@ public class InterruptibleReportGenerator {
         }
 
         @Override
-        public Collection<Result> getResults(Collection<String> topics) {
+        public Collection<IResult> getResults(Collection<String> topics) {
             Collection<String> topics2 = topics;
             if (topics2.contains("")) {
                 topics2 = new HashSet<>(topics);
                 topics2.addAll(unmappedTopics);
             }
-            Collection<Result> results = new HashSet<>();
+            Collection<IResult> results = new HashSet<>();
             for (String topic : topics2) {
-                Collection<Result> topicResults = resultsByTopic.get(topic);
+                Collection<IResult> topicResults = resultsByTopic.get(topic);
                 if (topicResults != null) {
                     results.addAll(topicResults);
                 }
             }
             return results;
+        }
+    }
+
+    private static class RuleEvaluator implements Runnable {
+        private Queue<RunnableFuture<IResult>> futureQueue;
+
+        public RuleEvaluator(Queue<RunnableFuture<IResult>> futureQueue) {
+            this.futureQueue = futureQueue;
+        }
+
+        @Override
+        public void run() {
+            RunnableFuture<IResult> resultFuture;
+            while ((resultFuture = futureQueue.poll()) != null) {
+                resultFuture.run();
+            }
         }
     }
 
@@ -521,6 +668,7 @@ public class InterruptibleReportGenerator {
 
         ReportResult(String html) {
             this.html = html;
+            this.reportStats = new ReportStats(0, 0, 0);
         }
 
         ReportResult(String html, ReportStats reportStats) {

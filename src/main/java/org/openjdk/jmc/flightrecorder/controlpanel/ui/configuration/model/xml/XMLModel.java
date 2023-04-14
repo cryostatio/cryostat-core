@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved.
  * 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Stack;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -259,9 +260,10 @@ public final class XMLModel extends Observable {
 		// NOTE: The pretty printer writes that the encoding is UTF-8, so we must make sure it is.
 		// Ensure charset exists before opening file for writing.
 		Charset charset = Charset.forName("UTF-8"); //$NON-NLS-1$
-		Writer osw = new OutputStreamWriter(new FileOutputStream(file), charset);
-		if (writeTo(osw)) {
-			setDirty(false);
+		try (Writer osw = new OutputStreamWriter(new FileOutputStream(file), charset)) {
+			if (writeTo(osw)) {
+				setDirty(false);
+			}
 		}
 	}
 
@@ -275,15 +277,12 @@ public final class XMLModel extends Observable {
 	 * @return true iff the model was successfully written to the {@link Writer}.
 	 */
 	public boolean writeTo(Writer writer) {
-		PrintWriter pw = new PrintWriter(writer);
-		try {
+		try (PrintWriter pw = new PrintWriter(writer)) {
 			PrettyPrinter pp = new PrettyPrinter(pw, m_validator.getElementsTooKeepOnOneLine());
 			pp.print(this);
 			pw.flush();
 			// PrintWriter never throws any exceptions, so this is how we find out if something went wrong.
 			return !pw.checkError();
-		} finally {
-			IOToolkit.closeSilently(pw);
 		}
 	}
 
@@ -321,8 +320,9 @@ public final class XMLModel extends Observable {
 				// NOTE: This will only keep one result per node, although many may have been found.
 				m_resultLookup.put(r.getObject(), r);
 				if (r.isError()) {
-					// FIXME: Get a logger when this is in a better bundle.
-					System.out.println(r.getObject() + ": " + r.getText()); //$NON-NLS-1$
+					Logger logger = Logger
+							.getLogger("org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml"); //$NON-NLS-1$
+					logger.severe(r.getObject() + ": " + r.getText()); //$NON-NLS-1$
 				}
 			}
 		}
