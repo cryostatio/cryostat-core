@@ -137,7 +137,7 @@ public class JFRJMXConnection implements JFRConnection {
         if (!isConnected()) {
             connect();
         }
-        IFlightRecorderService service = serviceFactory.getServiceInstance(handle);
+        IFlightRecorderService service = serviceFactory.getServiceInstance(getHandle());
         if (service == null || !isConnected()) {
             throw new ConnectionException(
                     String.format(
@@ -382,12 +382,12 @@ public class JFRJMXConnection implements JFRConnection {
         return stringified;
     }
 
-    public synchronized boolean isV1() {
+    public synchronized boolean isV1() throws ConnectionException, IOException {
         return !isV2();
     }
 
-    public synchronized boolean isV2() {
-        return FlightRecorderServiceV2.isAvailable(this.handle);
+    public synchronized boolean isV2() throws ConnectionException, IOException {
+        return FlightRecorderServiceV2.isAvailable(getHandle());
     }
 
     public synchronized boolean isConnected() {
