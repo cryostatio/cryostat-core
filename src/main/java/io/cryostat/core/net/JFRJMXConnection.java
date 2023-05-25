@@ -220,13 +220,15 @@ public class JFRJMXConnection implements JFRConnection {
                 Object attrObject =
                         this.rjmxConnection.getAttributeValue(
                                 new MRI(Type.ATTRIBUTE, ConnectionToolkit.RUNTIME_BEAN_NAME, attr));
-                if (attrObject.getClass().isArray()) {
-                    String stringified = stringifyArray(attrObject);
-                    dos.writeUTF(stringified);
-                } else if (attrObject instanceof Long) {
-                    dos.writeLong((Long) attrObject);
-                } else {
-                    dos.writeUTF(attrObject.toString());
+                if (attrObject != null) {
+                    if (attrObject.getClass().isArray()) {
+                        String stringified = stringifyArray(attrObject);
+                        dos.writeUTF(stringified);
+                    } else if (attrObject instanceof Long) {
+                        dos.writeLong((Long) attrObject);
+                    } else {
+                        dos.writeUTF(attrObject.toString());
+                    }
                 }
             }
             byte[] hash = DigestUtils.sha256(baos.toByteArray());
