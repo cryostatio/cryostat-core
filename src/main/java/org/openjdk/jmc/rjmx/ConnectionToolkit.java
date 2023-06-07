@@ -365,6 +365,9 @@ public final class ConnectionToolkit {
 		return vmName != null && JavaVMVersionToolkit.isHotspotJVMName(vmName);
 	}
 
+    public static boolean isSubstrateVm(IConnectionHandle connectionHandle) {
+        return getVMName(connectionHandle).equals("Substrate VM");
+    }
 	/**
 	 * Returns {@code true} if the connection handle is associated with an Oracle built JVM,
 	 * {@code false} otherwise. If the information is already present in the {@link JVMDescriptor},

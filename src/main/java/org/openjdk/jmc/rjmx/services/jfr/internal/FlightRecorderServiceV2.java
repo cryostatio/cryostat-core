@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved.
  * 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -103,17 +103,22 @@ public class FlightRecorderServiceV2 implements IFlightRecorderService {
 	}
 
 	private boolean isDynamicFlightRecorderSupported(IConnectionHandle handle) {
-		return ConnectionToolkit.isHotSpot(handle)
-				&& ConnectionToolkit.isJavaVersionAboveOrEqual(handle, JavaVersionSupport.DYNAMIC_JFR_SUPPORTED);
-	}
+		// All OpenJDK versions of JFR support dynamic enablement of JFR, so if there are no commercial features in play
+		// all is A-OK.
+        if (ConnectionToolkit.isSubstrateVm(handle)){
+            // JFR may not have been built into the native image. Check that FlightRecorderMXBean is accessible from the MBean server.
+            return isAvailable(handle);
+        }
 
-	private boolean isFlightRecorderCommercial() {
-		return ConnectionToolkit.isHotSpot(connection)
-				&& !ConnectionToolkit.isJavaVersionAboveOrEqual(connection, JavaVersionSupport.JFR_NOT_COMMERCIAL);
+		return !cfs.hasCommercialFeatures() || (ConnectionToolkit.isHotSpot(handle)
+				&& ConnectionToolkit.isJavaVersionAboveOrEqual(handle, JavaVersionSupport.DYNAMIC_JFR_SUPPORTED));
 	}
 
 	private boolean isFlightRecorderDisabled(IConnectionHandle handle) {
-		if (cfs != null && isFlightRecorderCommercial()) {
+        if (ConnectionToolkit.isSubstrateVm(handle)){
+            // For SVM commercial features may be available but disabled and JFR is still enabled
+            return !isAvailable(handle);
+        } else if (cfs != null && cfs.hasCommercialFeatures()) {
 			return !cfs.isCommercialFeaturesEnabled() || JVMSupportToolkit.isFlightRecorderDisabled(handle, false);
 		} else {
 			return JVMSupportToolkit.isFlightRecorderDisabled(handle, false);
@@ -126,10 +131,11 @@ public class FlightRecorderServiceV2 implements IFlightRecorderService {
 
 	public FlightRecorderServiceV2(IConnectionHandle handle) throws ConnectionException, ServiceNotAvailableException {
 		cfs = handle.getServiceOrThrow(ICommercialFeaturesService.class);
+
 		if (!isDynamicFlightRecorderSupported(handle) && isFlightRecorderDisabled(handle)) {
 			throw new ServiceNotAvailableException(""); //$NON-NLS-1$
 		}
-		if (JVMSupportToolkit.isFlightRecorderDisabled(handle, true)) {
+		if (!ConnectionToolkit.isSubstrateVm(handle) && JVMSupportToolkit.isFlightRecorderDisabled(handle, true)) {
 			throw new ServiceNotAvailableException(""); //$NON-NLS-1$
 		}
 		connection = handle;
@@ -480,7 +486,7 @@ public class FlightRecorderServiceV2 implements IFlightRecorderService {
 	@Override
 	public boolean isEnabled() {
 		if (!wasEnabled) {
-			boolean isEnabled = isFlightRecorderCommercial() ? cfs.isCommercialFeaturesEnabled()
+			boolean isEnabled = cfs.hasCommercialFeatures() ? cfs.isCommercialFeaturesEnabled()
 					: isAvailable(connection);
 			if (isEnabled) {
 				wasEnabled = true;
