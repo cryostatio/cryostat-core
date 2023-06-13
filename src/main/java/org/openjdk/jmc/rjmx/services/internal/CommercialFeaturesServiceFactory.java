@@ -52,7 +52,7 @@ public class CommercialFeaturesServiceFactory implements IServiceFactory<ICommer
 		if (descriptor != null) {
 			JavaVersion version = new JavaVersion(descriptor.getJavaVersion());
 			if (version.getMajorVersion() >= 11) {
-				return new Jdk11CommercialFeaturesService();
+				return new NoCommercialFeaturesService();
 			}
 		}
 		return new HotSpot23CommercialFeaturesService(handle);
