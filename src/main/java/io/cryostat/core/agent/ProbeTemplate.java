@@ -107,7 +107,7 @@ public class ProbeTemplate {
         }
 
         Document document = builder.parse(stream);
-        stream.close();
+        stream.trulyClose();
         NodeList elements;
 
         // parse global configurations
