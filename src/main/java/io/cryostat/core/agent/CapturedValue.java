@@ -70,18 +70,28 @@ public class CapturedValue {
     private String converter;
 
     enum ContentType {
-        NONE,
-        BYTES,
-        TIMESTAMP,
-        MILLIS,
-        NANOS,
-        TICKS,
-        ADDRESS,
-        OS_THREAD,
-        JAVA_THREAD,
-        STACK_TRACE,
-        CLASS,
-        PERCENTAGE
+        NONE("None"),
+        BYTES("Bytes"),
+        TIMESTAMP("Timestamp"),
+        MILLIS("Millis"),
+        NANOS("Nanos"),
+        TICKS("Ticks"),
+        ADDRESS("Address"),
+        OS_THREAD("OSThread"),
+        JAVA_THREAD("JavaThread"),
+        STACK_TRACE("StackTrace"),
+        CLASS("Class"),
+        PERCENTAGE("Percentage");
+
+        private final String contentType;
+
+        ContentType(String contentType) {
+            this.contentType = contentType;
+        }
+
+        public String toString() {
+            return contentType;
+        }
     }
 
     CapturedValue() {
