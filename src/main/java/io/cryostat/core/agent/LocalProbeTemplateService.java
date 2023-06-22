@@ -87,18 +87,19 @@ public class LocalProbeTemplateService implements ProbeTemplateService {
         }
     }
 
-    public void addTemplate(InputStream inputStream, String filename)
+    public ProbeTemplate addTemplate(InputStream inputStream, String filename)
             throws FileAlreadyExistsException, IOException, SAXException {
+        Path path = fs.pathOf(env.getEnv(TEMPLATE_PATH), filename);
+        if (fs.exists(path)) {
+            throw new FileAlreadyExistsException(filename);
+        }
         try (inputStream) {
             ProbeTemplate template = new ProbeTemplate();
             template.setFileName(filename);
             // If validation fails this will throw a ProbeValidationException with details
             template.deserialize(inputStream);
-            Path path = fs.pathOf(env.getEnv(TEMPLATE_PATH), filename);
-            if (fs.exists(path)) {
-                throw new FileAlreadyExistsException(template.getFileName());
-            }
             fs.writeString(path, template.serialize());
+            return template;
         }
     }
 
@@ -138,8 +139,8 @@ public class LocalProbeTemplateService implements ProbeTemplateService {
                         Path fileName = path.getFileName();
                         if (fileName != null) {
                             ProbeTemplate template = new ProbeTemplate();
-                            template.deserialize(stream);
                             template.setFileName(fileName.toString());
+                            template.deserialize(stream);
                             templates.add(template);
                         }
                     }
