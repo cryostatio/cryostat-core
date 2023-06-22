@@ -91,7 +91,8 @@ public class LocalProbeTemplateService implements ProbeTemplateService {
             throws FileAlreadyExistsException, IOException, SAXException {
         Path path = fs.pathOf(env.getEnv(TEMPLATE_PATH), filename);
         if (fs.exists(path)) {
-            throw new FileAlreadyExistsException(filename);
+            throw new FileAlreadyExistsException(
+                    String.format("Probe template \"%s\" already exists.", filename));
         }
         try (inputStream) {
             ProbeTemplate template = new ProbeTemplate();
