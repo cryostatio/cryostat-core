@@ -61,7 +61,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 
-public class RemoteTemplateService extends AbstractTemplateService implements TemplateService {
+public class RemoteTemplateService extends AbstractTemplateService {
 
     private final JFRConnection conn;
 
