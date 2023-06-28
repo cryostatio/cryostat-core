@@ -43,8 +43,8 @@ import java.util.Optional;
 import org.openjdk.jmc.flightrecorder.configuration.internal.DefaultValueMap;
 import org.openjdk.jmc.flightrecorder.configuration.internal.EventOptionDescriptorMapper;
 import org.openjdk.jmc.flightrecorder.configuration.internal.EventTypeIDV2;
-import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
 
+import io.cryostat.core.net.CryostatFlightRecorderService;
 import io.cryostat.core.net.JFRConnection;
 
 import org.apache.commons.io.IOUtils;
@@ -66,7 +66,7 @@ class RemoteTemplateServiceTest {
 
     TemplateService templateSvc;
     @Mock JFRConnection conn;
-    @Mock IFlightRecorderService svc;
+    @Mock CryostatFlightRecorderService svc;
     String xmlText;
 
     @BeforeEach

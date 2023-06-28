@@ -39,44 +39,26 @@ package io.cryostat.core.net;
 
 import java.io.IOException;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.IntrospectionException;
-import javax.management.ReflectionException;
-import javax.management.remote.JMXServiceURL;
-
+import org.openjdk.jmc.common.unit.IConstrainedMap;
+import org.openjdk.jmc.common.unit.QuantityConversionException;
 import org.openjdk.jmc.rjmx.ConnectionException;
-import org.openjdk.jmc.rjmx.IConnectionHandle;
 import org.openjdk.jmc.rjmx.ServiceNotAvailableException;
+import org.openjdk.jmc.rjmx.services.jfr.FlightRecorderException;
+import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
+import org.openjdk.jmc.rjmx.services.jfr.IRecordingDescriptor;
 
-import io.cryostat.core.sys.Clock;
-import io.cryostat.core.templates.TemplateService;
+import io.cryostat.core.EventOptionsBuilder.EventOptionException;
+import io.cryostat.core.EventOptionsBuilder.EventTypeException;
+import io.cryostat.core.templates.TemplateType;
 
-public interface JFRConnection extends AutoCloseable {
+public interface CryostatFlightRecorderService extends IFlightRecorderService {
 
-    public IConnectionHandle getHandle() throws ConnectionException, IOException;
-
-    public CryostatFlightRecorderService getService()
-            throws ConnectionException, IOException, ServiceNotAvailableException;
-
-    public TemplateService getTemplateService();
-
-    public long getApproximateServerTime(Clock clock);
-
-    public JMXServiceURL getJMXURL() throws IOException;
-
-    public String getHost();
-
-    public int getPort();
-
-    public String getJvmId() throws IDException, IOException;
-
-    public MBeanMetrics getMBeanMetrics()
-            throws ConnectionException, IOException, InstanceNotFoundException,
-                    IntrospectionException, ReflectionException;
-
-    public boolean isConnected();
-
-    public void connect() throws ConnectionException;
-
-    public void disconnect();
+    IRecordingDescriptor start(
+            IConstrainedMap<String> recordingOptions,
+            String templateName,
+            TemplateType preferredTemplateType)
+            throws io.cryostat.core.FlightRecorderException, FlightRecorderException,
+                    ConnectionException, IOException, FlightRecorderException,
+                    ServiceNotAvailableException, QuantityConversionException, EventOptionException,
+                    EventTypeException;
 }
