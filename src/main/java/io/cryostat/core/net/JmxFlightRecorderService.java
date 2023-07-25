@@ -278,10 +278,6 @@ public class JmxFlightRecorderService implements CryostatFlightRecorderService {
         if (templateType != null) {
             return templateType;
         }
-        if (templateName.equals("ALL")) {
-            // special case for the ALL meta-template
-            return TemplateType.TARGET;
-        }
         List<Template> matchingNameTemplates =
                 connection.getTemplateService().getTemplates().stream()
                         .filter(t -> t.getName().equals(templateName))
