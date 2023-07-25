@@ -47,11 +47,11 @@ import org.openjdk.jmc.common.unit.IOptionDescriptor;
 import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
 import org.openjdk.jmc.flightrecorder.configuration.events.IEventTypeID;
 import org.openjdk.jmc.rjmx.services.jfr.IEventTypeInfo;
-import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
 
 import io.cryostat.core.EventOptionsCustomizer.EventOptionException;
 import io.cryostat.core.EventOptionsCustomizer.EventTypeException;
 import io.cryostat.core.EventOptionsCustomizer.OptionValueException;
+import io.cryostat.core.net.CryostatFlightRecorderService;
 import io.cryostat.core.net.JFRConnection;
 
 import org.hamcrest.MatcherAssert;
@@ -69,7 +69,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class EventOptionsCustomizerTest {
 
     @Mock JFRConnection connection;
-    @Mock IFlightRecorderService service;
+    @Mock CryostatFlightRecorderService service;
     @Mock IDescribedMap<EventOptionID> defaultMap;
     @Mock IMutableConstrainedMap<EventOptionID> emptyMap;
     EventOptionsCustomizer customizer;

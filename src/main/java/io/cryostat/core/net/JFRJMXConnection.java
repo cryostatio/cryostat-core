@@ -70,7 +70,6 @@ import org.openjdk.jmc.rjmx.ServiceNotAvailableException;
 import org.openjdk.jmc.rjmx.internal.DefaultConnectionHandle;
 import org.openjdk.jmc.rjmx.internal.RJMXConnection;
 import org.openjdk.jmc.rjmx.internal.ServerDescriptor;
-import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
 import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceFactory;
 import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceV2;
 import org.openjdk.jmc.rjmx.subscription.MRI;
@@ -132,19 +131,9 @@ public class JFRJMXConnection implements JFRConnection {
         return handle;
     }
 
-    public synchronized IFlightRecorderService getService()
+    public synchronized CryostatFlightRecorderService getService()
             throws ConnectionException, IOException, ServiceNotAvailableException {
-        if (!isConnected()) {
-            connect();
-        }
-        IFlightRecorderService service = serviceFactory.getServiceInstance(getHandle());
-        if (service == null || !isConnected()) {
-            throw new ConnectionException(
-                    String.format(
-                            "Could not connect to remote target %s",
-                            this.connectionDescriptor.createJMXServiceURL().toString()));
-        }
-        return service;
+        return new JmxFlightRecorderService(this, cw);
     }
 
     public TemplateService getTemplateService() {

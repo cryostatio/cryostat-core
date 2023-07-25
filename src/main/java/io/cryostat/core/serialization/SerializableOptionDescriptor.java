@@ -35,48 +35,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.cryostat.core.net;
+package io.cryostat.core.serialization;
 
-import java.io.IOException;
+import org.openjdk.jmc.common.unit.IOptionDescriptor;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.IntrospectionException;
-import javax.management.ReflectionException;
-import javax.management.remote.JMXServiceURL;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import org.openjdk.jmc.rjmx.ConnectionException;
-import org.openjdk.jmc.rjmx.IConnectionHandle;
-import org.openjdk.jmc.rjmx.ServiceNotAvailableException;
+public class SerializableOptionDescriptor {
 
-import io.cryostat.core.sys.Clock;
-import io.cryostat.core.templates.TemplateService;
+    private String name;
+    private String description;
+    private String defaultValue;
 
-public interface JFRConnection extends AutoCloseable {
+    public SerializableOptionDescriptor(IOptionDescriptor<?> orig) {
+        this.name = orig.getName();
+        this.description = orig.getDescription();
+        this.defaultValue = orig.getDefault().toString();
+    }
 
-    public IConnectionHandle getHandle() throws ConnectionException, IOException;
+    public String getName() {
+        return name;
+    }
 
-    public CryostatFlightRecorderService getService()
-            throws ConnectionException, IOException, ServiceNotAvailableException;
+    public String getDescription() {
+        return description;
+    }
 
-    public TemplateService getTemplateService();
+    public String getDefaultValue() {
+        return defaultValue;
+    }
 
-    public long getApproximateServerTime(Clock clock);
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
 
-    public JMXServiceURL getJMXURL() throws IOException;
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
 
-    public String getHost();
-
-    public int getPort();
-
-    public String getJvmId() throws IDException, IOException;
-
-    public MBeanMetrics getMBeanMetrics()
-            throws ConnectionException, IOException, InstanceNotFoundException,
-                    IntrospectionException, ReflectionException;
-
-    public boolean isConnected();
-
-    public void connect() throws ConnectionException;
-
-    public void disconnect();
+    @Override
+    public boolean equals(Object o) {
+        return EqualsBuilder.reflectionEquals(this, o);
+    }
 }
