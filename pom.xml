@@ -51,15 +51,9 @@
   <org.junit.jupiter.version>5.9.2</org.junit.jupiter.version>
   <org.hamcrest.version>2.2</org.hamcrest.version>
   <org.mockito.version>5.2.0</org.mockito.version>
-<<<<<<< HEAD
   <org.jacoco.maven.plugin.version>0.8.9</org.jacoco.maven.plugin.version>
   <com.diffplug.spotless.maven.plugin.version>2.36.0</com.diffplug.spotless.maven.plugin.version>
-  <org.slf4j.version>2.0.6</org.slf4j.version>
-=======
-  <org.jacoco.maven.plugin.version>0.8.10</org.jacoco.maven.plugin.version>
-  <com.diffplug.spotless.maven.plugin.version>2.38.0</com.diffplug.spotless.maven.plugin.version>
   <org.slf4j.version>2.0.7</org.slf4j.version>
->>>>>>> 07b3fa2 (build(deps): bump slf4j-jdk14 from 2.0.6 to 2.0.7 (#200))
 </properties>
 
 <dependencies>
