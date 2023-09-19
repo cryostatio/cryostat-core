@@ -43,11 +43,11 @@ public interface MutableTemplateService extends TemplateService {
 
     @SuppressWarnings("serial")
     public static class InvalidEventTemplateException extends Exception {
-        InvalidEventTemplateException(String message, Throwable cause) {
+        public InvalidEventTemplateException(String message, Throwable cause) {
             super(message, cause);
         }
 
-        InvalidEventTemplateException(String message) {
+        public InvalidEventTemplateException(String message) {
             super(message);
         }
     }
