@@ -25,7 +25,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import io.cryostat.core.log.Logger;
-import io.cryostat.core.reports.InterruptibleReportGenerator.RuleEvaluation;
+import io.cryostat.core.reports.InterruptibleReportGenerator.AnalysisResult;
 
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -51,10 +51,10 @@ class InterruptibleReportGeneratorTest {
     @Test
     void shouldProduceEvalMap() throws Exception {
         try (InputStream is = new FileInputStream(getJfrFile())) {
-            Future<Map<String, RuleEvaluation>> scoreMap =
+            Future<Map<String, AnalysisResult>> scoreMap =
                     generator.generateEvalMapInterruptibly(is, rule -> true);
 
-            Map<String, RuleEvaluation> s = scoreMap.get();
+            Map<String, AnalysisResult> s = scoreMap.get();
 
             MatcherAssert.assertThat(s.entrySet(), Matchers.not(Matchers.empty()));
             for (var entry : s.entrySet()) {
@@ -71,7 +71,7 @@ class InterruptibleReportGeneratorTest {
     @Test
     void shouldBeCancellableEvalMap() throws Exception {
         try (InputStream is = new FileInputStream(getJfrFile())) {
-            Future<Map<String, RuleEvaluation>> scoreMap =
+            Future<Map<String, AnalysisResult>> scoreMap =
                     generator.generateEvalMapInterruptibly(is, rule -> true);
 
             scoreMap.cancel(true);
@@ -82,7 +82,7 @@ class InterruptibleReportGeneratorTest {
     @Test
     void shouldProduceEvalMapWithFilteredRules() throws Exception {
         try (InputStream is = new FileInputStream(getJfrFile())) {
-            Future<Map<String, RuleEvaluation>> scoreMap =
+            Future<Map<String, AnalysisResult>> scoreMap =
                     generator.generateEvalMapInterruptibly(is, rule -> rule.getId() == "ClassLeak");
 
             MatcherAssert.assertThat(

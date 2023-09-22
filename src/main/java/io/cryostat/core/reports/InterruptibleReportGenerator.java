@@ -20,11 +20,13 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -41,6 +43,7 @@ import org.openjdk.jmc.common.util.Pair;
 import org.openjdk.jmc.flightrecorder.CouldNotLoadRecordingException;
 import org.openjdk.jmc.flightrecorder.JfrLoaderToolkit;
 import org.openjdk.jmc.flightrecorder.rules.DependsOn;
+import org.openjdk.jmc.flightrecorder.rules.IRecordingSetting;
 import org.openjdk.jmc.flightrecorder.rules.IResult;
 import org.openjdk.jmc.flightrecorder.rules.IRule;
 import org.openjdk.jmc.flightrecorder.rules.ResultBuilder;
@@ -59,7 +62,6 @@ import jdk.jfr.Event;
 import jdk.jfr.Label;
 import jdk.jfr.Name;
 import org.apache.commons.io.input.CountingInputStream;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * Re-implementation of {@link ReportGenerator} where the report generation task is represented by a
@@ -84,7 +86,7 @@ public class InterruptibleReportGenerator {
         this.logger = logger;
     }
 
-    public Future<Map<String, RuleEvaluation>> generateEvalMapInterruptibly(
+    public Future<Map<String, AnalysisResult>> generateEvalMapInterruptibly(
             InputStream recording, Predicate<IRule> predicate) {
         Objects.requireNonNull(recording);
         Objects.requireNonNull(predicate);
@@ -93,7 +95,7 @@ public class InterruptibleReportGenerator {
                     try {
                         Collection<IResult> results =
                                 generateResultHelper(recording, predicate).left;
-                        Map<String, RuleEvaluation> evalMap = new HashMap<String, RuleEvaluation>();
+                        Map<String, AnalysisResult> evalMap = new HashMap<String, AnalysisResult>();
                         for (var eval : results) {
                             IQuantity scoreQuantity = eval.getResult(TypedResult.SCORE);
                             double score;
@@ -102,64 +104,16 @@ public class InterruptibleReportGenerator {
                             } else {
                                 score = eval.getSeverity().getLimit();
                             }
-                            evalMap.put(
-                                    eval.getRule().getId(),
-                                    new RuleEvaluation(
-                                            score,
-                                            eval.getRule().getName(),
-                                            eval.getRule().getTopic(),
-                                            getTextDescription(eval)));
+                            evalMap.put(eval.getRule().getId(), new AnalysisResult(score, eval));
                         }
                         return evalMap;
                     } catch (InterruptedException
                             | IOException
                             | ExecutionException
                             | CouldNotLoadRecordingException e) {
-                        return Map.of(
-                                e.getClass().toString(),
-                                new RuleEvaluation(
-                                        Severity.NA.getLimit(),
-                                        e.getClass().getSimpleName(),
-                                        "report_failure",
-                                        e.getMessage()));
+                        throw new CompletionException(e);
                     }
                 });
-    }
-
-    private String getTextDescription(IResult result) {
-        StringBuilder sb = new StringBuilder();
-
-        if (StringUtils.isNotBlank(result.getSummary())) {
-            sb.append("Summary:\n");
-            sb.append(ResultToolkit.populateMessage(result, result.getSummary(), false));
-            sb.append("\n\n");
-        }
-
-        if (StringUtils.isNotBlank(result.getExplanation())) {
-            sb.append("Explanation:\n");
-            sb.append(ResultToolkit.populateMessage(result, result.getExplanation(), false));
-            sb.append("\n\n");
-        }
-
-        if (StringUtils.isNotBlank(result.getSolution())) {
-            sb.append("Solution:\n");
-            sb.append(ResultToolkit.populateMessage(result, result.getSolution(), false));
-            sb.append("\n\n");
-        }
-
-        if (!result.suggestRecordingSettings().isEmpty()) {
-            sb.append("Suggested settings:\n");
-            for (var suggestion : result.suggestRecordingSettings()) {
-                sb.append(
-                        String.format(
-                                "%s %s=%s",
-                                suggestion.getSettingFor(),
-                                suggestion.getSettingName(),
-                                suggestion.getSettingValue()));
-            }
-        }
-
-        return sb.toString().strip();
     }
 
     private Pair<Collection<IResult>, Long> generateResultHelper(
@@ -263,7 +217,7 @@ public class InterruptibleReportGenerator {
                 | IOException
                 | ExecutionException
                 | CouldNotLoadRecordingException e) {
-            for (Future f : resultFutures.values()) {
+            for (Future<?> f : resultFutures.values()) {
                 if (!f.isDone()) {
                     f.cancel(true);
                 }
@@ -273,17 +227,17 @@ public class InterruptibleReportGenerator {
         }
     }
 
-    public static class RuleEvaluation {
-        private double score;
-        private String name;
-        private String topic;
-        private String description;
+    public static class AnalysisResult {
+        private final String name;
+        private final String topic;
+        private final double score;
+        private final Evaluation evaluation;
 
-        RuleEvaluation(double score, String name, String topic, String description) {
+        AnalysisResult(double score, IResult result) {
             this.score = score;
-            this.name = name;
-            this.topic = topic;
-            this.description = description;
+            this.name = result.getRule().getName();
+            this.topic = result.getRule().getTopic();
+            this.evaluation = new Evaluation(result);
         }
 
         public double getScore() {
@@ -298,8 +252,66 @@ public class InterruptibleReportGenerator {
             return topic;
         }
 
-        public String getDescription() {
-            return description;
+        public Evaluation getEvaluation() {
+            return evaluation;
+        }
+
+        public static class Evaluation {
+            private final String summary;
+            private final String explanation;
+            private final String solution;
+            private final List<Suggestion> suggestions;
+
+            Evaluation(IResult result) {
+                this.summary = ResultToolkit.populateMessage(result, result.getSummary(), false);
+                this.explanation =
+                        ResultToolkit.populateMessage(result, result.getExplanation(), false);
+                this.solution = ResultToolkit.populateMessage(result, result.getSolution(), false);
+                this.suggestions =
+                        result.suggestRecordingSettings().stream()
+                                .map(Suggestion::new)
+                                .collect(Collectors.toList());
+            }
+
+            public String getSummary() {
+                return summary;
+            }
+
+            public String getExplanation() {
+                return explanation;
+            }
+
+            public String getSolution() {
+                return solution;
+            }
+
+            public List<Suggestion> getSuggestions() {
+                return suggestions;
+            }
+
+            public static class Suggestion {
+                private final String name;
+                private final String setting;
+                private final String value;
+
+                Suggestion(IRecordingSetting setting) {
+                    this.name = setting.getSettingName();
+                    this.setting = setting.getSettingFor();
+                    this.value = setting.getSettingValue();
+                }
+
+                public String getName() {
+                    return name;
+                }
+
+                public String getSetting() {
+                    return setting;
+                }
+
+                public String getValue() {
+                    return value;
+                }
+            }
         }
     }
 
