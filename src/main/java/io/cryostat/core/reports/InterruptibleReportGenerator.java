@@ -58,10 +58,6 @@ import org.openjdk.jmc.flightrecorder.rules.util.RulesToolkit;
 import io.cryostat.core.log.Logger;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import jdk.jfr.Category;
-import jdk.jfr.Event;
-import jdk.jfr.Label;
-import jdk.jfr.Name;
 import org.apache.commons.io.input.CountingInputStream;
 
 /**
@@ -351,51 +347,6 @@ public class InterruptibleReportGenerator {
             while ((resultFuture = futureQueue.poll()) != null) {
                 resultFuture.run();
             }
-        }
-    }
-
-    @Name("io.cryostat.core.reports.InterruptibleReportGenerator.ReportRuleEvalEvent")
-    @Label("Report Rule Evaluation")
-    @Category("Cryostat")
-    @SuppressFBWarnings(
-            value = "URF_UNREAD_FIELD",
-            justification = "The event fields are recorded with JFR instead of accessed directly")
-    public static class ReportRuleEvalEvent extends Event {
-
-        String ruleName;
-
-        ReportRuleEvalEvent(String ruleName) {
-            this.ruleName = ruleName;
-        }
-    }
-
-    @Name("io.cryostat.core.reports.InterruptibleReportGenerator.ReportGenerationEvent")
-    @Label("Report Generation")
-    @Category("Cryostat")
-    @SuppressFBWarnings(
-            value = "URF_UNREAD_FIELD",
-            justification = "The event fields are recorded with JFR instead of accessed directly")
-    public static class ReportGenerationEvent extends Event {
-
-        String recordingName;
-        int rulesEvaluated;
-        int rulesApplicable;
-        long recordingSizeBytes;
-
-        public ReportGenerationEvent(String recordingName) {
-            this.recordingName = recordingName;
-        }
-
-        public void setRulesEvaluated(int rulesEvaluated) {
-            this.rulesEvaluated = rulesEvaluated;
-        }
-
-        public void setRulesApplicable(int rulesApplicable) {
-            this.rulesApplicable = rulesApplicable;
-        }
-
-        public void setRecordingSizeBytes(long recordingSizeBytes) {
-            this.recordingSizeBytes = recordingSizeBytes;
         }
     }
 }
