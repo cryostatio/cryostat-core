@@ -19,16 +19,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Paths;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.function.Function;
 
 import io.cryostat.core.log.Logger;
-import io.cryostat.core.reports.InterruptibleReportGenerator.ReportResult;
 import io.cryostat.core.reports.InterruptibleReportGenerator.RuleEvaluation;
 
 import org.hamcrest.MatcherAssert;
@@ -43,106 +39,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class InterruptibleReportGeneratorTest {
 
-    @Mock Logger logger;
-    @Mock Function<InputStream, String> reporter;
     @Mock InputStream recording;
-    Set<ReportTransformer> transformers;
+    @Mock Logger logger;
     InterruptibleReportGenerator generator;
 
     @BeforeEach()
     void setup() throws Exception {
-        transformers = new HashSet<>();
-        generator =
-                new InterruptibleReportGenerator(
-                        logger, transformers, Executors.newWorkStealingPool(1));
-    }
-
-    @Test
-    void shouldProduceReport() throws Exception {
-        try (InputStream is = new FileInputStream(getJfrFile())) {
-            Future<ReportResult> report = generator.generateReportInterruptibly(is);
-            MatcherAssert.assertThat(
-                    report.get().getHtml(), Matchers.not(Matchers.emptyOrNullString()));
-            MatcherAssert.assertThat(
-                    report.get().getReportStats(), Matchers.not(Matchers.nullValue()));
-        }
-    }
-
-    @Test
-    void shouldBeCancellable() throws Exception {
-        try (InputStream is = new FileInputStream(getJfrFile())) {
-            Future<ReportResult> report = generator.generateReportInterruptibly(is);
-            report.cancel(true);
-            Assertions.assertThrows(CancellationException.class, report::get);
-        }
-    }
-
-    @Test
-    void shouldThrowNullRecording() throws Exception {
-        Assertions.assertThrows(
-                NullPointerException.class,
-                () -> {
-                    generator.generateReportInterruptibly(null).get();
-                });
-    }
-
-    @Test
-    void shouldThrowNullPredicate() throws Exception {
-        try (InputStream is = new FileInputStream(getJfrFile())) {
-            Assertions.assertThrows(
-                    NullPointerException.class,
-                    () -> {
-                        generator.generateReportInterruptibly(is, null).get();
-                    });
-        }
-    }
-
-    @Test
-    void shouldProduceReportWithFilteredRules() throws Exception {
-        try (InputStream is = new FileInputStream(getJfrFile())) {
-            Future<ReportResult> report =
-                    generator.generateReportInterruptibly(
-                            is, rule -> rule.getId() == "ClassLeak" || rule.getId() == "Errors");
-            MatcherAssert.assertThat(
-                    report.get().getHtml(), Matchers.not(Matchers.emptyOrNullString()));
-            MatcherAssert.assertThat(
-                    report.get().getReportStats(), Matchers.not(Matchers.nullValue()));
-            MatcherAssert.assertThat(
-                    report.get().getReportStats().rulesEvaluated, Matchers.equalTo(2));
-        }
-    }
-
-    @Test
-    void shouldProduceReportWithFilteredRulesAndTopics() throws Exception {
-        try (InputStream is = new FileInputStream(getJfrFile())) {
-            Future<ReportResult> report =
-                    generator.generateReportInterruptibly(
-                            is,
-                            rule ->
-                                    rule.getId() == "ClassLeak"
-                                            || rule.getId() == "SystemGc"
-                                            || rule.getTopic() == "garbage_collection");
-            MatcherAssert.assertThat(
-                    report.get().getHtml(), Matchers.not(Matchers.emptyOrNullString()));
-            MatcherAssert.assertThat(
-                    report.get().getReportStats(), Matchers.not(Matchers.nullValue()));
-            MatcherAssert.assertThat(
-                    report.get().getReportStats().rulesEvaluated, Matchers.equalTo(11));
-        }
-    }
-
-    @Test
-    void shouldProduceEmptyReport() throws Exception {
-        try (InputStream is = new FileInputStream(getJfrFile())) {
-            Future<ReportResult> report =
-                    generator.generateReportInterruptibly(is, rule -> rule.getId() == "AFakeRule");
-            MatcherAssert.assertThat(
-                    report.get().getHtml(), Matchers.not(Matchers.emptyOrNullString()));
-            MatcherAssert.assertThat(
-                    report.get().getReportStats(), Matchers.not(Matchers.nullValue()));
-            MatcherAssert.assertThat(
-                    report.get().getReportStats().rulesEvaluated, Matchers.equalTo(0));
-        }
+        generator = new InterruptibleReportGenerator(Executors.newWorkStealingPool(1), logger);
     }
 
     @Test
