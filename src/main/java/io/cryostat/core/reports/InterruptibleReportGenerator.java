@@ -18,6 +18,7 @@ package io.cryostat.core.reports;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -286,7 +287,7 @@ public class InterruptibleReportGenerator {
             }
 
             public List<Suggestion> getSuggestions() {
-                return suggestions;
+                return Collections.unmodifiableList(suggestions);
             }
 
             public static class Suggestion {
