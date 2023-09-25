@@ -20,9 +20,6 @@ import java.io.InputStream;
 import java.util.logging.LogManager;
 
 import io.cryostat.core.jmc.SecurityManager;
-import io.cryostat.core.reports.InterruptibleReportGenerator.ReportRuleEvalEvent;
-
-import jdk.jfr.FlightRecorder;
 
 public class CryostatCore {
     private CryostatCore() {}
@@ -37,7 +34,5 @@ public class CryostatCore {
             LogManager.getLogManager()
                     .updateConfiguration(config, k -> ((o, n) -> o != null ? o : n));
         }
-
-        FlightRecorder.register(ReportRuleEvalEvent.class);
     }
 }
