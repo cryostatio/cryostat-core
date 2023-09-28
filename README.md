@@ -12,7 +12,7 @@ Build:
 
 ## Build
 
-`mvn install` to compile this core library and publish the artifacts to the
+`./mvnw install` to compile this core library and publish the artifacts to the
 local Maven repository for consumption by other projects.
 
 Consumers of this build may pull it from the GitHub Packages registry. This
