@@ -13,10 +13,6 @@ on:
         description: the Cryostat application version that will be built
         value: ${{ jobs.get-pom-properties.outputs.image-version }}
 
-permissions:
-  contents: read
-  packages: read
-
 jobs:
   get-pom-properties:
     runs-on: ubuntu-latest
@@ -47,7 +43,8 @@ jobs:
     - uses: actions/checkout@v4
       if: always()
       with:
-        repository: cryostatio/cryostat
+        repository: ${{ github.repository_owner }}
+        name: cryostat
         ref: main
         submodules: true
         fetch-depth: 0
