@@ -19,8 +19,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        repository: cryostatio/cryostat
+        repository: ${{ github.repository_owner }}/cryostat
         ref: main
+    - uses: Mudlet/xmlstarlet-action@master
+      with:
+        args: ed -P -L -u '//_:properties[_:io.cryostat.core.version="2.23.0"]/_:io.cryostat.core.version' -v "2.24.0-SNAPSHOT" pom.xml 
     - id: query-pom
       name: Get properties from POM
       # Query POM for image version and save as output parameter
@@ -43,8 +46,7 @@ jobs:
     - uses: actions/checkout@v4
       if: always()
       with:
-        repository: ${{ github.repository_owner }}
-        name: cryostat
+        repository: ${{ github.repository_owner }}/cryostat
         ref: main
         submodules: true
         fetch-depth: 0
@@ -62,6 +64,9 @@ jobs:
         step: restore
     - run: git submodule init
     - run: git submodule update
+    - uses: actions/download-artifact@v3
+      with:
+        name: cryostat-core
     - run: mvn -B -U -Dbuild.arch=${{ inputs.build-arch }} clean package
       env:
         GITHUB_TOKEN_REF: ${{ secrets.GITHUB_TOKEN }}
@@ -87,7 +92,7 @@ jobs:
     - uses: actions/checkout@v4
       if: always()
       with:
-        repository: cryostatio/cryostat
+        repository: ${{ github.repository_owner }}/cryostat
         ref: main
         submodules: true
         fetch-depth: 0

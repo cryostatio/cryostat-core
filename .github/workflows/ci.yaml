@@ -27,6 +27,10 @@ jobs:
       with:
         step: restore
     - run: mvn -B -U clean verify
+    - uses: actions/upload-artifact@v3
+      with:
+        name: cryostat-core
+        path: /home/runner/work/cryostat-core/cryostat-core/target/cryostat-core-2.24.0-SNAPSHOT.jar
     - uses: skjolber/maven-cache-github-action@v1
       with:
         step: save
@@ -40,3 +44,71 @@ jobs:
     with:
       build-arch: ${{ matrix.arch }}
       skip-itests: ${{ matrix.arch != 'amd64' }}
+  
+  push-to-ghcr:
+    runs-on: ubuntu-latest
+    needs: [cryostat-test]
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+    outputs: 
+      amd64_image: ${{ steps.amd64_image.outputs.image }}
+      arm64_image: ${{ steps.arm64_image.outputs.image }}
+    permissions:
+      packages: write
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: cryostat-${{ matrix.arch }}
+    - name: Load cryostat image
+      run: podman load -i cryostat-${{ matrix.arch }}.tar
+    - name: Tag cryostat image
+      run: podman tag cryostat ghcr.io/${{ github.repository_owner }}/cryostat-core:pr-${{ github.event.number }}-${{ github.event.pull_request.head.sha }}-linux-${{ matrix.arch }}
+    - name: Push PR test image to ghcr.io
+      id: push-to-ghcr
+      uses: redhat-actions/push-to-registry@v2
+      with:
+        image: cryostat
+        tags: pr-${{ github.event.number }}-${{ github.event.pull_request.head.sha }}-linux-${{ matrix.arch }}
+        registry: ghcr.io/${{ github.repository_owner }}
+        username: ${{ github.event.pull_request.user.login }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Store images as output amd64
+      if: ${{ matrix.arch == 'amd64' }}
+      id: amd64_image
+      run: echo "image=${{ steps.push-to-ghcr.outputs.registry-path }}" >> "$GITHUB_OUTPUT"
+    - name: Store images as output
+      if: ${{ matrix.arch == 'arm64' }}
+      id: arm64_image
+      run: echo "image=${{ steps.push-to-ghcr.outputs.registry-path }}" >> "$GITHUB_OUTPUT"
+
+  comment-image:
+    runs-on: ubuntu-latest
+    needs: [push-to-ghcr]
+    env:
+      amd64_image: ${{ needs.push-to-ghcr.outputs.amd64_image }}
+      arm64_image: ${{ needs.push-to-ghcr.outputs.arm64_image }}
+    permissions:
+      pull-requests: write
+    steps:
+    - name: Create markdown table
+      id: md-table
+      uses: petems/csv-to-md-table-action@v3.0.0
+      with: 
+        csvinput: |
+          ARCH, IMAGE
+          amd64, ${{ env.amd64_image }}
+          arm64, ${{ env.arm64_image }}
+    - uses: thollander/actions-comment-pull-request@v2
+      with:
+        message: |-
+          ${{ steps.md-table.outputs.markdown-table }}
+
+          To run smoketest:
+          ```
+          # amd64          
+          CRYOSTAT_IMAGE=${{ env.amd64_image }} sh smoketest.sh
+
+          # or arm64
+          CRYOSTAT_IMAGE=${{ env.arm64_image }} sh smoketest.sh
+          ```
