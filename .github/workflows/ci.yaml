@@ -1,13 +1,17 @@
 name: CI build
 
+concurrency:
+  group: ci-${{ github.run_id }}
+  cancel-in-progress: true
+
 on:
-  push:
-    branches:
-      - main
-      - v[0-9]+
-      - v[0-9]+.[0-9]+
-      - cryostat-v[0-9]+.[0-9]+
-  pull_request:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - labeled
+      - unlabeled
     branches:
       - main
       - v[0-9]+
@@ -15,20 +19,143 @@ on:
       - cryostat-v[0-9]+.[0-9]+
 
 jobs:
-  build:
-
+  check-before-build:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-java@v2
+    - name: Fail if safe-to-test is not applied
+      if: github.repository_owner == 'cryostatio' && (!contains(github.event.pull_request.labels.*.name, 'safe-to-test'))
+      run: exit 1
+
+  build-core:
+    runs-on: ubuntu-latest
+    outputs:
+      core_version: ${{ steps.get_core_version.outputs.core_version }}
+    steps:
+    - uses: actions/checkout@v4
+    - id: get_core_version
+      run: |
+        echo "core_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+        echo "name=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)" >> $GITHUB_OUTPUT
+    - uses: actions/setup-java@v3
       with:
-        java-version: '11'
+        java-version: '17'
         distribution: 'temurin'
-    - uses: skjolber/maven-cache-github-action@v1
+    - uses: actions/cache@v3
       with:
-        step: restore
-    - run: mvn -B -U clean verify
-    - uses: skjolber/maven-cache-github-action@v1
+        path: ~/.m2
+        key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml') }}
+    - run: mvn -B -U clean install
+
+  build-cryostat:
+    needs: [build-core]
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install qemu
+      if: ${{ inputs.build-arch != 'amd64' }}
+      continue-on-error: true
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y qemu-user-static
+    - uses: actions/checkout@v4
       with:
-        step: save
+        repository: ${{ github.repository_owner }}/cryostat
+        ref: main
+        submodules: true
+        fetch-depth: 0
+    - uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+    - name: maven-settings
+      uses: s4u/maven-settings-action@v2
+      with:
+        githubServer: true
+    - run: git submodule init
+    - run: git submodule update
+    - run: mvn -B -U -Dbuild.arch=${{ matrix.arch}} -Dio.cryostat.core.version=${{ needs.build-core.outputs.core_version }} clean package
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Save cryostat image
+      run: podman save -o cryostat-${{ matrix.arch }}.tar --format oci-archive quay.io/cryostat/cryostat
+    - uses: actions/upload-artifact@v3
+      with:
+        name: cryostat-${{ matrix.arch }}
+        path: ${{ github.workspace }}/cryostat-${{ matrix.arch }}.tar
+  
+  push-to-ghcr:
+    runs-on: ubuntu-latest
+    needs: [build-cryostat]
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+    outputs: 
+      amd64_image: ${{ steps.amd64_image.outputs.image }}
+      arm64_image: ${{ steps.arm64_image.outputs.image }}
+    permissions:
+      packages: write
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: cryostat-${{ matrix.arch }}
+    - name: Load cryostat image
+      run: podman load -i cryostat-${{ matrix.arch }}.tar
+    - name: Tag cryostat image
+      run: podman tag cryostat ghcr.io/${{ github.repository_owner }}/cryostat-core:pr-${{ github.event.number }}-${{ github.event.pull_request.head.sha }}-linux-${{ matrix.arch }}
+    - name: Push PR test image to ghcr.io
+      id: push-to-ghcr
+      uses: redhat-actions/push-to-registry@v2
+      with:
+        image: cryostat-core
+        tags: pr-${{ github.event.number }}-${{ github.event.pull_request.head.sha }}-linux-${{ matrix.arch }}
+        registry: ghcr.io/${{ github.repository_owner }}
+        username: ${{ github.event.pull_request.user.login }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Store images as output amd64
+      if: ${{ matrix.arch == 'amd64' }}
+      id: amd64_image
+      run: echo "image=${{ steps.push-to-ghcr.outputs.registry-path }}" >> "$GITHUB_OUTPUT"
+    - name: Store images as output
+      if: ${{ matrix.arch == 'arm64' }}
+      id: arm64_image
+      run: echo "image=${{ steps.push-to-ghcr.outputs.registry-path }}" >> "$GITHUB_OUTPUT"
+
+  comment-image:
+    runs-on: ubuntu-latest
+    needs: [push-to-ghcr]
+    env:
+      amd64_image: ${{ needs.push-to-ghcr.outputs.amd64_image }}
+      arm64_image: ${{ needs.push-to-ghcr.outputs.arm64_image }}
+    permissions:
+      pull-requests: write
+    steps:
+    - name: Create markdown table
+      id: md-table
+      uses: petems/csv-to-md-table-action@v3.0.0
+      with: 
+        csvinput: |
+          ARCH, IMAGE
+          amd64, ${{ env.amd64_image }}
+          arm64, ${{ env.arm64_image }}
+    - uses: thollander/actions-comment-pull-request@v2
+      with:
+        message: |-
+          ${{ steps.md-table.outputs.markdown-table }}
+
+          To run smoketest:
+          ```
+          # amd64          
+          CRYOSTAT_IMAGE=${{ env.amd64_image }} sh smoketest.sh
+
+          # or arm64
+          CRYOSTAT_IMAGE=${{ env.arm64_image }} sh smoketest.sh
+          ```
