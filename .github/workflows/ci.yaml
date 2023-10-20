@@ -1,7 +1,7 @@
 name: CI build
 
 concurrency:
-  group: ci-${{ github.run_id }}
+  group: pr-${{ github.event.number }}
   cancel-in-progress: true
 
 on:
