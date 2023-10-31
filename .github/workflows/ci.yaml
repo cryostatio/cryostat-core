@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Install qemu
-      if: ${{ inputs.build-arch != 'amd64' }}
+      if: ${{ matrix.arch != 'amd64' }}
       continue-on-error: true
       run: |
         sudo apt-get update
@@ -98,7 +98,7 @@ jobs:
     strategy:
       matrix:
         arch: [amd64, arm64]
-    outputs: 
+    outputs:
       amd64_image: ${{ steps.amd64_image.outputs.image }}
       arm64_image: ${{ steps.arm64_image.outputs.image }}
     permissions:
@@ -141,7 +141,7 @@ jobs:
     - name: Create markdown table
       id: md-table
       uses: petems/csv-to-md-table-action@v3.0.0
-      with: 
+      with:
         csvinput: |
           ARCH, IMAGE
           amd64, ${{ env.amd64_image }}
@@ -153,7 +153,7 @@ jobs:
 
           To run smoketest:
           ```
-          # amd64          
+          # amd64
           CRYOSTAT_IMAGE=${{ env.amd64_image }} sh smoketest.sh
 
           # or arm64
