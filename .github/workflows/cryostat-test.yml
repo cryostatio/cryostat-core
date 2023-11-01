@@ -41,10 +41,10 @@ jobs:
               content: "+1",
             });
 
-  checkout-branch: 
+  checkout-branch:
     runs-on: ubuntu-latest
     needs: [check-before-build]
-    outputs: 
+    outputs:
       PR_head_ref: ${{ fromJSON(steps.comment-branch.outputs.result).ref }}
       PR_head_sha: ${{ fromJSON(steps.comment-branch.outputs.result).sha }}
       PR_num: ${{ fromJSON(steps.comment-branch.outputs.result).num }}
@@ -97,6 +97,7 @@ jobs:
         username: ${{ github.event.comment.user.login }}
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: pull cryostat image
+      id: pull-image
       run: podman pull ghcr.io/${{ github.repository_owner }}/cryostat-core:pr-${{ needs.checkout-branch.outputs.PR_num }}-${{ needs.checkout-branch.outputs.PR_head_sha }}-linux-${{ env.build_arch }}
     - name: tag cryostat image
       run: podman tag ghcr.io/${{ github.repository_owner }}/cryostat-core:pr-${{ needs.checkout-branch.outputs.PR_num }}-${{ needs.checkout-branch.outputs.PR_head_sha }}-linux-${{ env.build_arch }} quay.io/cryostat/cryostat
@@ -110,3 +111,40 @@ jobs:
     - name: Print itest container logs
       if: failure()
       run: ls -1dt target/cryostat-*.server.log | head -n1 | xargs cat
+    - name: Add workflow result as comment on PR
+      uses: actions/github-script@v6
+      if: always()
+      with:
+        script: |
+          const name = '${{ github.workflow	}}';
+          const url = '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}';
+          const success = '${{ job.status }}' === 'success';
+          const body = `${name}: ${success ? 'All tests pass ✅' : 'At least one test failed ❌'}\n${url}`;
+
+          await github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: body
+          })
+
+    - name: Leave a comment on pull failure
+      uses: actions/github-script@v6
+      if: always() && steps.pull-image.outcome != 'success'
+      with:
+        script: |
+          const body = `Image does not exist! Please wait for the initial build and push to complete before using \`/build_test\` command.`;
+          await github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: body
+          })
+          
+    - name: Set latest commit status as ${{ job.status }}
+      uses: myrotvorets/set-commit-status-action@master
+      if: always()
+      with:
+        sha: ${{ needs.checkout-branch.outputs.PR_head_sha}}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        status: ${{ job.status }}
