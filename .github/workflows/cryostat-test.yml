@@ -66,6 +66,8 @@ jobs:
   cryostat-test:
     runs-on: ubuntu-latest
     needs: [checkout-branch]
+    permissions:
+      statuses: write
     env:
       build_arch: 'amd64'
     permissions:
