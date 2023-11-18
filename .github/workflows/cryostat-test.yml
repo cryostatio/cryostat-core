@@ -68,10 +68,9 @@ jobs:
     needs: [checkout-branch]
     permissions:
       statuses: write
+      pull-requests: write
     env:
       build_arch: 'amd64'
-    permissions:
-      statuses: write
     steps:
     - uses: actions/checkout@v4
       with:
