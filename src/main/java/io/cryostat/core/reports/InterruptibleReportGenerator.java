@@ -225,16 +225,26 @@ public class InterruptibleReportGenerator {
     }
 
     public static class AnalysisResult {
-        private final String name;
-        private final String topic;
-        private final double score;
-        private final Evaluation evaluation;
+        private String name;
+        private String topic;
+        private double score;
+        private Evaluation evaluation;
+
+        AnalysisResult() {}
+
+        AnalysisResult(String name, String topic, double score, Evaluation evaluation) {
+            this.name = name;
+            this.topic = topic;
+            this.score = score;
+            this.evaluation = evaluation;
+        }
 
         AnalysisResult(double score, IResult result) {
-            this.score = score;
-            this.name = result.getRule().getName();
-            this.topic = result.getRule().getTopic();
-            this.evaluation = new Evaluation(result);
+            this(
+                    result.getRule().getName(),
+                    result.getRule().getTopic(),
+                    score,
+                    new Evaluation(result));
         }
 
         public double getScore() {
@@ -254,10 +264,12 @@ public class InterruptibleReportGenerator {
         }
 
         public static class Evaluation {
-            private final String summary;
-            private final String explanation;
-            private final String solution;
-            private final List<Suggestion> suggestions;
+            private String summary;
+            private String explanation;
+            private String solution;
+            private List<Suggestion> suggestions;
+
+            Evaluation() {}
 
             Evaluation(IResult result) {
                 this.summary = ResultToolkit.populateMessage(result, result.getSummary(), false);
@@ -287,9 +299,11 @@ public class InterruptibleReportGenerator {
             }
 
             public static class Suggestion {
-                private final String name;
-                private final String setting;
-                private final String value;
+                private String name;
+                private String setting;
+                private String value;
+
+                Suggestion() {}
 
                 Suggestion(IRecordingSetting setting) {
                     this.name = setting.getSettingName();
