@@ -32,6 +32,10 @@ jobs:
       core_version: ${{ steps.get_core_version.outputs.core_version }}
     steps:
     - uses: actions/checkout@v4
+      with:
+        repository: ${{ github.event.pull_request.head.repo.full_name }}
+        ref: ${{ github.event.pull_request.head.ref }}
+        fetch-depth: 0
     - id: get_core_version
       run: |
         echo "core_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT

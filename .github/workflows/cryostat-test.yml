@@ -66,6 +66,9 @@ jobs:
   cryostat-test:
     runs-on: ubuntu-latest
     needs: [checkout-branch]
+    permissions:
+      statuses: write
+      pull-requests: write
     env:
       build_arch: 'amd64'
     steps:
@@ -127,7 +130,6 @@ jobs:
             repo: context.repo.repo,
             body: body
           })
-
     - name: Leave a comment on pull failure
       uses: actions/github-script@v6
       if: always() && steps.pull-image.outcome != 'success'
@@ -140,11 +142,10 @@ jobs:
             repo: context.repo.repo,
             body: body
           })
-          
     - name: Set latest commit status as ${{ job.status }}
       uses: myrotvorets/set-commit-status-action@master
       if: always()
       with:
-        sha: ${{ needs.checkout-branch.outputs.PR_head_sha}}
+        sha: ${{ needs.checkout-branch.outputs.PR_head_sha }}
         token: ${{ secrets.GITHUB_TOKEN }}
         status: ${{ job.status }}
