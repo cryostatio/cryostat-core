@@ -53,7 +53,7 @@
   <org.mockito.version>5.2.0</org.mockito.version>
   <org.jacoco.maven.plugin.version>0.8.11</org.jacoco.maven.plugin.version>
   <com.diffplug.spotless.maven.plugin.version>2.40.0</com.diffplug.spotless.maven.plugin.version>
-  <org.slf4j.version>2.0.7</org.slf4j.version>
+  <org.slf4j.version>2.0.9</org.slf4j.version>
 </properties>
 
 <dependencies>
