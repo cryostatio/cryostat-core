@@ -53,6 +53,7 @@ import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceV2;
 import org.openjdk.jmc.rjmx.subscription.MRI;
 import org.openjdk.jmc.rjmx.subscription.MRI.Type;
 
+import io.cryostat.core.JvmIdentifier;
 import io.cryostat.core.sys.Clock;
 import io.cryostat.core.sys.Environment;
 import io.cryostat.core.sys.FileSystem;
@@ -143,26 +144,6 @@ public class JFRJMXConnection implements JFRConnection {
         } catch (IOException e) {
             cw.println(e);
             return 0;
-        }
-    }
-
-    public synchronized String getJvmId(RuntimeMetrics metrics) throws IOException {
-        if (!isConnected()) {
-            connect();
-        }
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
-                DataOutputStream dos = new DataOutputStream(baos)) {
-            dos.writeUTF(metrics.getClassPath());
-            dos.writeUTF(metrics.getName());
-            dos.writeUTF(stringifyArray(metrics.getInputArguments()));
-            dos.writeUTF(metrics.getLibraryPath());
-            dos.writeUTF(metrics.getVmVendor());
-            dos.writeUTF(metrics.getVmVersion());
-            dos.writeLong(metrics.getStartTime());
-            byte[] hash = DigestUtils.sha256(baos.toByteArray());
-            return new String(Base64.getUrlEncoder().encode(hash), StandardCharsets.UTF_8).trim();
-        } catch (IOException e) {
-            throw new IDException(e);
         }
     }
 
@@ -304,10 +285,10 @@ public class JFRJMXConnection implements JFRConnection {
                 new MemoryMetrics(memoryMap),
                 new ThreadMetrics(threadMap),
                 new OperatingSystemMetrics(osMap),
-                getJvmId(runtimeMetrics));
+                new JvmIdentifier(runtimeMetrics).getHash());
     }
 
-    private String stringifyArray(Object arrayObject) {
+    private static String stringifyArray(Object arrayObject) {
         String stringified;
         String componentType = arrayObject.getClass().getComponentType().toString();
         switch (componentType) {
