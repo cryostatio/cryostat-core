@@ -159,7 +159,7 @@ public class JFRJMXConnection implements JFRConnection {
                                 "VmVersion",
                                 "StartTime"));
         try {
-            return new JvmIdentifier(
+            return JvmIdentifier.from(
                     new RuntimeMetrics(
                             getAttributeMap(
                                     ConnectionToolkit.RUNTIME_BEAN_NAME,
@@ -274,7 +274,7 @@ public class JFRJMXConnection implements JFRConnection {
                 new MemoryMetrics(memoryMap),
                 new ThreadMetrics(threadMap),
                 new OperatingSystemMetrics(osMap),
-                new JvmIdentifier(runtimeMetrics).getHash());
+                JvmIdentifier.from(runtimeMetrics).getHash());
     }
 
     public synchronized boolean isV1() throws ConnectionException, IOException {

@@ -32,11 +32,15 @@ public class JvmIdentifier {
 
     private final String hash;
 
-    public JvmIdentifier() {
-        this(RuntimeMetrics.readLocalMetrics());
+    private JvmIdentifier(String hash) {
+        this.hash = hash;
     }
 
-    public JvmIdentifier(RuntimeMetrics metrics) {
+    public static JvmIdentifier getLocal() throws IDException {
+        return from(RuntimeMetrics.readLocalMetrics());
+    }
+
+    public static JvmIdentifier from(RuntimeMetrics metrics) throws IDException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
                 DataOutputStream dos = new DataOutputStream(baos)) {
             dos.writeUTF(metrics.getClassPath());
@@ -47,10 +51,10 @@ public class JvmIdentifier {
             dos.writeUTF(metrics.getVmVersion());
             dos.writeLong(metrics.getStartTime());
             byte[] hash = DigestUtils.sha256(baos.toByteArray());
-            this.hash =
-                    new String(Base64.getUrlEncoder().encode(hash), StandardCharsets.UTF_8).trim();
+            return new JvmIdentifier(
+                    new String(Base64.getUrlEncoder().encode(hash), StandardCharsets.UTF_8).trim());
         } catch (IOException e) {
-            throw new RuntimeException(new IDException(e));
+            throw new IDException(e);
         }
     }
 
