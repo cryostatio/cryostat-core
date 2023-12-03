@@ -69,6 +69,7 @@ jobs:
     permissions:
       statuses: write
       pull-requests: write
+      packages: read
     env:
       build_arch: 'amd64'
     steps:
