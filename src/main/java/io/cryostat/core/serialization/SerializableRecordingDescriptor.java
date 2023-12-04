@@ -67,7 +67,7 @@ public class SerializableRecordingDescriptor {
         this(
                 recording.getId(),
                 recording.getName(),
-                RecordingState.valueOf(recording.getState().name()),
+                mapRecordingStateState(recording.getState()),
                 recording.getStartTime() == null ? 0 : recording.getStartTime().toEpochMilli(),
                 recording.getDuration() == null ? 0 : recording.getDuration().toMillis(),
                 recording.getDuration() == null,
@@ -99,6 +99,25 @@ public class SerializableRecordingDescriptor {
         this.toDisk = o.getToDisk();
         this.maxSize = o.getMaxSize();
         this.maxAge = o.getMaxAge();
+    }
+
+    private static RecordingState mapRecordingStateState(jdk.jfr.RecordingState s) {
+        switch (s) {
+            case NEW:
+                return RecordingState.CREATED;
+            case DELAYED:
+                return RecordingState.CREATED;
+            case RUNNING:
+                return RecordingState.RUNNING;
+            case STOPPED:
+                return RecordingState.STOPPED;
+            case CLOSED:
+                return RecordingState.STOPPED;
+            default:
+                // better not to return null here for NPE safety, but this may not always be
+                // accurate
+                return RecordingState.CREATED;
+        }
     }
 
     public IRecordingDescriptor toJmcForm() {
