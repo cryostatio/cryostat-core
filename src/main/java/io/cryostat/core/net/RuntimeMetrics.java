@@ -15,7 +15,11 @@
  */
 package io.cryostat.core.net;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.lang3.StringUtils;
@@ -59,6 +63,38 @@ public class RuntimeMetrics {
         this.vmVersion = (String) attributes.getOrDefault("VmVersion", StringUtils.EMPTY);
         this.bootClassPathSupported =
                 (boolean) attributes.getOrDefault("BootClassPathSupported", false);
+    }
+
+    public static RuntimeMetrics readLocalMetrics() {
+        RuntimeMXBean bean = ManagementFactory.getRuntimeMXBean();
+        Map<String, Object> attrs = new HashMap<>();
+        store(attrs, "BootClassPath", bean::getBootClassPath);
+        store(attrs, "ClassPath", bean::getClassPath);
+        store(attrs, "InputArguments", () -> bean.getInputArguments().toArray(new String[0]));
+        store(attrs, "LibraryPath", bean::getLibraryPath);
+        store(attrs, "ManagementSpecVersion", bean::getManagementSpecVersion);
+        store(attrs, "Name", bean::getName);
+        store(attrs, "SpecName", bean::getSpecName);
+        store(attrs, "SpecVendor", bean::getSpecVendor);
+        store(attrs, "SpecVersion", bean::getSpecVersion);
+        store(attrs, "SystemProperties", bean::getSystemProperties);
+        store(attrs, "StartTime", bean::getStartTime);
+        store(attrs, "Uptime", bean::getUptime);
+        store(attrs, "VmName", bean::getVmName);
+        store(attrs, "VmVendor", bean::getVmVendor);
+        store(attrs, "VmVersion", bean::getVmVersion);
+        store(attrs, "BootClassPathSupported", bean::isBootClassPathSupported);
+        return new RuntimeMetrics(attrs);
+    }
+
+    private static void store(Map<String, Object> map, String key, Supplier<?> supplier) {
+        try {
+            Object s = supplier.get();
+            if (s != null) {
+                map.put(key, s);
+            }
+        } catch (UnsupportedOperationException __) {
+        }
     }
 
     public String getBootClassPath() {

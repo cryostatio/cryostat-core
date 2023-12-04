@@ -26,6 +26,7 @@ import org.openjdk.jmc.rjmx.ConnectionException;
 import org.openjdk.jmc.rjmx.IConnectionHandle;
 import org.openjdk.jmc.rjmx.ServiceNotAvailableException;
 
+import io.cryostat.core.JvmIdentifier;
 import io.cryostat.core.sys.Clock;
 import io.cryostat.core.templates.TemplateService;
 
@@ -46,7 +47,12 @@ public interface JFRConnection extends AutoCloseable {
 
     public int getPort();
 
-    public String getJvmId() throws IDException, IOException;
+    @Deprecated
+    public default String getJvmId() throws IDException, IOException {
+        return getJvmIdentifier().getHash();
+    }
+
+    public JvmIdentifier getJvmIdentifier() throws IDException, IOException;
 
     public MBeanMetrics getMBeanMetrics()
             throws ConnectionException, IOException, InstanceNotFoundException,

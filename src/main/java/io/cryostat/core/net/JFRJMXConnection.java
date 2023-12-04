@@ -15,23 +15,21 @@
  */
 package io.cryostat.core.net;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.management.MemoryUsage;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
+import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
@@ -53,14 +51,13 @@ import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceV2;
 import org.openjdk.jmc.rjmx.subscription.MRI;
 import org.openjdk.jmc.rjmx.subscription.MRI.Type;
 
+import io.cryostat.core.JvmIdentifier;
 import io.cryostat.core.sys.Clock;
 import io.cryostat.core.sys.Environment;
 import io.cryostat.core.sys.FileSystem;
 import io.cryostat.core.templates.MergedTemplateService;
 import io.cryostat.core.templates.TemplateService;
 import io.cryostat.core.tui.ClientWriter;
-
-import org.apache.commons.codec.digest.DigestUtils;
 
 public class JFRJMXConnection implements JFRConnection {
 
@@ -146,27 +143,8 @@ public class JFRJMXConnection implements JFRConnection {
         }
     }
 
-    public synchronized String getJvmId(RuntimeMetrics metrics) throws IOException {
-        if (!isConnected()) {
-            connect();
-        }
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
-                DataOutputStream dos = new DataOutputStream(baos)) {
-            dos.writeUTF(metrics.getClassPath());
-            dos.writeUTF(metrics.getName());
-            dos.writeUTF(stringifyArray(metrics.getInputArguments()));
-            dos.writeUTF(metrics.getLibraryPath());
-            dos.writeUTF(metrics.getVmVendor());
-            dos.writeUTF(metrics.getVmVersion());
-            dos.writeLong(metrics.getStartTime());
-            byte[] hash = DigestUtils.sha256(baos.toByteArray());
-            return new String(Base64.getUrlEncoder().encode(hash), StandardCharsets.UTF_8).trim();
-        } catch (IOException e) {
-            throw new IDException(e);
-        }
-    }
-
-    public synchronized String getJvmId() throws IDException, IOException {
+    @Override
+    public synchronized JvmIdentifier getJvmIdentifier() throws IDException, IOException {
         if (!isConnected()) {
             connect();
         }
@@ -180,30 +158,13 @@ public class JFRJMXConnection implements JFRConnection {
                                 "VmVendor",
                                 "VmVersion",
                                 "StartTime"));
-
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
-                DataOutputStream dos = new DataOutputStream(baos)) {
-            for (String attr : attrNames) {
-                Object attrObject =
-                        this.rjmxConnection.getAttributeValue(
-                                new MRI(Type.ATTRIBUTE, ConnectionToolkit.RUNTIME_BEAN_NAME, attr));
-                if (attrObject != null) {
-                    if (attrObject.getClass().isArray()) {
-                        String stringified = stringifyArray(attrObject);
-                        dos.writeUTF(stringified);
-                    } else if (attrObject instanceof Long) {
-                        dos.writeLong((Long) attrObject);
-                    } else {
-                        dos.writeUTF(attrObject.toString());
-                    }
-                }
-            }
-            byte[] hash = DigestUtils.sha256(baos.toByteArray());
-            return new String(Base64.getUrlEncoder().encode(hash), StandardCharsets.UTF_8).trim();
-        } catch (AttributeNotFoundException
-                | InstanceNotFoundException
-                | MBeanException
-                | ReflectionException e) {
+        try {
+            return JvmIdentifier.from(
+                    new RuntimeMetrics(
+                            getAttributeMap(
+                                    ConnectionToolkit.RUNTIME_BEAN_NAME,
+                                    m -> attrNames.contains(m.getName()))));
+        } catch (ReflectionException | IntrospectionException | InstanceNotFoundException e) {
             throw new IDException(e);
         }
     }
@@ -260,12 +221,21 @@ public class JFRJMXConnection implements JFRConnection {
     private Map<String, Object> getAttributeMap(ObjectName beanName)
             throws InstanceNotFoundException, IntrospectionException, ReflectionException,
                     IOException {
+        return getAttributeMap(beanName, m -> true);
+    }
+
+    private Map<String, Object> getAttributeMap(
+            ObjectName beanName, Predicate<MBeanAttributeInfo> attrPredicate)
+            throws InstanceNotFoundException, IntrospectionException, ReflectionException,
+                    IOException {
         Map<String, Object> attrMap = new HashMap<>();
 
         var attrs = rjmxConnection.getMBeanInfo(beanName).getAttributes();
 
         for (var attr : attrs) {
-            if (attr.isReadable() && !attr.getName().equals("ObjectName")) {
+            if (attr.isReadable()
+                    && !attr.getName().equals("ObjectName")
+                    && attrPredicate.test(attr)) {
                 try {
                     Object attrObject =
                             this.rjmxConnection.getAttributeValue(
@@ -304,49 +274,7 @@ public class JFRJMXConnection implements JFRConnection {
                 new MemoryMetrics(memoryMap),
                 new ThreadMetrics(threadMap),
                 new OperatingSystemMetrics(osMap),
-                getJvmId(runtimeMetrics));
-    }
-
-    private String stringifyArray(Object arrayObject) {
-        String stringified;
-        String componentType = arrayObject.getClass().getComponentType().toString();
-        switch (componentType) {
-            case "boolean":
-                stringified = Arrays.toString((boolean[]) arrayObject);
-                break;
-
-            case "byte":
-                stringified = Arrays.toString((byte[]) arrayObject);
-                break;
-
-            case "char":
-                stringified = Arrays.toString((char[]) arrayObject);
-                break;
-
-            case "short":
-                stringified = Arrays.toString((short[]) arrayObject);
-                break;
-
-            case "int":
-                stringified = Arrays.toString((int[]) arrayObject);
-                break;
-
-            case "long":
-                stringified = Arrays.toString((long[]) arrayObject);
-                break;
-
-            case "float":
-                stringified = Arrays.toString((float[]) arrayObject);
-                break;
-
-            case "double":
-                stringified = Arrays.toString((double[]) arrayObject);
-                break;
-
-            default:
-                stringified = Arrays.toString((Object[]) arrayObject);
-        }
-        return stringified;
+                JvmIdentifier.from(runtimeMetrics).getHash());
     }
 
     public synchronized boolean isV1() throws ConnectionException, IOException {
