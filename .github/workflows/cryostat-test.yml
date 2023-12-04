@@ -88,6 +88,7 @@ jobs:
         path: ~/.m2
         key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
+          ${{ runner.os }}-build-${{ hashFiles('**/pom.xml') }}
           ${{ runner.os }}-build-
           ${{ runner.os }}-
     - name: maven-settings
