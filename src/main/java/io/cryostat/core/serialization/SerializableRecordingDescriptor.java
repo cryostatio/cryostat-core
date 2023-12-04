@@ -101,22 +101,23 @@ public class SerializableRecordingDescriptor {
         this.maxAge = o.getMaxAge();
     }
 
+    /**
+     * @see {@link org.openjdk.jmc.rjmx.services.jfr.internal.RecordingDescriptorV2#decideState}
+     */
     private static RecordingState mapRecordingStateState(jdk.jfr.RecordingState s) {
         switch (s) {
             case NEW:
                 return RecordingState.CREATED;
             case DELAYED:
-                return RecordingState.CREATED;
+                return RecordingState.RUNNING;
             case RUNNING:
                 return RecordingState.RUNNING;
             case STOPPED:
                 return RecordingState.STOPPED;
-            case CLOSED:
-                return RecordingState.STOPPED;
             default:
                 // better not to return null here for NPE safety, but this may not always be
                 // accurate
-                return RecordingState.CREATED;
+                return RecordingState.STOPPED;
         }
     }
 
