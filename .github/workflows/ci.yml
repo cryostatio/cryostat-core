@@ -65,6 +65,18 @@ jobs:
         sudo apt-get install -y qemu-user-static
     - uses: actions/checkout@v4
       with:
+        repository: ${{ github.event.pull_request.head.repo.full_name }}
+        ref: ${{ github.event.pull_request.head.ref }}
+        fetch-depth: 0
+    - uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+    - uses: actions/checkout@v4
+      with:
         repository: ${{ github.repository_owner }}/cryostat
         ref: main
         submodules: true
@@ -73,14 +85,6 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-    - uses: actions/cache@v3
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-build-${{ hashFiles('**/pom.xml') }}
-          ${{ runner.os }}-build-
-          ${{ runner.os }}-
     - name: maven-settings
       uses: s4u/maven-settings-action@v2
       with:
