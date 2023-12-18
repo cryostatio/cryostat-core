@@ -17,108 +17,102 @@ package io.cryostat.core.log;
 
 import org.slf4j.LoggerFactory;
 
-public enum Logger {
-    INSTANCE;
+public class Logger {
 
-    private org.slf4j.Logger logger = LoggerFactory.getLogger(Logger.class);
+    private org.slf4j.Logger logger;
+    private LogConfig logConfig;
 
-    public void error(String message) {
-        logger.error(message);
+    public static final Logger INSTANCE = new Logger();
+
+    private Logger() {
+        this.logger = LoggerFactory.getLogger(Logger.class);
+        this.logConfig = new LogConfig();
     }
 
-    public void error(String message, Object a) {
-        logger.error(message, a);
-    }
-
-    public void error(String message, Object a, Object b) {
-        logger.error(message, a, b);
+    public void setLogConfig(LogConfig logConfig) {
+        this.logConfig = new LogConfig(logConfig);
     }
 
     public void error(String message, Object... args) {
-        logger.error(message, args);
+        log(LogLevel.ERROR, message, args);
     }
 
     public void error(Exception exception) {
-        logger.error("Exception thrown", exception);
-    }
-
-    public void warn(String message) {
-        logger.warn(message);
-    }
-
-    public void warn(String message, Object a) {
-        logger.warn(message, a);
-    }
-
-    public void warn(String message, Object a, Object b) {
-        logger.warn(message, a, b);
+        log(LogLevel.ERROR, "Exception thrown", exception);
     }
 
     public void warn(String message, Object... args) {
-        logger.warn(message, args);
+        log(LogLevel.WARN, message, args);
     }
 
     public void warn(Exception exception) {
-        logger.warn("Exception thrown", exception);
-    }
-
-    public void info(String message) {
-        logger.info(message);
-    }
-
-    public void info(String message, Object a) {
-        logger.info(message, a);
-    }
-
-    public void info(String message, Object a, Object b) {
-        logger.info(message, a, b);
+        log(LogLevel.WARN, "Exception thrown", exception);
     }
 
     public void info(String message, Object... args) {
-        logger.info(message, args);
+        log(LogLevel.INFO, message, args);
     }
 
     public void info(Exception exception) {
-        logger.info("Exception thrown", exception);
-    }
-
-    public void debug(String message) {
-        logger.debug(message);
-    }
-
-    public void debug(String message, Object a) {
-        logger.debug(message, a);
-    }
-
-    public void debug(String message, Object a, Object b) {
-        logger.debug(message, a, b);
+        log(LogLevel.INFO, "Exception thrown", exception);
     }
 
     public void debug(String message, Object... args) {
-        logger.debug(message, args);
+        log(LogLevel.DEBUG, message, args);
     }
 
     public void debug(Exception exception) {
-        logger.debug("Exception thrown", exception);
-    }
-
-    public void trace(String message) {
-        logger.trace(message);
-    }
-
-    public void trace(String message, Object a) {
-        logger.trace(message, a);
-    }
-
-    public void trace(String message, Object a, Object b) {
-        logger.trace(message, a, b);
+        log(LogLevel.DEBUG, "Exception thrown", exception);
     }
 
     public void trace(String message, Object... args) {
-        logger.trace(message, args);
+        log(LogLevel.TRACE, message, args);
     }
 
     public void trace(Exception exception) {
-        logger.trace("Exception thrown", exception);
+        log(LogLevel.TRACE, "Exception thrown", exception);
+    }
+
+    private void log(LogLevel level, String message, Object... args) {
+        String formattedMessage = formatMessage(level, message, args);
+        switch (level) {
+            case ERROR:
+                logger.error(formattedMessage);
+                break;
+            case WARN:
+                logger.warn(formattedMessage);
+                break;
+            case INFO:
+                logger.info(formattedMessage);
+                break;
+            case DEBUG:
+                logger.debug(formattedMessage);
+                break;
+            case TRACE:
+                logger.trace(formattedMessage);
+                break;
+        }
+    }
+
+    private String formatMessage(LogLevel level, String message, Object... args) {
+        StringBuilder formattedMessage = new StringBuilder();
+        formattedMessage.append("{");
+        formattedMessage
+                .append("\"timestamp\":\"")
+                .append(System.currentTimeMillis())
+                .append("\",");
+        formattedMessage.append("\"level\":\"").append(level.name()).append("\",");
+        formattedMessage.append("\"message\":\"").append(message).append("\"");
+        if (args.length > 0) {
+            formattedMessage.append(" [");
+            for (int i = 0; i < args.length; i++) {
+                formattedMessage.append(args[i]);
+                if (i < args.length - 1) {
+                    formattedMessage.append(", ");
+                }
+            }
+            formattedMessage.append("]");
+        }
+        return formattedMessage.toString();
     }
 }
