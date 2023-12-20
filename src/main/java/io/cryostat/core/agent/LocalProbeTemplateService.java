@@ -65,6 +65,8 @@ public class LocalProbeTemplateService implements ProbeTemplateService {
         }
     }
 
+    protected final void finalize() {}
+
     public ProbeTemplate addTemplate(InputStream inputStream, String filename)
             throws FileAlreadyExistsException, IOException, SAXException {
         Path path = fs.pathOf(env.getEnv(TEMPLATE_PATH), filename);
