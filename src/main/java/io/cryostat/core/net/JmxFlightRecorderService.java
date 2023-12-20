@@ -30,14 +30,12 @@ import org.openjdk.jmc.common.unit.QuantityConversionException;
 import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
 import org.openjdk.jmc.flightrecorder.configuration.events.IEventTypeID;
 import org.openjdk.jmc.rjmx.ConnectionException;
-import org.openjdk.jmc.rjmx.IConnectionHandle;
 import org.openjdk.jmc.rjmx.ServiceNotAvailableException;
 import org.openjdk.jmc.rjmx.services.jfr.FlightRecorderException;
 import org.openjdk.jmc.rjmx.services.jfr.IEventTypeInfo;
 import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
 import org.openjdk.jmc.rjmx.services.jfr.IRecordingDescriptor;
 import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceFactory;
-import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceV2;
 
 import io.cryostat.core.EventOptionsBuilder;
 import io.cryostat.core.EventOptionsBuilder.EventOptionException;
@@ -237,11 +235,7 @@ public class JmxFlightRecorderService implements CryostatFlightRecorderService {
             throws ConnectionException, IOException, FlightRecorderException,
                     ServiceNotAvailableException, QuantityConversionException, EventOptionException,
                     EventTypeException {
-
-        IConnectionHandle handle = conn.getHandle();
-        EventOptionsBuilder builder =
-                new EventOptionsBuilder(
-                        cw, conn, () -> FlightRecorderServiceV2.isAvailable(handle));
+        EventOptionsBuilder builder = new EventOptionsBuilder.Factory().create(conn);
 
         for (IEventTypeInfo eventTypeInfo : conn.getService().getAvailableEventTypes()) {
             builder.addEvent(eventTypeInfo.getEventTypeID().getFullKey(), "enabled", "true");

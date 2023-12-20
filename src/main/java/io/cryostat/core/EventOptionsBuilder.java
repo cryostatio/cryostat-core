@@ -16,9 +16,9 @@
 package io.cryostat.core;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import org.openjdk.jmc.common.unit.IConstrainedMap;
 import org.openjdk.jmc.common.unit.IConstraint;
@@ -27,36 +27,26 @@ import org.openjdk.jmc.common.unit.IOptionDescriptor;
 import org.openjdk.jmc.common.unit.QuantityConversionException;
 import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
 import org.openjdk.jmc.flightrecorder.configuration.events.IEventTypeID;
-import org.openjdk.jmc.rjmx.IConnectionHandle;
 import org.openjdk.jmc.rjmx.ServiceNotAvailableException;
 import org.openjdk.jmc.rjmx.services.jfr.IEventTypeInfo;
 import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceV2;
 
 import io.cryostat.core.net.JFRConnection;
-import io.cryostat.core.tui.ClientWriter;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public class EventOptionsBuilder {
 
-    private final boolean isV2;
     private final IMutableConstrainedMap<EventOptionID> map;
-    private Map<IEventTypeID, Map<String, IOptionDescriptor<?>>> knownTypes;
-    private Map<String, IEventTypeID> eventIds;
+    private final Map<IEventTypeID, Map<String, IOptionDescriptor<?>>> knownTypes;
+    private final Map<String, IEventTypeID> eventIds;
 
-    public EventOptionsBuilder(ClientWriter cw, JFRConnection connection, Supplier<Boolean> v2)
-            throws ServiceNotAvailableException, IOException,
-                    org.openjdk.jmc.rjmx.services.jfr.FlightRecorderException {
-        this.isV2 = v2.get();
-        this.map = connection.getService().getDefaultEventOptions().emptyWithSameConstraints();
-        knownTypes = new HashMap<>();
-        eventIds = new HashMap<>();
+    public EventOptionsBuilder(
+            IMutableConstrainedMap<EventOptionID> empty,
+            Collection<? extends IEventTypeInfo> eventTypes) {
+        this.map = empty.emptyWithSameConstraints();
+        this.knownTypes = new HashMap<>();
+        this.eventIds = new HashMap<>();
 
-        if (!isV2) {
-            cw.println("Flight Recorder V1 is not supported");
-        }
-
-        for (IEventTypeInfo eventTypeInfo : connection.getService().getAvailableEventTypes()) {
+        for (IEventTypeInfo eventTypeInfo : eventTypes) {
             eventIds.put(
                     eventTypeInfo.getEventTypeID().getFullKey(), eventTypeInfo.getEventTypeID());
             knownTypes.putIfAbsent(
@@ -87,12 +77,8 @@ public class EventOptionsBuilder {
         return (V) t;
     }
 
-    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Field is never mutated")
     public IConstrainedMap<EventOptionID> build() {
-        if (!isV2) {
-            return null;
-        }
-        return map;
+        return map.mutableCopy();
     }
 
     public static class EventTypeException extends Exception {
@@ -108,18 +94,17 @@ public class EventOptionsBuilder {
     }
 
     public static class Factory {
-        private final ClientWriter cw;
-
-        public Factory(ClientWriter cw) {
-            this.cw = cw;
-        }
-
         public EventOptionsBuilder create(JFRConnection connection)
                 throws IOException, ServiceNotAvailableException,
                         org.openjdk.jmc.rjmx.services.jfr.FlightRecorderException {
-            IConnectionHandle handle = connection.getHandle();
-            return new EventOptionsBuilder(
-                    cw, connection, () -> FlightRecorderServiceV2.isAvailable(handle));
+            if (!FlightRecorderServiceV2.isAvailable(connection.getHandle())) {
+                throw new UnsupportedOperationException("Only FlightRecorder V2 is supported");
+            }
+            IMutableConstrainedMap<EventOptionID> empty =
+                    connection.getService().getDefaultEventOptions().emptyWithSameConstraints();
+            Collection<? extends IEventTypeInfo> eventTypes =
+                    connection.getService().getAvailableEventTypes();
+            return new EventOptionsBuilder(empty, eventTypes);
         }
     }
 }
