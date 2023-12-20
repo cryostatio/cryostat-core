@@ -106,7 +106,7 @@ public class JFRJMXConnection implements JFRConnection {
 
     public synchronized CryostatFlightRecorderService getService()
             throws ConnectionException, IOException, ServiceNotAvailableException {
-        return new JmxFlightRecorderService(this, cw);
+        return new JmxFlightRecorderService(this);
     }
 
     public TemplateService getTemplateService() {
