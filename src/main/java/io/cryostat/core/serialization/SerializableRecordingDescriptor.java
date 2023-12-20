@@ -101,6 +101,8 @@ public class SerializableRecordingDescriptor {
         this.maxAge = o.getMaxAge();
     }
 
+    protected final void finalize() {}
+
     /**
      * @see {@link org.openjdk.jmc.rjmx.services.jfr.internal.RecordingDescriptorV2#decideState}
      */
