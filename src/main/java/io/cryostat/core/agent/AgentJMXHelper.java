@@ -26,7 +26,6 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
-import org.openjdk.jmc.rjmx.ConnectionException;
 import org.openjdk.jmc.rjmx.IConnectionHandle;
 
 public class AgentJMXHelper {
@@ -41,7 +40,7 @@ public class AgentJMXHelper {
     private final IConnectionHandle connectionHandle;
     private final MBeanServerConnection mbsc;
 
-    public AgentJMXHelper(IConnectionHandle connectionHandle) throws ConnectionException {
+    public AgentJMXHelper(IConnectionHandle connectionHandle) {
         this.connectionHandle = connectionHandle;
         mbsc = connectionHandle.getServiceOrDummy(MBeanServerConnection.class);
     }
