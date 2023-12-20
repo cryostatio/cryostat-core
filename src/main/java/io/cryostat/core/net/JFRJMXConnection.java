@@ -77,8 +77,7 @@ public class JFRJMXConnection implements JFRConnection {
             FileSystem fs,
             Environment env,
             IConnectionDescriptor cd,
-            List<Runnable> listeners)
-            throws ConnectionException {
+            List<Runnable> listeners) {
         this.cw = cw;
         this.fs = fs;
         this.env = env;
@@ -87,8 +86,7 @@ public class JFRJMXConnection implements JFRConnection {
         this.serviceFactory = new FlightRecorderServiceFactory();
     }
 
-    JFRJMXConnection(ClientWriter cw, FileSystem fs, Environment env, IConnectionDescriptor cd)
-            throws ConnectionException {
+    JFRJMXConnection(ClientWriter cw, FileSystem fs, Environment env, IConnectionDescriptor cd) {
         this(cw, fs, env, cd, List.of());
     }
 
@@ -108,7 +106,7 @@ public class JFRJMXConnection implements JFRConnection {
 
     public synchronized CryostatFlightRecorderService getService()
             throws ConnectionException, IOException, ServiceNotAvailableException {
-        return new JmxFlightRecorderService(this, cw);
+        return new JmxFlightRecorderService(this);
     }
 
     public TemplateService getTemplateService() {

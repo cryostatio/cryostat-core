@@ -30,119 +30,123 @@ import org.openjdk.jmc.common.unit.QuantityConversionException;
 import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
 import org.openjdk.jmc.flightrecorder.configuration.events.IEventTypeID;
 import org.openjdk.jmc.rjmx.ConnectionException;
-import org.openjdk.jmc.rjmx.IConnectionHandle;
 import org.openjdk.jmc.rjmx.ServiceNotAvailableException;
 import org.openjdk.jmc.rjmx.services.jfr.FlightRecorderException;
 import org.openjdk.jmc.rjmx.services.jfr.IEventTypeInfo;
 import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
 import org.openjdk.jmc.rjmx.services.jfr.IRecordingDescriptor;
 import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceFactory;
-import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceV2;
 
 import io.cryostat.core.EventOptionsBuilder;
 import io.cryostat.core.EventOptionsBuilder.EventOptionException;
 import io.cryostat.core.EventOptionsBuilder.EventTypeException;
 import io.cryostat.core.templates.Template;
 import io.cryostat.core.templates.TemplateType;
-import io.cryostat.core.tui.ClientWriter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JmxFlightRecorderService implements CryostatFlightRecorderService {
 
+    private final Logger logger = LoggerFactory.getLogger(getClass());
     private final JFRJMXConnection conn;
-    private final IFlightRecorderService delegate;
-    private final ClientWriter cw;
 
-    JmxFlightRecorderService(JFRJMXConnection conn, ClientWriter cw)
-            throws ConnectionException, ServiceNotAvailableException, IOException {
+    JmxFlightRecorderService(JFRJMXConnection conn) {
         this.conn = conn;
-        if (!conn.isConnected()) {
-            conn.connect();
+    }
+
+    protected IFlightRecorderService tryConnect() throws FlightRecorderException {
+        try {
+            if (!conn.isConnected()) {
+                conn.connect();
+            }
+            IFlightRecorderService service =
+                    new FlightRecorderServiceFactory().getServiceInstance(conn.getHandle());
+            if (service == null || !conn.isConnected()) {
+                throw new ConnectionException(
+                        String.format(
+                                "Could not connect to remote target %s",
+                                conn.connectionDescriptor.createJMXServiceURL().toString()));
+            }
+            return service;
+        } catch (IOException | ServiceNotAvailableException e) {
+            throw new FlightRecorderException("Connection failed", e);
         }
-        IFlightRecorderService service =
-                new FlightRecorderServiceFactory().getServiceInstance(conn.getHandle());
-        if (service == null || !conn.isConnected()) {
-            throw new ConnectionException(
-                    String.format(
-                            "Could not connect to remote target %s",
-                            conn.connectionDescriptor.createJMXServiceURL().toString()));
-        }
-        this.delegate = service;
-        this.cw = cw;
     }
 
     @Override
     public List<IRecordingDescriptor> getAvailableRecordings() throws FlightRecorderException {
-        return delegate.getAvailableRecordings();
+        return tryConnect().getAvailableRecordings();
     }
 
     @Override
     public IRecordingDescriptor getSnapshotRecording() throws FlightRecorderException {
-        return delegate.getSnapshotRecording();
+        return tryConnect().getSnapshotRecording();
     }
 
     @Override
     public IRecordingDescriptor getUpdatedRecordingDescription(IRecordingDescriptor descriptor)
             throws FlightRecorderException {
-        return delegate.getUpdatedRecordingDescription(descriptor);
+        return tryConnect().getUpdatedRecordingDescription(descriptor);
     }
 
     @Override
     public IRecordingDescriptor start(
             IConstrainedMap<String> recordingOptions, IConstrainedMap<EventOptionID> eventOptions)
             throws FlightRecorderException {
-        return delegate.start(recordingOptions, eventOptions);
+        return tryConnect().start(recordingOptions, eventOptions);
     }
 
     @Override
     public void stop(IRecordingDescriptor descriptor) throws FlightRecorderException {
-        delegate.stop(descriptor);
+        tryConnect().stop(descriptor);
     }
 
     @Override
     public void close(IRecordingDescriptor descriptor) throws FlightRecorderException {
-        delegate.close(descriptor);
+        tryConnect().close(descriptor);
     }
 
     @Override
     public Map<String, IOptionDescriptor<?>> getAvailableRecordingOptions()
             throws FlightRecorderException {
-        return delegate.getAvailableRecordingOptions();
+        return tryConnect().getAvailableRecordingOptions();
     }
 
     @Override
     public IConstrainedMap<String> getRecordingOptions(IRecordingDescriptor recording)
             throws FlightRecorderException {
-        return delegate.getRecordingOptions(recording);
+        return tryConnect().getRecordingOptions(recording);
     }
 
     @Override
     public Collection<? extends IEventTypeInfo> getAvailableEventTypes()
             throws FlightRecorderException {
-        return delegate.getAvailableEventTypes();
+        return tryConnect().getAvailableEventTypes();
     }
 
     @Override
     public Map<? extends IEventTypeID, ? extends IEventTypeInfo> getEventTypeInfoMapByID()
             throws FlightRecorderException {
-        return delegate.getEventTypeInfoMapByID();
+        return tryConnect().getEventTypeInfoMapByID();
     }
 
     @Override
     public IConstrainedMap<EventOptionID> getCurrentEventTypeSettings()
             throws FlightRecorderException {
-        return delegate.getCurrentEventTypeSettings();
+        return tryConnect().getCurrentEventTypeSettings();
     }
 
     @Override
     public IConstrainedMap<EventOptionID> getEventSettings(IRecordingDescriptor recording)
             throws FlightRecorderException {
-        return delegate.getEventSettings(recording);
+        return tryConnect().getEventSettings(recording);
     }
 
     @Override
     public InputStream openStream(IRecordingDescriptor descriptor, boolean removeOnClose)
             throws FlightRecorderException {
-        return delegate.openStream(descriptor, removeOnClose);
+        return tryConnect().openStream(descriptor, removeOnClose);
     }
 
     @Override
@@ -152,58 +156,76 @@ public class JmxFlightRecorderService implements CryostatFlightRecorderService {
             IQuantity endTime,
             boolean removeOnClose)
             throws FlightRecorderException {
-        return delegate.openStream(descriptor, startTime, endTime, removeOnClose);
+        return tryConnect().openStream(descriptor, startTime, endTime, removeOnClose);
     }
 
     @Override
     public InputStream openStream(
             IRecordingDescriptor descriptor, IQuantity lastPartDuration, boolean removeOnClose)
             throws FlightRecorderException {
-        return delegate.openStream(descriptor, lastPartDuration, removeOnClose);
+        return tryConnect().openStream(descriptor, lastPartDuration, removeOnClose);
     }
 
     @Override
     public List<String> getServerTemplates() throws FlightRecorderException {
-        return delegate.getServerTemplates();
+        return tryConnect().getServerTemplates();
     }
 
     @Override
     public void updateEventOptions(
             IRecordingDescriptor descriptor, IConstrainedMap<EventOptionID> options)
             throws FlightRecorderException {
-        delegate.updateEventOptions(descriptor, options);
+        tryConnect().updateEventOptions(descriptor, options);
     }
 
     @Override
     public void updateRecordingOptions(
             IRecordingDescriptor descriptor, IConstrainedMap<String> options)
             throws FlightRecorderException {
-        delegate.updateRecordingOptions(descriptor, options);
+        tryConnect().updateRecordingOptions(descriptor, options);
     }
 
     @Override
     public boolean isEnabled() {
-        return delegate.isEnabled();
+        try {
+            return tryConnect().isEnabled();
+        } catch (FlightRecorderException e) {
+            logger.error("Connection failed", e);
+            return false;
+        }
     }
 
     @Override
     public void enable() throws FlightRecorderException {
-        delegate.enable();
+        tryConnect().enable();
     }
 
     @Override
     public String getVersion() {
-        return delegate.getVersion();
+        try {
+            return tryConnect().getVersion();
+        } catch (FlightRecorderException e) {
+            logger.error("Connection failed", e);
+            return "unknown";
+        }
     }
 
     @Override
     public IDescribedMap<String> getDefaultRecordingOptions() {
-        return delegate.getDefaultRecordingOptions();
+        try {
+            return tryConnect().getDefaultRecordingOptions();
+        } catch (FlightRecorderException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public IDescribedMap<EventOptionID> getDefaultEventOptions() {
-        return delegate.getDefaultEventOptions();
+        try {
+            return tryConnect().getDefaultEventOptions();
+        } catch (FlightRecorderException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -215,7 +237,8 @@ public class JmxFlightRecorderService implements CryostatFlightRecorderService {
                     ConnectionException, IOException, FlightRecorderException,
                     ServiceNotAvailableException, QuantityConversionException, EventOptionException,
                     EventTypeException {
-        return delegate.start(recordingOptions, enableEvents(templateName, preferredTemplateType));
+        return tryConnect()
+                .start(recordingOptions, enableEvents(templateName, preferredTemplateType));
     }
 
     private IConstrainedMap<EventOptionID> enableEvents(
@@ -237,11 +260,7 @@ public class JmxFlightRecorderService implements CryostatFlightRecorderService {
             throws ConnectionException, IOException, FlightRecorderException,
                     ServiceNotAvailableException, QuantityConversionException, EventOptionException,
                     EventTypeException {
-
-        IConnectionHandle handle = conn.getHandle();
-        EventOptionsBuilder builder =
-                new EventOptionsBuilder(
-                        cw, conn, () -> FlightRecorderServiceV2.isAvailable(handle));
+        EventOptionsBuilder builder = new EventOptionsBuilder.Factory().create(conn);
 
         for (IEventTypeInfo eventTypeInfo : conn.getService().getAvailableEventTypes()) {
             builder.addEvent(eventTypeInfo.getEventTypeID().getFullKey(), "enabled", "true");
