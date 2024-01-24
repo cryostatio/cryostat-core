@@ -126,6 +126,9 @@ public class InterruptibleReportGenerator {
         Map<String, Pair<IRule, IRule>> rulesWithDependencies = new HashMap<>();
         Map<IRule, IResult> computedResults = new HashMap<>();
         try (CountingInputStream countingRecordingStream = new CountingInputStream(recording)) {
+            // TODO parsing the JFR file should also happen on the executor rather than the qThread,
+            // so that this method can return to the qThread more quickly and free up the ability to
+            // queue more work on the executor.
             IItemCollection items = JfrLoaderToolkit.loadEvents(countingRecordingStream);
             for (IRule rule : rules) {
                 if (RulesToolkit.matchesEventAvailabilityMap(items, rule.getRequiredEvents())) {
@@ -155,6 +158,10 @@ public class InterruptibleReportGenerator {
                                             .build()));
                 }
             }
+            // TODO this implementation forces rule dependencies to be evaluated on the qThread. The
+            // executor is only used for rules that have no dependencies or which have all their
+            // dependencies satisfied (by the qThread). Ideally we should perform all of the rule
+            // evaluations on executor threads.
             for (Entry<String, Pair<IRule, IRule>> entry : rulesWithDependencies.entrySet()) {
                 IRule rule = entry.getValue().left;
                 IRule depRule = entry.getValue().right;
