@@ -201,8 +201,10 @@ public class InterruptibleReportGenerator {
                     }
                 }
             }
-            RuleEvaluator re = new RuleEvaluator(futureQueue);
-            executor.submit(re);
+            RunnableFuture<IResult> resultFuture;
+            while ((resultFuture = futureQueue.poll()) != null) {
+                executor.submit(resultFuture);
+            }
             Collection<IResult> results = new HashSet<IResult>();
             for (Future<IResult> future : resultFutures.values()) {
                 results.add(future.get());
@@ -345,21 +347,5 @@ public class InterruptibleReportGenerator {
             }
         }
         return true;
-    }
-
-    private static class RuleEvaluator implements Runnable {
-        private Queue<RunnableFuture<IResult>> futureQueue;
-
-        public RuleEvaluator(Queue<RunnableFuture<IResult>> futureQueue) {
-            this.futureQueue = futureQueue;
-        }
-
-        @Override
-        public void run() {
-            RunnableFuture<IResult> resultFuture;
-            while ((resultFuture = futureQueue.poll()) != null) {
-                resultFuture.run();
-            }
-        }
     }
 }
