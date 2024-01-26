@@ -43,7 +43,7 @@ jobs:
       - name: Commit & Push changes
         uses: actions-js/push@v1.4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.SUBMODULE_TOKEN }}
           message: "Releasing version ${{ github.event.inputs.version }}"
       - name: Release with JReleaser
         env:
@@ -53,13 +53,13 @@ jobs:
           JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_GPG_PASSPHRASE }}
           JRELEASER_NEXUS2_USERNAME: ${{ secrets.MAVEN_CENTRAL_NEXUS2_USERNAME }}
           JRELEASER_NEXUS2_PASSWORD: ${{ secrets.MAVEN_CENTRAL_NEXUS2_PASSWORD }}
-          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.SUBMODULE_TOKEN }}
         run: ./release.sh
       - name: Set the next release version
         run: ./mvnw --batch-mode --no-transfer-progress versions:set -DnewVersion=${{ github.event.inputs.nextVersion }}-SNAPSHOT
       - name: Commit & Push changes
         uses: actions-js/push@v1.4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.SUBMODULE_TOKEN }}
           message: "Setting version ${{ github.event.inputs.nextVersion }}-SNAPSHOT"
 
