@@ -3,12 +3,46 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
 <modelVersion>4.0.0</modelVersion>
+
+<name>Cryostat Core</name>
+<description>Core library for Cryostat</description>
+<url>https://github.com/cryostatio/cryostat-core</url>
+<inceptionYear>2019</inceptionYear>
+
 <groupId>io.cryostat</groupId>
 <artifactId>cryostat-core</artifactId>
+
 <version>2.28.0-SNAPSHOT</version>
 <packaging>jar</packaging>
-<name>cryostat-core</name>
-<url>http://maven.apache.org</url>
+
+<licenses>
+  <license>
+    <name>The Apache License, Version 2.0</name>
+    <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    <distribution>repo</distribution>
+  </license>
+  <license>
+    <name>Universal Permissive License Version 1.0</name>
+    <url>http://oss.oracle.com/licenses/upl</url>
+    <distribution>repo</distribution>
+    <comments>Copyright (c) 2018, 2023, Oracle and/or its affiliates. Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.</comments>
+  </license>
+</licenses>
+
+<developers>
+  <developer>
+    <name>Andrew Azores</name>
+    <email>aazores@redhat.com</email>
+    <organization>Red Hat</organization>
+    <organizationUrl>https://www.redhat.com</organizationUrl>
+  </developer>
+  <developer>
+    <name>Elliott Baron</name>
+    <email>ebaron@redhat.com</email>
+    <organization>Red Hat</organization>
+    <organizationUrl>https://www.redhat.com</organizationUrl>
+  </developer>
+</developers>
 
 <distributionManagement>
   <repository>
@@ -17,6 +51,12 @@
     <url>https://maven.pkg.github.com/cryostatio/cryostat-core</url>
   </repository>
 </distributionManagement>
+
+<scm>
+  <connection>scm:git://github.com/cryostatio/cryostat-core.git</connection>
+  <developerConnection>scm:git:ssh://github.com:cryostatio/cryostat-core.git</developerConnection>
+  <url>https://github.com/cryostatio/cryostat-core/tree/main</url>
+</scm>
 
 <properties>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -45,6 +85,10 @@
   <org.jacoco.maven.plugin.version>0.8.11</org.jacoco.maven.plugin.version>
   <com.diffplug.spotless.maven.plugin.version>2.43.0</com.diffplug.spotless.maven.plugin.version>
   <org.slf4j.version>2.0.7</org.slf4j.version>
+
+  <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
+  <maven-javadoc-plugin.version>3.6.2</maven-javadoc-plugin.version>
+  <jreleaser-maven-plugin.version>1.9.0</jreleaser-maven-plugin.version>
 </properties>
 
 <dependencies>
@@ -273,6 +317,89 @@
     </plugin>
   </plugins>
 </build>
+
+<profiles>
+  <profile>
+    <id>release</id>
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>org.jreleaser</groupId>
+          <artifactId>jreleaser-maven-plugin</artifactId>
+          <version>${jreleaser-maven-plugin.version}</version>
+          <inherited>false</inherited>
+          <configuration>
+            <jreleaser>
+              <signing>
+                <active>ALWAYS</active>
+                <armored>true</armored>
+              </signing>
+              <deploy>
+                <maven>
+                  <nexus2>
+                    <maven-central>
+                      <active>ALWAYS</active>
+                      <url>https://oss.sonatype.org/service/local</url>
+                      <snapshotUrl>https://oss.sonatype.org/content/repositories/snapshots/</snapshotUrl>
+                      <closeRepository>true</closeRepository>
+                      <releaseRepository>true</releaseRepository>
+                      <stagingRepositories>target/staging-deploy</stagingRepositories>
+                    </maven-central>
+                  </nexus2>
+                </maven>
+              </deploy>
+            </jreleaser>
+          </configuration>
+        </plugin>
+      </plugins>
+    </build>
+  </profile>
+
+  <profile>
+    <id>publication</id>
+    <properties>
+      <altDeploymentRepository>local::file:./target/staging-deploy</altDeploymentRepository>
+    </properties>
+    <build>
+      <defaultGoal>deploy</defaultGoal>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>${maven-javadoc-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>attach-javadocs</id>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+              <configuration>
+                <attach>true</attach>
+                <failOnError>false</failOnError>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>${maven-source-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>attach-sources</id>
+              <goals>
+                <goal>jar-no-fork</goal>
+              </goals>
+              <configuration>
+                <attach>true</attach>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </build>
+  </profile>
+</profiles>
 
 <reporting>
   <plugins>
