@@ -1,5 +1,5 @@
 # Inspired from https://foojay.io/today/how-to-release-a-java-module-with-jreleaser-to-maven-central-with-github-actions/
-name: Publish a new release
+name: Publish a new Maven Central release
 
 on:
   workflow_dispatch:
@@ -14,6 +14,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
     steps:
       - name: Git checkout
         uses: actions/checkout@v4
