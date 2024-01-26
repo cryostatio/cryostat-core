@@ -88,7 +88,7 @@
 
   <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
   <maven-javadoc-plugin.version>3.6.2</maven-javadoc-plugin.version>
-  <jreleaser-plugin.version>1.9.0</jreleaser-plugin.version>
+  <jreleaser-maven-plugin.version>1.9.0</jreleaser-maven-plugin.version>
 </properties>
 
 <dependencies>
