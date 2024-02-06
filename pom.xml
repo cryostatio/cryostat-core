@@ -44,14 +44,6 @@
   </developer>
 </developers>
 
-<distributionManagement>
-  <repository>
-    <id>github</id>
-    <name>GitHub Packages</name>
-    <url>https://maven.pkg.github.com/cryostatio/cryostat-core</url>
-  </repository>
-</distributionManagement>
-
 <scm>
   <connection>scm:git://github.com/cryostatio/cryostat-core.git</connection>
   <developerConnection>scm:git:ssh://github.com:cryostatio/cryostat-core.git</developerConnection>
