@@ -24,7 +24,6 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import io.cryostat.core.log.Logger;
 import io.cryostat.core.reports.InterruptibleReportGenerator.AnalysisResult;
 
 import org.hamcrest.MatcherAssert;
@@ -35,12 +34,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ExtendWith(MockitoExtension.class)
 class InterruptibleReportGeneratorTest {
 
     @Mock InputStream recording;
-    @Mock Logger logger;
+    @Mock Logger logger = LoggerFactory.getLogger(getClass());
+
     InterruptibleReportGenerator generator;
 
     @BeforeEach()

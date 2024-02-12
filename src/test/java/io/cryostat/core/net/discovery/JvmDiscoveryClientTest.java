@@ -28,7 +28,6 @@ import org.openjdk.jmc.jdp.client.DiscoveryEvent;
 import org.openjdk.jmc.jdp.client.DiscoveryListener;
 import org.openjdk.jmc.jdp.client.JDPClient;
 
-import io.cryostat.core.log.Logger;
 import io.cryostat.core.net.discovery.JvmDiscoveryClient.EventKind;
 
 import org.hamcrest.MatcherAssert;
@@ -42,13 +41,15 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ExtendWith(MockitoExtension.class)
 class JvmDiscoveryClientTest {
 
     JvmDiscoveryClient client;
     @Mock JDPClient jdp;
-    @Mock Logger logger;
+    @Mock Logger logger = LoggerFactory.getLogger(getClass());
 
     @BeforeEach
     void setup() {

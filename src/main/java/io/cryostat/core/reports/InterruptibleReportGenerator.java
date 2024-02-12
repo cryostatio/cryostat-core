@@ -55,10 +55,9 @@ import org.openjdk.jmc.flightrecorder.rules.Severity;
 import org.openjdk.jmc.flightrecorder.rules.TypedResult;
 import org.openjdk.jmc.flightrecorder.rules.util.RulesToolkit;
 
-import io.cryostat.core.log.Logger;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.input.CountingInputStream;
+import org.slf4j.Logger;
 
 /**
  * Re-implementation of {@link ReportGenerator} where the report generation task is represented by a
@@ -219,7 +218,7 @@ public class InterruptibleReportGenerator {
                     f.cancel(true);
                 }
             }
-            logger.warn(e);
+            logger.warn("Exception thrown", e);
             throw e;
         }
     }
