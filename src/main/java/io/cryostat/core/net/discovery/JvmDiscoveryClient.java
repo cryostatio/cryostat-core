@@ -26,7 +26,7 @@ import org.openjdk.jmc.jdp.client.DiscoveryEvent;
 import org.openjdk.jmc.jdp.client.DiscoveryListener;
 import org.openjdk.jmc.jdp.client.JDPClient;
 
-import io.cryostat.core.log.Logger;
+import org.slf4j.Logger;
 
 public class JvmDiscoveryClient {
 
@@ -67,6 +67,7 @@ public class JvmDiscoveryClient {
                                 break;
                             default:
                                 logger.error(
+                                        "Exception thrown",
                                         new IllegalArgumentException(evt.getKind().toString()));
                         }
                     }

@@ -30,7 +30,6 @@ import org.openjdk.jmc.rjmx.ServiceNotAvailableException;
 import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
 
 import io.cryostat.core.FlightRecorderException;
-import io.cryostat.core.log.Logger;
 import io.cryostat.core.net.JFRConnection;
 
 import org.jsoup.Jsoup;
@@ -38,9 +37,12 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RemoteTemplateService extends AbstractTemplateService {
 
+    private final Logger logger = LoggerFactory.getLogger(getClass());
     private final JFRConnection conn;
 
     public RemoteTemplateService(JFRConnection conn) {
@@ -129,7 +131,7 @@ public class RemoteTemplateService extends AbstractTemplateService {
                                 try {
                                     return EventConfiguration.createModel(xmlText);
                                 } catch (ParseException | IOException e) {
-                                    Logger.INSTANCE.warn(e);
+                                    logger.warn("Exception thrown", e);
                                     return null;
                                 }
                             })
