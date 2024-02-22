@@ -57,61 +57,9 @@ jobs:
 
   build-cryostat:
     needs: [build-core]
-    strategy:
-      matrix:
-        arch: [amd64, arm64]
-    runs-on: ubuntu-latest
-    steps:
-    - name: Install qemu
-      if: ${{ matrix.arch != 'amd64' }}
-      continue-on-error: true
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y qemu-user-static
-    - uses: actions/checkout@v4
-      with:
-        repository: ${{ github.event.pull_request.head.repo.full_name }}
-        ref: ${{ github.event.pull_request.head.ref }}
-        fetch-depth: 0
-    - uses: actions/cache@v3
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-build-
-          ${{ runner.os }}-
-    - uses: actions/checkout@v4
-      with:
-        repository: ${{ github.repository_owner }}/cryostat
-        ref: main
-        submodules: true
-        fetch-depth: 0
-    - uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-    - name: maven-settings
-      uses: s4u/maven-settings-action@v2
-      with:
-        githubServer: true
-    - run: git submodule init
-    - run: git submodule update
-    - run: mvn -B -U -Dbuild.arch=${{ matrix.arch}} -Dio.cryostat.core.version=${{ needs.build-core.outputs.core_version }} clean package
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Save cryostat image
-      run: podman save -o cryostat-${{ matrix.arch }}.tar --format oci-archive quay.io/cryostat/cryostat
-    - uses: actions/upload-artifact@v3
-      with:
-        name: cryostat-${{ matrix.arch }}
-        path: ${{ github.workspace }}/cryostat-${{ matrix.arch }}.tar
-  
-  build-cryostat3:
-    needs: [build-core]
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        arch: [amd64, arm64]
         java: ['17']
     env:
         cache-name: cache-yarn
@@ -182,67 +130,27 @@ jobs:
     - name: Set DOCKER_HOST environment variable
       run: echo "DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock" >> "$GITHUB_ENV"
     - name: Build cryostat3
-      run: ./mvnw -B -U -Dbuild.arch=${{ matrix.arch }} -Dio.cryostat.core.version=${{ needs.build-core.outputs.core_version }} clean package
+      run: ./mvnw -B -U -Dio.cryostat.core.version=${{ needs.build-core.outputs.core_version }} clean verify
       continue-on-error: ${{ matrix.java != '17' }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Debug podman images
       run: podman images
     - name: Save cryostat3 image
-      run: podman save -o cryostat3-${{ matrix.arch }}.tar --format oci-archive quay.io/cryostat/cryostat:3.0.0-snapshot
+      run: podman save -o cryostat3.tar --format oci-archive quay.io/cryostat/cryostat:3.0.0-snapshot
     - uses: actions/upload-artifact@v3
       with:
-        name: cryostat3-${{ matrix.arch }}
-        path: ${{ github.workspace }}/cryostat3-${{ matrix.arch }}.tar
+        name: cryostat3
+        path: ${{ github.workspace }}/cryostat3.tar
 
   push-to-ghcr:
     runs-on: ubuntu-latest
     needs: [build-cryostat]
     strategy:
       matrix:
-        arch: [amd64, arm64]
-    outputs:
-      amd64_image: ${{ steps.amd64_image.outputs.image }}
-      arm64_image: ${{ steps.arm64_image.outputs.image }}
-    permissions:
-      packages: write
-    steps:
-    - name: Download cryostat artifact
-      uses: actions/download-artifact@v3
-      with:
-        name: cryostat-${{ matrix.arch }}
-    - name: Load cryostat image
-      run: podman load -i cryostat-${{ matrix.arch }}.tar
-    - name: Tag cryostat image
-      run: podman tag cryostat ghcr.io/${{ github.repository_owner }}/cryostat-core:pr-${{ github.event.number }}-${{ github.event.pull_request.head.sha }}-linux-${{ matrix.arch }}
-    - name: Push PR test image to ghcr.io
-      id: push-to-ghcr
-      uses: redhat-actions/push-to-registry@v2
-      with:
-        image: cryostat-core
-        tags: pr-${{ github.event.number }}-${{ github.event.pull_request.head.sha }}-linux-${{ matrix.arch }}
-        registry: ghcr.io/${{ github.repository_owner }}
-        username: ${{ github.event.pull_request.user.login }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Store images as output amd64
-      if: ${{ matrix.arch == 'amd64' }}
-      id: amd64_image
-      run: echo "image=${{ steps.push-to-ghcr.outputs.registry-path }}" >> "$GITHUB_OUTPUT"
-    - name: Store images as output
-      if: ${{ matrix.arch == 'arm64' }}
-      id: arm64_image
-      run: echo "image=${{ steps.push-to-ghcr.outputs.registry-path }}" >> "$GITHUB_OUTPUT"
-
-  push-cryostat3-to-ghcr:
-    runs-on: ubuntu-latest
-    needs: [build-cryostat3]
-    strategy:
-      matrix:
-        arch: [amd64, arm64]
         java: ['17']
     outputs:
-      cryostat3_java17_amd64_image: ${{ steps.cryostat3_java17_amd64_image.outputs.image }}
-      cryostat3_java17_arm64_image: ${{ steps.cryostat3_java17_arm64_image.outputs.image }}
+      amd64_image: ${{ steps.cryostat3_amd64_image.outputs.image }}
 
     permissions:
         packages: write
@@ -250,39 +158,30 @@ jobs:
     - name: Download cryostat3 artifact
       uses: actions/download-artifact@v3
       with:
-        name: cryostat3-${{ matrix.arch }}
+        name: cryostat3
     - name: Load cryostat3 image
-      run: podman load -i cryostat3-${{ matrix.arch }}.tar
+      run: podman load -i cryostat3.tar
     - name: Tag cryostat3 image
-      run: podman tag cryostat:3.0.0-snapshot ghcr.io/${{ github.repository_owner }}/cryostat-core:pr-${{ github.event.number }}-${{ github.event.pull_request.head.sha }}-linux-${{ matrix.arch }}-java${{ matrix.java }}
+      run: podman tag cryostat:3.0.0-snapshot ghcr.io/${{ github.repository_owner }}/cryostat-core:pr-${{ github.event.number }}-${{ github.event.pull_request.head.sha }}-linux-java${{ matrix.java }}
     - name: Push PR test image to ghcr.io
       id: push-cryostat3-to-ghcr
       uses: redhat-actions/push-to-registry@v2
       with:
         image: cryostat-core
-        tags: pr-${{ github.event.number }}-${{ github.event.pull_request.head.sha }}-linux-${{ matrix.arch }}-java${{ matrix.java }}
+        tags: pr-${{ github.event.number }}-${{ github.event.pull_request.head.sha }}-linux-java${{ matrix.java }}
         registry: ghcr.io/${{ github.repository_owner }}
         username: ${{ github.event.pull_request.user.login }}
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: store cryostat3 images as output
-      if: ${{ matrix.arch == 'amd64' && matrix.java == '17' }}
-      id: cryostat3_java17_amd64_image
+      id: cryostat3_amd64_image
       run: echo "image=${{ steps.push-cryostat3-to-ghcr.outputs.registry-path }}" >> "$GITHUB_OUTPUT"
-    - name: store cryostat3 images as output
-      if: ${{ matrix.arch == 'arm64' && matrix.java == '17' }}
-      id: cryostat3_java17_arm64_image
-      run: echo "image=${{ steps.push-cryostat3-to-ghcr.outputs.registry-path }}" >> "$GITHUB_OUTPUT"
-    
 
   comment-image:
     runs-on: ubuntu-latest
-    needs: [push-to-ghcr, push-cryostat3-to-ghcr]
+    needs: [push-to-ghcr]
     env:
       amd64_image: ${{ needs.push-to-ghcr.outputs.amd64_image }}
-      arm64_image: ${{ needs.push-to-ghcr.outputs.arm64_image }}
-      cryostat3_java17_amd64_image: ${{needs.push-cryostat3-to-ghcr.outputs.cryostat3_java17_amd64_image}}
-      cryostat3_java17_arm64_image: ${{ needs.push-cryostat3-to-ghcr.outputs.cryostat3_java17_arm64_image }}
-      
+
     permissions:
       pull-requests: write
     steps:
@@ -293,9 +192,6 @@ jobs:
         csvinput: |
           ARCH, IMAGE
           amd64, ${{ env.amd64_image }}
-          arm64, ${{ env.arm64_image }}
-          cryostat3-java17_amd64, ${{ env.cryostat3_java17_amd64_image }}
-          cryostat3-java17_arm64, ${{ env.cryostat3_java17_arm64_image }}
 
     - uses: thollander/actions-comment-pull-request@v2
       with:
@@ -304,15 +200,5 @@ jobs:
 
           To run smoketest:
           ```
-          # amd64
-          CRYOSTAT_IMAGE=${{ env.amd64_image }} sh smoketest.sh
-
-          # or arm64
-          CRYOSTAT_IMAGE=${{ env.arm64_image }} sh smoketest.sh
-
-          # or cryostat3-java17-amd64
-          CRYOSTAT3_java17amd64_IMAGE=${{ env.cryostat3_java17_amd64_image }} sh smoketest.sh
-
-          # or cryostat3-java17-arm64
-          CRYOSTAT3_java17arm64_IMAGE=${{ env.cryostat3_java17_arm64_image }} sh smoketest.sh 
+          CRYOSTAT_IMAGE=${{ env.amd64_image }} bash smoketest.bash
           ```
