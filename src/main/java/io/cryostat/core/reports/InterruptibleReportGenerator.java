@@ -58,6 +58,7 @@ import org.openjdk.jmc.flightrecorder.rules.util.RulesToolkit;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.input.CountingInputStream;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Re-implementation of {@link ReportGenerator} where the report generation task is represented by a
@@ -72,14 +73,13 @@ public class InterruptibleReportGenerator {
 
     private final ExecutorService qThread = Executors.newCachedThreadPool();
     private final ExecutorService executor;
-    private final Logger logger;
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @SuppressFBWarnings(
             value = "EI_EXPOSE_REP2",
             justification = "fields are not exposed since there are no getters")
-    public InterruptibleReportGenerator(ExecutorService executor, Logger logger) {
+    public InterruptibleReportGenerator(ExecutorService executor) {
         this.executor = executor;
-        this.logger = logger;
     }
 
     public Future<Map<String, AnalysisResult>> generateEvalMapInterruptibly(

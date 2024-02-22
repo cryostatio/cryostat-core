@@ -41,19 +41,16 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @ExtendWith(MockitoExtension.class)
 class JvmDiscoveryClientTest {
 
     JvmDiscoveryClient client;
     @Mock JDPClient jdp;
-    @Mock Logger logger = LoggerFactory.getLogger(getClass());
 
     @BeforeEach
     void setup() {
-        this.client = new JvmDiscoveryClient(jdp, logger);
+        this.client = new JvmDiscoveryClient(jdp);
     }
 
     @Test

@@ -27,18 +27,18 @@ import org.openjdk.jmc.jdp.client.DiscoveryListener;
 import org.openjdk.jmc.jdp.client.JDPClient;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JvmDiscoveryClient {
 
-    private final Logger logger;
+    private final Logger logger = LoggerFactory.getLogger(getClass());
     private final JDPClient jdp;
     private final Set<Consumer<JvmDiscoveryEvent>> eventListeners;
     private final DiscoveryListener listener;
 
     // package-private for testing
-    JvmDiscoveryClient(JDPClient jdp, Logger logger) {
+    JvmDiscoveryClient(JDPClient jdp) {
         this.jdp = jdp;
-        this.logger = logger;
         this.eventListeners = new HashSet<>();
         this.listener =
                 new DiscoveryListener() {
@@ -74,8 +74,8 @@ public class JvmDiscoveryClient {
                 };
     }
 
-    public JvmDiscoveryClient(Logger logger) {
-        this(new JDPClient(), logger);
+    public JvmDiscoveryClient() {
+        this(new JDPClient());
     }
 
     public void start() throws IOException {
