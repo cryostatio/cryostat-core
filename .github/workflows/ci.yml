@@ -131,7 +131,7 @@ jobs:
     - name: Set DOCKER_HOST environment variable
       run: echo "DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock" >> "$GITHUB_ENV"
     - name: Build cryostat3
-      run: ./mvnw -B -U -Dbuild.arch=${{ matrix.arch }} -Dio.cryostat.core.version=${{ needs.build-core.outputs.core_version }} clean package
+      run: ./mvnw -B -U -Dbuild.arch=${{ matrix.arch }} -Dio.cryostat.core.version=${{ needs.build-core.outputs.core_version }} clean verify
       continue-on-error: ${{ matrix.java != '17' }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
