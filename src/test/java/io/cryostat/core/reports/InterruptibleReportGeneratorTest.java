@@ -34,20 +34,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @ExtendWith(MockitoExtension.class)
 class InterruptibleReportGeneratorTest {
 
     @Mock InputStream recording;
-    @Mock Logger logger = LoggerFactory.getLogger(getClass());
 
     InterruptibleReportGenerator generator;
 
     @BeforeEach()
     void setup() throws Exception {
-        generator = new InterruptibleReportGenerator(Executors.newWorkStealingPool(1), logger);
+        generator = new InterruptibleReportGenerator(Executors.newWorkStealingPool(1));
     }
 
     @Test
