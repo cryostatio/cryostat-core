@@ -55,29 +55,16 @@ import org.openjdk.jmc.flightrecorder.rules.Severity;
 import org.openjdk.jmc.flightrecorder.rules.TypedResult;
 import org.openjdk.jmc.flightrecorder.rules.util.RulesToolkit;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.input.CountingInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Re-implementation of {@link ReportGenerator} where the report generation task is represented by a
- * {@link Future}, allowing callers to cancel ongoing rules report analyses or to easily time out on
- * analysis requests. This should eventually replace {@link ReportGenerator} entirely - there should
- * only be benefits to using this implementation.
- */
-@SuppressFBWarnings(
-        value = "THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION",
-        justification = "There are no basic exceptions being thrown")
 public class InterruptibleReportGenerator {
 
     private final ExecutorService qThread = Executors.newCachedThreadPool();
     private final ExecutorService executor;
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @SuppressFBWarnings(
-            value = "EI_EXPOSE_REP2",
-            justification = "fields are not exposed since there are no getters")
     public InterruptibleReportGenerator(ExecutorService executor) {
         this.executor = executor;
     }
