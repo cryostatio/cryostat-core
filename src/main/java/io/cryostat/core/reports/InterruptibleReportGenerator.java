@@ -55,29 +55,16 @@ import org.openjdk.jmc.flightrecorder.rules.Severity;
 import org.openjdk.jmc.flightrecorder.rules.TypedResult;
 import org.openjdk.jmc.flightrecorder.rules.util.RulesToolkit;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.input.CountingInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Re-implementation of {@link ReportGenerator} where the report generation task is represented by a
- * {@link Future}, allowing callers to cancel ongoing rules report analyses or to easily time out on
- * analysis requests. This should eventually replace {@link ReportGenerator} entirely - there should
- * only be benefits to using this implementation.
- */
-@SuppressFBWarnings(
-        value = "THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION",
-        justification = "There are no basic exceptions being thrown")
 public class InterruptibleReportGenerator {
 
     private final ExecutorService qThread = Executors.newCachedThreadPool();
     private final ExecutorService executor;
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @SuppressFBWarnings(
-            value = "EI_EXPOSE_REP2",
-            justification = "fields are not exposed since there are no getters")
     public InterruptibleReportGenerator(ExecutorService executor) {
         this.executor = executor;
     }
@@ -126,6 +113,9 @@ public class InterruptibleReportGenerator {
         Map<String, Pair<IRule, IRule>> rulesWithDependencies = new HashMap<>();
         Map<IRule, IResult> computedResults = new HashMap<>();
         try (CountingInputStream countingRecordingStream = new CountingInputStream(recording)) {
+            // TODO parsing the JFR file should also happen on the executor rather than the qThread,
+            // so that this method can return to the qThread more quickly and free up the ability to
+            // queue more work on the executor.
             IItemCollection items = JfrLoaderToolkit.loadEvents(countingRecordingStream);
             for (IRule rule : rules) {
                 if (RulesToolkit.matchesEventAvailabilityMap(items, rule.getRequiredEvents())) {
@@ -155,6 +145,10 @@ public class InterruptibleReportGenerator {
                                             .build()));
                 }
             }
+            // TODO this implementation forces rule dependencies to be evaluated on the qThread. The
+            // executor is only used for rules that have no dependencies or which have all their
+            // dependencies satisfied (by the qThread). Ideally we should perform all of the rule
+            // evaluations on executor threads.
             for (Entry<String, Pair<IRule, IRule>> entry : rulesWithDependencies.entrySet()) {
                 IRule rule = entry.getValue().left;
                 IRule depRule = entry.getValue().right;
@@ -201,8 +195,10 @@ public class InterruptibleReportGenerator {
                     }
                 }
             }
-            RuleEvaluator re = new RuleEvaluator(futureQueue);
-            executor.submit(re);
+            RunnableFuture<IResult> resultFuture;
+            while ((resultFuture = futureQueue.poll()) != null) {
+                executor.submit(resultFuture);
+            }
             Collection<IResult> results = new HashSet<IResult>();
             for (Future<IResult> future : resultFutures.values()) {
                 results.add(future.get());
@@ -345,21 +341,5 @@ public class InterruptibleReportGenerator {
             }
         }
         return true;
-    }
-
-    private static class RuleEvaluator implements Runnable {
-        private Queue<RunnableFuture<IResult>> futureQueue;
-
-        public RuleEvaluator(Queue<RunnableFuture<IResult>> futureQueue) {
-            this.futureQueue = futureQueue;
-        }
-
-        @Override
-        public void run() {
-            RunnableFuture<IResult> resultFuture;
-            while ((resultFuture = futureQueue.poll()) != null) {
-                resultFuture.run();
-            }
-        }
     }
 }
