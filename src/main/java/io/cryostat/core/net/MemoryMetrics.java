@@ -21,8 +21,8 @@ import java.util.Map;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class MemoryMetrics {
-    private final MemoryUsage heapMemoryUsage;
-    private final MemoryUsage nonHeapMemoryUsage;
+    private final MemoryUtilization heapMemoryUsage;
+    private final MemoryUtilization nonHeapMemoryUsage;
     private final long objectPendingFinalizationCount;
     private final long freeHeapMemory;
     private final long freeNonHeapMemory;
@@ -31,12 +31,15 @@ public class MemoryMetrics {
 
     public MemoryMetrics(Map<String, Object> attributes) {
         this.heapMemoryUsage =
-                (MemoryUsage)
-                        attributes.getOrDefault("HeapMemoryUsage", new MemoryUsage(-1, 0, 0, -1));
+                MemoryUtilization.from(
+                        (MemoryUsage)
+                                attributes.getOrDefault(
+                                        "HeapMemoryUsage", new MemoryUsage(-1, 0, 0, -1)));
         this.nonHeapMemoryUsage =
-                (MemoryUsage)
-                        attributes.getOrDefault(
-                                "NonHeapMemoryUsage", new MemoryUsage(-1, 0, 0, -1));
+                MemoryUtilization.from(
+                        (MemoryUsage)
+                                attributes.getOrDefault(
+                                        "NonHeapMemoryUsage", new MemoryUsage(-1, 0, 0, -1)));
         this.objectPendingFinalizationCount =
                 (int) attributes.getOrDefault("ObjectPendingFinalizationCount", Integer.MIN_VALUE);
         this.freeHeapMemory = (long) attributes.getOrDefault("FreeHeapMemory", Long.MIN_VALUE);
@@ -47,11 +50,11 @@ public class MemoryMetrics {
         this.verbose = (boolean) attributes.getOrDefault("Verbose", false);
     }
 
-    public MemoryUsage getHeapMemoryUsage() {
+    public MemoryUtilization getHeapMemoryUsage() {
         return heapMemoryUsage;
     }
 
-    public MemoryUsage getNonHeapMemoryUsage() {
+    public MemoryUtilization getNonHeapMemoryUsage() {
         return nonHeapMemoryUsage;
     }
 
