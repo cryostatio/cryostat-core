@@ -73,7 +73,7 @@
   <com.mycila.license.maven.plugin.version>4.3</com.mycila.license.maven.plugin.version>
 
   <org.apache.commons.lang3.version>3.13.0</org.apache.commons.lang3.version>
-  <org.apache.commons.codec.version>1.16.0</org.apache.commons.codec.version>
+  <org.apache.commons.codec.version>1.16.1</org.apache.commons.codec.version>
   <org.apache.commons.io.version>2.13.0</org.apache.commons.io.version>
   <org.apache.commons.text.version>1.11.0</org.apache.commons.text.version>
   <org.jsoup.version>1.16.1</org.jsoup.version>
