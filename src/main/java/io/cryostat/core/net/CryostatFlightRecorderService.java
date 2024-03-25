@@ -20,14 +20,14 @@ import java.text.ParseException;
 
 import org.openjdk.jmc.common.unit.IConstrainedMap;
 import org.openjdk.jmc.common.unit.QuantityConversionException;
+import org.openjdk.jmc.flightrecorder.configuration.FlightRecorderException;
+import org.openjdk.jmc.flightrecorder.configuration.IFlightRecorderService;
+import org.openjdk.jmc.flightrecorder.configuration.IRecordingDescriptor;
+import org.openjdk.jmc.flightrecorder.configuration.events.EventConfiguration;
 import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
-import org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration.model.xml.XMLModel;
-import org.openjdk.jmc.flightrecorder.controlpanel.ui.model.EventConfiguration;
-import org.openjdk.jmc.rjmx.ConnectionException;
-import org.openjdk.jmc.rjmx.ServiceNotAvailableException;
-import org.openjdk.jmc.rjmx.services.jfr.FlightRecorderException;
-import org.openjdk.jmc.rjmx.services.jfr.IFlightRecorderService;
-import org.openjdk.jmc.rjmx.services.jfr.IRecordingDescriptor;
+import org.openjdk.jmc.flightrecorder.configuration.model.xml.XMLModel;
+import org.openjdk.jmc.rjmx.common.ConnectionException;
+import org.openjdk.jmc.rjmx.common.ServiceNotAvailableException;
 
 import io.cryostat.core.EventOptionsBuilder.EventOptionException;
 import io.cryostat.core.EventOptionsBuilder.EventTypeException;

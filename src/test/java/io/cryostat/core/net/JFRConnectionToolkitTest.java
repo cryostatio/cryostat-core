@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import javax.management.remote.JMXServiceURL;
 
-import org.openjdk.jmc.rjmx.internal.WrappedConnectionException;
+import org.openjdk.jmc.rjmx.common.internal.WrappedConnectionException;
 
 import io.cryostat.core.sys.Environment;
 import io.cryostat.core.sys.FileSystem;
