@@ -26,22 +26,24 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class RuntimeMetrics {
-    private final String bootClassPath;
-    private final String classPath;
-    private final String[] inputArguments;
-    private final String libraryPath;
-    private final String managementSpecVersion;
-    private final String name;
-    private final String specName;
-    private final String specVendor;
-    private final String specVersion;
-    private final Map<String, String> systemProperties;
-    private final long startTime;
-    private final long uptime;
-    private final String vmName;
-    private final String vmVendor;
-    private final String vmVersion;
-    private final boolean bootClassPathSupported;
+    private String bootClassPath;
+    private String classPath;
+    private String[] inputArguments;
+    private String libraryPath;
+    private String managementSpecVersion;
+    private String name;
+    private String specName;
+    private String specVendor;
+    private String specVersion;
+    private Map<String, String> systemProperties;
+    private long startTime;
+    private long uptime;
+    private String vmName;
+    private String vmVendor;
+    private String vmVersion;
+    private boolean bootClassPathSupported;
+
+    public RuntimeMetrics() {}
 
     public RuntimeMetrics(Map<String, Object> attributes) {
         this.bootClassPath = (String) attributes.getOrDefault("BootClassPath", StringUtils.EMPTY);

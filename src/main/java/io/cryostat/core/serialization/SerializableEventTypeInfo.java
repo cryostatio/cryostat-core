@@ -34,6 +34,8 @@ public class SerializableEventTypeInfo {
     private String[] category;
     private Map<String, SerializableOptionDescriptor> options;
 
+    public SerializableEventTypeInfo() {}
+
     public SerializableEventTypeInfo(IEventTypeInfo orig) {
         this.name = orig.getName();
         this.typeId = orig.getEventTypeID().getFullKey();

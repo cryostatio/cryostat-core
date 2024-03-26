@@ -27,6 +27,8 @@ public class SerializableOptionDescriptor {
     private String description;
     private String defaultValue;
 
+    public SerializableOptionDescriptor() {}
+
     public SerializableOptionDescriptor(IOptionDescriptor<?> orig) {
         this.name = orig.getName();
         this.description = orig.getDescription();
