@@ -42,6 +42,8 @@ public class SerializableRecordingDescriptor {
     protected long maxSize;
     protected long maxAge;
 
+    public SerializableRecordingDescriptor() {}
+
     public SerializableRecordingDescriptor(
             long id,
             String name,
