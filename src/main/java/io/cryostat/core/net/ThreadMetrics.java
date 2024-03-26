@@ -21,20 +21,22 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class ThreadMetrics {
-    private final long[] allThreadIds;
-    private final long currentThreadCpuTime;
-    private final long currentThreadUserTime;
-    private final int daemonThreadCount;
-    private final int peakThreadCount;
-    private final int threadCount;
-    private final long totalStartedThreadCount;
-    private final boolean currentThreadCpuTimeSupported;
-    private final boolean objectMonitorUsageSupported;
-    private final boolean synchronizerUsageSupported;
-    private final boolean threadContentionMonitoringEnabled;
-    private final boolean threadContentionMonitoringSupported;
-    private final boolean threadCpuTimeEnabled;
-    private final boolean threadCpuTimeSupported;
+    private long[] allThreadIds;
+    private long currentThreadCpuTime;
+    private long currentThreadUserTime;
+    private int daemonThreadCount;
+    private int peakThreadCount;
+    private int threadCount;
+    private long totalStartedThreadCount;
+    private boolean currentThreadCpuTimeSupported;
+    private boolean objectMonitorUsageSupported;
+    private boolean synchronizerUsageSupported;
+    private boolean threadContentionMonitoringEnabled;
+    private boolean threadContentionMonitoringSupported;
+    private boolean threadCpuTimeEnabled;
+    private boolean threadCpuTimeSupported;
+
+    public ThreadMetrics() {}
 
     public ThreadMetrics(Map<String, Object> attributes) {
         this.allThreadIds = (long[]) attributes.getOrDefault("AllThreadIds", new long[0]);

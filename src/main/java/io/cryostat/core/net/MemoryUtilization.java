@@ -19,10 +19,12 @@ import java.lang.management.MemoryUsage;
 
 public class MemoryUtilization {
 
-    private final long init;
-    private final long used;
-    private final long committed;
-    private final long max;
+    private long init;
+    private long used;
+    private long committed;
+    private long max;
+
+    public MemoryUtilization() {}
 
     public MemoryUtilization(long init, long used, long committed, long max) {
         this.init = init;

@@ -21,19 +21,21 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class OperatingSystemMetrics {
-    private final String arch;
-    private final int availableProcessors;
-    private final String name;
-    private final double systemLoadAverage;
-    private final String version;
-    private final long committedVirtualMemorySize;
-    private final long freePhysicalMemorySize;
-    private final long freeSwapSpaceSize;
-    private final double processCpuLoad;
-    private final long processCpuTime;
-    private final double systemCpuLoad;
-    private final long totalPhysicalMemorySize;
-    private final long totalSwapSpaceSize;
+    private String arch;
+    private int availableProcessors;
+    private String name;
+    private double systemLoadAverage;
+    private String version;
+    private long committedVirtualMemorySize;
+    private long freePhysicalMemorySize;
+    private long freeSwapSpaceSize;
+    private double processCpuLoad;
+    private long processCpuTime;
+    private double systemCpuLoad;
+    private long totalPhysicalMemorySize;
+    private long totalSwapSpaceSize;
+
+    public OperatingSystemMetrics() {}
 
     public OperatingSystemMetrics(Map<String, Object> attributes) {
         this.arch = (String) attributes.getOrDefault("Arch", StringUtils.EMPTY);

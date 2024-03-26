@@ -21,13 +21,15 @@ import java.util.Map;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class MemoryMetrics {
-    private final MemoryUtilization heapMemoryUsage;
-    private final MemoryUtilization nonHeapMemoryUsage;
-    private final long objectPendingFinalizationCount;
-    private final long freeHeapMemory;
-    private final long freeNonHeapMemory;
-    private final double heapMemoryUsagePercent;
-    private final boolean verbose;
+    private MemoryUtilization heapMemoryUsage;
+    private MemoryUtilization nonHeapMemoryUsage;
+    private long objectPendingFinalizationCount;
+    private long freeHeapMemory;
+    private long freeNonHeapMemory;
+    private double heapMemoryUsagePercent;
+    private boolean verbose;
+
+    public MemoryMetrics() {}
 
     public MemoryMetrics(Map<String, Object> attributes) {
         this.heapMemoryUsage =

@@ -16,11 +16,14 @@
 package io.cryostat.core.net;
 
 public class MBeanMetrics {
-    private final RuntimeMetrics runtime;
-    private final MemoryMetrics memory;
-    private final ThreadMetrics thread;
-    private final OperatingSystemMetrics os;
-    private final String jvmId;
+
+    private RuntimeMetrics runtime;
+    private MemoryMetrics memory;
+    private ThreadMetrics thread;
+    private OperatingSystemMetrics os;
+    private String jvmId;
+
+    public MBeanMetrics() {}
 
     public MBeanMetrics(
             RuntimeMetrics runtimeDetails,
