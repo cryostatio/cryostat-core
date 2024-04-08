@@ -107,6 +107,9 @@ public class AgentJMXHelper {
         }
     }
 
+    @Override
+    protected final void finalize() {}
+
     static class ProbeDefinitionException extends Exception {
         ProbeDefinitionException(String message, Throwable e) {
             super(message, e);

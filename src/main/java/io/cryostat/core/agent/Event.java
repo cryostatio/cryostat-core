@@ -231,4 +231,7 @@ public class Event {
 
         return methodElement;
     }
+
+    @Override
+    protected final void finalize() {}
 }
