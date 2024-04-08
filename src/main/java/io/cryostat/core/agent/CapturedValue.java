@@ -205,6 +205,9 @@ public class CapturedValue {
         this.converter = converter;
     }
 
+    @Override
+    protected final void finalize() {}
+
     protected void copyContentToWorkingCopy(CapturedValue copy) {
         copy.name = name;
         copy.description = description;
