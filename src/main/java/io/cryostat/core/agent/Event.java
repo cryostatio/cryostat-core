@@ -44,17 +44,17 @@ public class Event {
     private static final String XML_ATTRIBUTE_ID = "id";
     private static final String XML_TAG_METHOD_NAME = "name";
 
-    private String id;
-    private String name;
-    private String clazz;
-    private String description;
-    private String path;
-    private boolean recordStackTrace;
-    private boolean useRethrow;
-    private String methodName;
-    private String methodDescriptor;
-    private Location location;
-    private MethodReturnValue returnValue;
+    public String id;
+    public String name;
+    public String clazz;
+    public String description;
+    public String path;
+    public boolean recordStackTrace;
+    public boolean useRethrow;
+    public String methodName;
+    public String methodDescriptor;
+    public Location location;
+    public MethodReturnValue returnValue;
 
     private final List<MethodParameter> parameters = new ArrayList<>();
     private final List<Field> fields = new ArrayList<>();
