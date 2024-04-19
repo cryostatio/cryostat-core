@@ -110,13 +110,13 @@ public class AgentJMXHelper {
     @Override
     protected final void finalize() {}
 
-    static class ProbeDefinitionException extends Exception {
+    public static class ProbeDefinitionException extends Exception {
         ProbeDefinitionException(String message, Throwable e) {
             super(message, e);
         }
     }
 
-    static class MBeanRetrieveException extends Exception {
+    public static class MBeanRetrieveException extends Exception {
         MBeanRetrieveException(Throwable e) {
             super(e);
         }
