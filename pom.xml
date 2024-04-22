@@ -63,7 +63,7 @@
   <java.version>11</java.version>
   <maven.compiler.target>${java.version}</maven.compiler.target>
   <maven.compiler.source>${java.version}</maven.compiler.source>
-  <jmc.version>8.2.0</jmc.version>
+  <jmc.version>9.0.0</jmc.version>
 
   <io.smallrye.jandex.plugin.version>3.1.7</io.smallrye.jandex.plugin.version>
   <org.apache.maven.plugins.compiler.version>3.13.0</org.apache.maven.plugins.compiler.version>
