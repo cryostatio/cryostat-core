@@ -55,7 +55,7 @@ import io.cryostat.core.JvmIdentifier;
 import io.cryostat.core.sys.Clock;
 import io.cryostat.core.sys.Environment;
 import io.cryostat.core.sys.FileSystem;
-import io.cryostat.core.templates.MergedTemplateService;
+import io.cryostat.core.templates.RemoteTemplateService;
 import io.cryostat.core.templates.TemplateService;
 import io.cryostat.core.tui.ClientWriter;
 
@@ -110,7 +110,7 @@ public class JFRJMXConnection implements JFRConnection {
     }
 
     public TemplateService getTemplateService() {
-        return new MergedTemplateService(this, fs, env);
+        return new RemoteTemplateService(this);
     }
 
     public synchronized long getApproximateServerTime(Clock clock) {
