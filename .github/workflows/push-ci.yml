@@ -18,3 +18,6 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
     - run: mvn -B -U clean verify
+  publish-snapshot:
+    uses: ./.github/workflows/maven-central-release.yml
+    if: github.repository_owner == 'cryostatio'
