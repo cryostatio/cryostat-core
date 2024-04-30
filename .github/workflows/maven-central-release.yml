@@ -2,6 +2,7 @@
 name: Publish a new Maven Central release
 
 on:
+  workflow_call:
   workflow_dispatch:
     # inputs:
     #   version:
