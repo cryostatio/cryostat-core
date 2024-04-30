@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/setup-java@v3
       with:
-        java-version: '11'
+        java-version: '17'
         distribution: 'temurin'
     - run: mvn -B -U clean verify
   publish-snapshot:
