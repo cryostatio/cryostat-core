@@ -26,9 +26,9 @@ import java.util.List;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXServiceURL;
 
-import org.openjdk.jmc.rjmx.ConnectionDescriptorBuilder;
-import org.openjdk.jmc.rjmx.ConnectionException;
-import org.openjdk.jmc.rjmx.ConnectionToolkit;
+import org.openjdk.jmc.rjmx.common.ConnectionDescriptorBuilder;
+import org.openjdk.jmc.rjmx.common.ConnectionException;
+import org.openjdk.jmc.rjmx.common.ConnectionToolkit;
 
 import io.cryostat.core.sys.Environment;
 import io.cryostat.core.sys.FileSystem;

@@ -44,6 +44,15 @@
   </developer>
 </developers>
 
+<repositories>
+  <repository>
+    <id>jmc-libs</id>
+    <name>Adoptium JDK Mission Control Core Libraries</name>
+    <url>https://adoptium.jfrog.io/artifactory/jmc-libs</url>
+    <layout>default</layout>
+  </repository>
+</repositories>
+
 <distributionManagement>
   <repository>
     <id>github</id>
@@ -63,7 +72,7 @@
   <java.version>11</java.version>
   <maven.compiler.target>${java.version}</maven.compiler.target>
   <maven.compiler.source>${java.version}</maven.compiler.source>
-  <jmc.version>8.2.0</jmc.version>
+  <org.openjdk.jmc.version>9.0.0</org.openjdk.jmc.version>
 
   <io.smallrye.jandex.plugin.version>3.1.7</io.smallrye.jandex.plugin.version>
   <org.apache.maven.plugins.compiler.version>3.13.0</org.apache.maven.plugins.compiler.version>
@@ -96,27 +105,37 @@
   <dependency>
     <groupId>org.openjdk.jmc</groupId>
     <artifactId>common</artifactId>
-    <version>${jmc.version}</version>
+    <version>${org.openjdk.jmc.version}</version>
   </dependency>
   <dependency>
     <groupId>org.openjdk.jmc</groupId>
     <artifactId>flightrecorder</artifactId>
-    <version>${jmc.version}</version>
+    <version>${org.openjdk.jmc.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.openjdk.jmc</groupId>
+    <artifactId>flightrecorder.configuration</artifactId>
+    <version>${org.openjdk.jmc.version}</version>
   </dependency>
   <dependency>
     <groupId>org.openjdk.jmc</groupId>
     <artifactId>flightrecorder.rules</artifactId>
-    <version>${jmc.version}</version>
+    <version>${org.openjdk.jmc.version}</version>
   </dependency>
   <dependency>
     <groupId>org.openjdk.jmc</groupId>
     <artifactId>flightrecorder.rules.jdk</artifactId>
-    <version>${jmc.version}</version>
+    <version>${org.openjdk.jmc.version}</version>
   </dependency>
   <dependency>
     <groupId>org.openjdk.jmc</groupId>
     <artifactId>jdp</artifactId>
-    <version>${jmc.version}</version>
+    <version>${org.openjdk.jmc.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.openjdk.jmc</groupId>
+    <artifactId>rjmx.common</artifactId>
+    <version>${org.openjdk.jmc.version}</version>
   </dependency>
   <dependency>
     <groupId>org.apache.commons</groupId>

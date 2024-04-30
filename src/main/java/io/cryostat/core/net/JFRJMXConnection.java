@@ -37,19 +37,24 @@ import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
 import javax.management.remote.JMXServiceURL;
 
-import org.openjdk.jmc.rjmx.ConnectionException;
-import org.openjdk.jmc.rjmx.ConnectionToolkit;
-import org.openjdk.jmc.rjmx.IConnectionDescriptor;
-import org.openjdk.jmc.rjmx.IConnectionHandle;
-import org.openjdk.jmc.rjmx.IConnectionListener;
-import org.openjdk.jmc.rjmx.ServiceNotAvailableException;
-import org.openjdk.jmc.rjmx.internal.DefaultConnectionHandle;
-import org.openjdk.jmc.rjmx.internal.RJMXConnection;
-import org.openjdk.jmc.rjmx.internal.ServerDescriptor;
-import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceFactory;
-import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceV2;
-import org.openjdk.jmc.rjmx.subscription.MRI;
-import org.openjdk.jmc.rjmx.subscription.MRI.Type;
+import org.openjdk.jmc.rjmx.common.ConnectionException;
+import org.openjdk.jmc.rjmx.common.ConnectionToolkit;
+import org.openjdk.jmc.rjmx.common.IConnectionDescriptor;
+import org.openjdk.jmc.rjmx.common.IConnectionHandle;
+import org.openjdk.jmc.rjmx.common.IConnectionListener;
+import org.openjdk.jmc.rjmx.common.ServiceNotAvailableException;
+import org.openjdk.jmc.rjmx.common.internal.DefaultConnectionHandle;
+import org.openjdk.jmc.rjmx.common.internal.RJMXConnection;
+import org.openjdk.jmc.rjmx.common.internal.ServerDescriptor;
+import org.openjdk.jmc.rjmx.common.services.internal.AttributeStorageServiceFactory;
+import org.openjdk.jmc.rjmx.common.services.internal.CommercialFeaturesServiceFactory;
+import org.openjdk.jmc.rjmx.common.services.internal.DiagnosticCommandServiceFactory;
+import org.openjdk.jmc.rjmx.common.services.internal.ServiceEntry;
+import org.openjdk.jmc.rjmx.common.services.internal.SubscriptionServiceFactory;
+import org.openjdk.jmc.rjmx.common.services.jfr.internal.FlightRecorderServiceFactory;
+import org.openjdk.jmc.rjmx.common.services.jfr.internal.FlightRecorderServiceV2;
+import org.openjdk.jmc.rjmx.common.subscription.MRI;
+import org.openjdk.jmc.rjmx.common.subscription.MRI.Type;
 
 import io.cryostat.core.JvmIdentifier;
 import io.cryostat.core.sys.Clock;
@@ -68,6 +73,7 @@ public class JFRJMXConnection implements JFRConnection {
     protected final Environment env;
     protected final FlightRecorderServiceFactory serviceFactory;
     protected final List<Runnable> closeListeners;
+    protected final List<ServiceEntry<?>> serviceEntries;
     protected RJMXConnection rjmxConnection;
     protected IConnectionHandle handle;
     protected IConnectionDescriptor connectionDescriptor;
@@ -84,6 +90,33 @@ public class JFRJMXConnection implements JFRConnection {
         this.connectionDescriptor = cd;
         this.closeListeners = new ArrayList<>(listeners);
         this.serviceFactory = new FlightRecorderServiceFactory();
+        this.serviceEntries = new ArrayList<>();
+        initializeServiceEntries();
+    }
+
+    private void initializeServiceEntries() {
+        serviceEntries.add(
+                new ServiceEntry<>(
+                        new AttributeStorageServiceFactory(),
+                        "Attribute Storage",
+                        "Service for storing attribute values"));
+        serviceEntries.add(
+                new ServiceEntry<>(
+                        new CommercialFeaturesServiceFactory(),
+                        "Commercial Features",
+                        "Service for checking and enabling the state of the commercial features"
+                                + " in hotspot."));
+        serviceEntries.add(
+                new ServiceEntry<>(
+                        new DiagnosticCommandServiceFactory(),
+                        "Diagnostic Commands",
+                        "Diagnostic Commands"));
+        serviceEntries.add(
+                new ServiceEntry<>(
+                        new SubscriptionServiceFactory(),
+                        "Subscription Engine",
+                        "Service for controlling the client side attribute subscription"
+                                + " engine"));
     }
 
     JFRJMXConnection(ClientWriter cw, FileSystem fs, Environment env, IConnectionDescriptor cd) {
@@ -307,7 +340,8 @@ public class JFRJMXConnection implements JFRConnection {
                                                     }
                                                 })
                                 .collect(Collectors.toList())
-                                .toArray(new IConnectionListener[0]));
+                                .toArray(new IConnectionListener[0]),
+                        serviceEntries);
     }
 
     public synchronized void disconnect() {

@@ -22,8 +22,8 @@ import javax.management.ObjectName;
 import org.openjdk.jmc.common.unit.IQuantity;
 import org.openjdk.jmc.common.unit.QuantityConversionException;
 import org.openjdk.jmc.common.unit.UnitLookup;
-import org.openjdk.jmc.rjmx.services.jfr.IRecordingDescriptor;
-import org.openjdk.jmc.rjmx.services.jfr.IRecordingDescriptor.RecordingState;
+import org.openjdk.jmc.flightrecorder.configuration.IRecordingDescriptor;
+import org.openjdk.jmc.flightrecorder.configuration.IRecordingDescriptor.RecordingState;
 
 import jdk.jfr.Recording;
 import org.apache.commons.lang3.builder.EqualsBuilder;

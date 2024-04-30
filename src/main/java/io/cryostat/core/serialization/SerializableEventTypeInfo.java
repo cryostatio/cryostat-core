@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.openjdk.jmc.common.unit.IOptionDescriptor;
-import org.openjdk.jmc.rjmx.services.jfr.IEventTypeInfo;
+import org.openjdk.jmc.flightrecorder.configuration.events.IEventTypeInfo;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
