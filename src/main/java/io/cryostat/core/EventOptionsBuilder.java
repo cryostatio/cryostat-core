@@ -27,9 +27,9 @@ import org.openjdk.jmc.common.unit.IOptionDescriptor;
 import org.openjdk.jmc.common.unit.QuantityConversionException;
 import org.openjdk.jmc.flightrecorder.configuration.events.EventOptionID;
 import org.openjdk.jmc.flightrecorder.configuration.events.IEventTypeID;
-import org.openjdk.jmc.rjmx.ServiceNotAvailableException;
-import org.openjdk.jmc.rjmx.services.jfr.IEventTypeInfo;
-import org.openjdk.jmc.rjmx.services.jfr.internal.FlightRecorderServiceV2;
+import org.openjdk.jmc.flightrecorder.configuration.events.IEventTypeInfo;
+import org.openjdk.jmc.rjmx.common.ServiceNotAvailableException;
+import org.openjdk.jmc.rjmx.common.services.jfr.internal.FlightRecorderServiceV2;
 
 import io.cryostat.core.net.JFRConnection;
 
@@ -96,7 +96,7 @@ public class EventOptionsBuilder {
     public static class Factory {
         public EventOptionsBuilder create(JFRConnection connection)
                 throws IOException, ServiceNotAvailableException,
-                        org.openjdk.jmc.rjmx.services.jfr.FlightRecorderException {
+                        org.openjdk.jmc.flightrecorder.configuration.FlightRecorderException {
             if (!FlightRecorderServiceV2.isAvailable(connection.getHandle())) {
                 throw new UnsupportedOperationException("Only FlightRecorder V2 is supported");
             }

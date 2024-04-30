@@ -18,10 +18,10 @@ package io.cryostat.core.jmc;
 import java.util.Collections;
 import java.util.Set;
 
-import org.openjdk.jmc.ui.common.security.ActionNotGrantedException;
-import org.openjdk.jmc.ui.common.security.FailedToSaveException;
-import org.openjdk.jmc.ui.common.security.ISecurityManager;
-import org.openjdk.jmc.ui.common.security.SecurityException;
+import org.openjdk.jmc.common.security.ActionNotGrantedException;
+import org.openjdk.jmc.common.security.FailedToSaveException;
+import org.openjdk.jmc.common.security.ISecurityManager;
+import org.openjdk.jmc.common.security.SecurityException;
 
 import io.cryostat.core.jmc.internal.Store;
 
