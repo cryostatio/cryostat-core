@@ -20,4 +20,5 @@ jobs:
     - run: mvn -B -U clean verify
   publish-snapshot:
     uses: ./.github/workflows/maven-central-release.yml
+    secrets: inherit
     if: github.repository_owner == 'cryostatio'
