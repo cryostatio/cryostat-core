@@ -29,7 +29,6 @@ import org.apache.commons.io.IOUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.jsoup.parser.Parser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -100,9 +99,10 @@ class RemoteTemplateServiceTest {
     void getXmlShouldReturnModelFromRemote() throws Exception {
         Mockito.when(conn.getService()).thenReturn(svc);
         Mockito.when(svc.getServerTemplates()).thenReturn(Collections.singletonList(xmlText));
-        Optional<Document> doc = templateSvc.getXml("Profiling", TemplateType.TARGET);
+        Optional<String> doc = templateSvc.getXml("Profiling", TemplateType.TARGET);
         Assertions.assertTrue(doc.isPresent());
-        Assertions.assertTrue(doc.get().hasSameValue(Jsoup.parse(xmlText, "", Parser.xmlParser())));
+        Assertions.assertTrue(
+                doc.get().equals(Jsoup.parse(xmlText, "", Parser.xmlParser()).outerHtml()));
     }
 
     @Test

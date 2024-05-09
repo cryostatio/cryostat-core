@@ -55,35 +55,42 @@ public class RemoteTemplateService extends AbstractTemplateService {
     }
 
     @Override
-    public Optional<Document> getXml(String templateName, TemplateType type)
+    public Optional<String> getXml(String templateName, TemplateType type)
             throws FlightRecorderException {
         if (!providedTemplateType().equals(type)) {
             return Optional.empty();
         }
         try {
-            return conn.getService().getServerTemplates().stream()
-                    .map(xmlText -> Jsoup.parse(xmlText, "", Parser.xmlParser()))
-                    .filter(
-                            doc -> {
-                                Elements els = doc.getElementsByTag("configuration");
-                                if (els.isEmpty()) {
-                                    throw new MalformedXMLException(
-                                            "Document did not contain \"configuration\" element");
-                                }
-                                if (els.size() > 1) {
-                                    throw new MalformedXMLException(
-                                            "Document contains multiple \"configuration\""
-                                                    + " elements");
-                                }
-                                Element configuration = els.first();
-                                if (!configuration.hasAttr("label")) {
-                                    throw new MalformedXMLException(
-                                            "Configuration element did not have \"label\""
-                                                    + " attribute");
-                                }
-                                return configuration.attr("label").equals(templateName);
-                            })
-                    .findFirst();
+            Optional<Document> document =
+                    conn.getService().getServerTemplates().stream()
+                            .map(xmlText -> Jsoup.parse(xmlText, "", Parser.xmlParser()))
+                            .filter(
+                                    doc -> {
+                                        Elements els = doc.getElementsByTag("configuration");
+                                        if (els.isEmpty()) {
+                                            throw new MalformedXMLException(
+                                                    "Document did not contain \"configuration\""
+                                                            + " element");
+                                        }
+                                        if (els.size() > 1) {
+                                            throw new MalformedXMLException(
+                                                    "Document contains multiple \"configuration\""
+                                                            + " elements");
+                                        }
+                                        Element configuration = els.first();
+                                        if (!configuration.hasAttr("label")) {
+                                            throw new MalformedXMLException(
+                                                    "Configuration element did not have \"label\""
+                                                            + " attribute");
+                                        }
+                                        return configuration.attr("label").equals(templateName);
+                                    })
+                            .findFirst();
+            if (document.isPresent()) {
+                return Optional.of(document.get().toString());
+            } else {
+                return Optional.empty();
+            }
         } catch (org.openjdk.jmc.flightrecorder.configuration.FlightRecorderException
                 | IOException
                 | ServiceNotAvailableException e) {
