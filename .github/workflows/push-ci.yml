@@ -33,5 +33,5 @@ jobs:
     uses: ./.github/workflows/maven-central-publish.yml
     secrets: inherit
     with:
-      publish-cmd: './mvnw -Prelease deploy jreleaser:deploy'
+      publish-cmd: './release-snapshot.sh'
     if: ${{ github.repository_owner == 'cryostatio' && endsWith(needs.get-version.outputs.project-version, '-SNAPSHOT') }}
