@@ -18,15 +18,19 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
     - run: mvn -B -U clean verify
-  publish-snapshot:
+  get-version:
+    runs-on: ubuntu-latest
+    outputs:
+      project-version: ${{ steps.get-version.outputs.project-version }}
     steps:
     - id: get-version
       run: |
         PROJECT_VERSION="$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
         echo "project-version=${PROJECT_VERSION}" >> "${GITHUB_OUTPUT}"
-    - id: run-publish
-      uses: ./.github/workflows/maven-central-publish.yml
-      secrets: inherit
-      with:
-        publish-cmd: './mvnw -Prelease deploy jreleaser:deploy'
-      if: ${{ github.repository_owner == 'cryostatio' && endsWith(steps.get-version.outputs.project-version, '-SNAPSHOT') }}
+  publish-snapshot:
+    needs: get-version
+    uses: ./.github/workflows/maven-central-publish.yml
+    secrets: inherit
+    with:
+      publish-cmd: './mvnw -Prelease deploy jreleaser:deploy'
+    if: ${{ github.repository_owner == 'cryostatio' && endsWith(needs.get-version.outputs.project-version, '-SNAPSHOT') }}
