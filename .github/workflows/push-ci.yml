@@ -23,6 +23,7 @@ jobs:
     outputs:
       project-version: ${{ steps.get-version.outputs.project-version }}
     steps:
+    - uses: actions/checkout@v4
     - id: get-version
       run: |
         PROJECT_VERSION="$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
