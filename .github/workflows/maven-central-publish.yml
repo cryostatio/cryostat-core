@@ -7,6 +7,7 @@ on:
       publish-cmd:
         description: 'Command to perform publish'
         required: true
+        type: string
 
 jobs:
   build:
