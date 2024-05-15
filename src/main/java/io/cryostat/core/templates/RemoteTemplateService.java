@@ -61,8 +61,7 @@ public class RemoteTemplateService extends AbstractTemplateService {
             return Optional.empty();
         }
         try {
-            Optional<Document> document =
-                    conn.getService().getServerTemplates().stream()
+                    return conn.getService().getServerTemplates().stream()
                             .map(xmlText -> Jsoup.parse(xmlText, "", Parser.xmlParser()))
                             .filter(
                                     doc -> {
@@ -85,12 +84,8 @@ public class RemoteTemplateService extends AbstractTemplateService {
                                         }
                                         return configuration.attr("label").equals(templateName);
                                     })
+                             .map(doc -> document.toString())
                             .findFirst();
-            if (document.isPresent()) {
-                return Optional.of(document.get().toString());
-            } else {
-                return Optional.empty();
-            }
         } catch (org.openjdk.jmc.flightrecorder.configuration.FlightRecorderException
                 | IOException
                 | ServiceNotAvailableException e) {
