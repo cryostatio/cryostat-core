@@ -13,25 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cryostat.core.agent;
+package io.cryostat.core.jmcagent;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.List;
 
-public class AgentXMLStream extends BufferedInputStream {
+import io.cryostat.core.FlightRecorderException;
 
-    public AgentXMLStream(InputStream is) {
-        super(is);
-    }
+public interface ProbeTemplateService {
 
-    @Override
-    public void close() {
-        // The XML Validator closes the stream when it finishes validation,
-        // we want to keep it open for further processing after validating.
-    }
-
-    public void trulyClose() throws IOException {
-        super.close();
-    }
+    public abstract List<ProbeTemplate> getTemplates() throws FlightRecorderException;
 }

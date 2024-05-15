@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cryostat.core.agent;
+package io.cryostat.core.jmcagent;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -70,7 +70,7 @@ public class ProbeTemplate {
     }
 
     public void deserialize(InputStream xmlStream) throws IOException, SAXException {
-        AgentXMLStream stream = new AgentXMLStream(xmlStream);
+        JMCAgentXMLStream stream = new JMCAgentXMLStream(xmlStream);
         stream.mark(1); // arbitrary readLimit > 0
         ProbeValidator validator = new ProbeValidator();
         validator.validate(new StreamSource(stream));
