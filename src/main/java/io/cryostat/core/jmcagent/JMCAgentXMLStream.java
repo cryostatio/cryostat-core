@@ -13,11 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cryostat.core.agent;
+package io.cryostat.core.jmcagent;
 
-public class ProbeValidationException extends RuntimeException {
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
-    public ProbeValidationException(String reason, Throwable e) {
-        super(reason, e);
+public class JMCAgentXMLStream extends BufferedInputStream {
+
+    public JMCAgentXMLStream(InputStream is) {
+        super(is);
+    }
+
+    @Override
+    public void close() {
+        // The XML Validator closes the stream when it finishes validation,
+        // we want to keep it open for further processing after validating.
+    }
+
+    public void trulyClose() throws IOException {
+        super.close();
     }
 }

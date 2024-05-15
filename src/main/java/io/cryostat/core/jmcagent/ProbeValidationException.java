@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cryostat.core.agent;
+package io.cryostat.core.jmcagent;
 
-import java.util.List;
+public class ProbeValidationException extends RuntimeException {
 
-import io.cryostat.core.FlightRecorderException;
-
-public interface ProbeTemplateService {
-
-    public abstract List<ProbeTemplate> getTemplates() throws FlightRecorderException;
+    public ProbeValidationException(String reason, Throwable e) {
+        super(reason, e);
+    }
 }

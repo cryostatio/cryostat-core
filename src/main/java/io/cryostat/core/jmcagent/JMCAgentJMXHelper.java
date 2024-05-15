@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.cryostat.core.agent;
+package io.cryostat.core.jmcagent;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -28,9 +28,9 @@ import javax.management.ReflectionException;
 
 import org.openjdk.jmc.rjmx.common.IConnectionHandle;
 
-public class AgentJMXHelper {
+public class JMCAgentJMXHelper {
 
-    private static final Logger logger = Logger.getLogger(AgentJMXHelper.class.getName());
+    private static final Logger logger = Logger.getLogger(JMCAgentJMXHelper.class.getName());
     private static final String AGENT_OBJECT_NAME =
             "org.openjdk.jmc.jfr.agent:type=AgentController";
     private static final String DEFINE_EVENT_PROBES = "defineEventProbes";
@@ -40,7 +40,7 @@ public class AgentJMXHelper {
     private final IConnectionHandle connectionHandle;
     private final MBeanServerConnection mbsc;
 
-    public AgentJMXHelper(IConnectionHandle connectionHandle) {
+    public JMCAgentJMXHelper(IConnectionHandle connectionHandle) {
         this.connectionHandle = connectionHandle;
         mbsc = connectionHandle.getServiceOrDummy(MBeanServerConnection.class);
     }
