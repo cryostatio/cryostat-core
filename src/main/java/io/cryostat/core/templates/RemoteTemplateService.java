@@ -33,7 +33,6 @@ import io.cryostat.core.FlightRecorderException;
 import io.cryostat.core.net.JFRConnection;
 
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
@@ -61,31 +60,31 @@ public class RemoteTemplateService extends AbstractTemplateService {
             return Optional.empty();
         }
         try {
-                    return conn.getService().getServerTemplates().stream()
-                            .map(xmlText -> Jsoup.parse(xmlText, "", Parser.xmlParser()))
-                            .filter(
-                                    doc -> {
-                                        Elements els = doc.getElementsByTag("configuration");
-                                        if (els.isEmpty()) {
-                                            throw new MalformedXMLException(
-                                                    "Document did not contain \"configuration\""
-                                                            + " element");
-                                        }
-                                        if (els.size() > 1) {
-                                            throw new MalformedXMLException(
-                                                    "Document contains multiple \"configuration\""
-                                                            + " elements");
-                                        }
-                                        Element configuration = els.first();
-                                        if (!configuration.hasAttr("label")) {
-                                            throw new MalformedXMLException(
-                                                    "Configuration element did not have \"label\""
-                                                            + " attribute");
-                                        }
-                                        return configuration.attr("label").equals(templateName);
-                                    })
-                             .map(doc -> document.toString())
-                            .findFirst();
+            return conn.getService().getServerTemplates().stream()
+                    .map(xmlText -> Jsoup.parse(xmlText, "", Parser.xmlParser()))
+                    .filter(
+                            doc -> {
+                                Elements els = doc.getElementsByTag("configuration");
+                                if (els.isEmpty()) {
+                                    throw new MalformedXMLException(
+                                            "Document did not contain \"configuration\""
+                                                    + " element");
+                                }
+                                if (els.size() > 1) {
+                                    throw new MalformedXMLException(
+                                            "Document contains multiple \"configuration\""
+                                                    + " elements");
+                                }
+                                Element configuration = els.first();
+                                if (!configuration.hasAttr("label")) {
+                                    throw new MalformedXMLException(
+                                            "Configuration element did not have \"label\""
+                                                    + " attribute");
+                                }
+                                return configuration.attr("label").equals(templateName);
+                            })
+                    .map(doc -> doc.toString())
+                    .findFirst();
         } catch (org.openjdk.jmc.flightrecorder.configuration.FlightRecorderException
                 | IOException
                 | ServiceNotAvailableException e) {
