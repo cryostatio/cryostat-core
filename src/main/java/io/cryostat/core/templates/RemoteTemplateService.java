@@ -33,7 +33,6 @@ import io.cryostat.core.FlightRecorderException;
 import io.cryostat.core.net.JFRConnection;
 
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
@@ -55,7 +54,7 @@ public class RemoteTemplateService extends AbstractTemplateService {
     }
 
     @Override
-    public Optional<Document> getXml(String templateName, TemplateType type)
+    public Optional<String> getXml(String templateName, TemplateType type)
             throws FlightRecorderException {
         if (!providedTemplateType().equals(type)) {
             return Optional.empty();
@@ -68,7 +67,8 @@ public class RemoteTemplateService extends AbstractTemplateService {
                                 Elements els = doc.getElementsByTag("configuration");
                                 if (els.isEmpty()) {
                                     throw new MalformedXMLException(
-                                            "Document did not contain \"configuration\" element");
+                                            "Document did not contain \"configuration\""
+                                                    + " element");
                                 }
                                 if (els.size() > 1) {
                                     throw new MalformedXMLException(
@@ -83,6 +83,7 @@ public class RemoteTemplateService extends AbstractTemplateService {
                                 }
                                 return configuration.attr("label").equals(templateName);
                             })
+                    .map(doc -> doc.toString())
                     .findFirst();
         } catch (org.openjdk.jmc.flightrecorder.configuration.FlightRecorderException
                 | IOException
