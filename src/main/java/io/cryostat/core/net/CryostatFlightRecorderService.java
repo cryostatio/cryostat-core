@@ -34,8 +34,6 @@ import io.cryostat.core.EventOptionsBuilder.EventTypeException;
 import io.cryostat.core.templates.Template;
 import io.cryostat.core.templates.TemplateType;
 
-import org.jsoup.nodes.Document;
-
 public interface CryostatFlightRecorderService extends IFlightRecorderService {
 
     IRecordingDescriptor start(
@@ -56,9 +54,9 @@ public interface CryostatFlightRecorderService extends IFlightRecorderService {
         return start(recordingOptions, eventTemplate.getName(), eventTemplate.getType());
     }
 
-    default IRecordingDescriptor start(IConstrainedMap<String> recordingOptions, Document template)
+    default IRecordingDescriptor start(IConstrainedMap<String> recordingOptions, String template)
             throws FlightRecorderException, ParseException, IOException {
-        XMLModel model = EventConfiguration.createModel(template.toString());
+        XMLModel model = EventConfiguration.createModel(template);
         IConstrainedMap<EventOptionID> eventOptions =
                 new EventConfiguration(model)
                         .getEventOptions(getDefaultEventOptions().emptyWithSameConstraints());
