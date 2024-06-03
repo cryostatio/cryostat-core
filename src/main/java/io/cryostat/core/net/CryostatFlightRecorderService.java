@@ -32,33 +32,20 @@ import org.openjdk.jmc.rjmx.common.ServiceNotAvailableException;
 import io.cryostat.core.EventOptionsBuilder.EventOptionException;
 import io.cryostat.core.EventOptionsBuilder.EventTypeException;
 import io.cryostat.core.templates.Template;
-import io.cryostat.core.templates.TemplateType;
-
-import org.jsoup.nodes.Document;
 
 public interface CryostatFlightRecorderService extends IFlightRecorderService {
 
-    IRecordingDescriptor start(
-            IConstrainedMap<String> recordingOptions,
-            String templateName,
-            TemplateType preferredTemplateType)
+    IRecordingDescriptor start(IConstrainedMap<String> recordingOptions, Template eventTemplate)
             throws io.cryostat.core.FlightRecorderException, FlightRecorderException,
-                    ConnectionException, IOException, FlightRecorderException,
+                    ConnectionException, ParseException, IOException, FlightRecorderException,
                     ServiceNotAvailableException, QuantityConversionException, EventOptionException,
                     EventTypeException;
 
-    default IRecordingDescriptor start(
-            IConstrainedMap<String> recordingOptions, Template eventTemplate)
+    default IRecordingDescriptor start(IConstrainedMap<String> recordingOptions, String template)
             throws io.cryostat.core.FlightRecorderException, FlightRecorderException,
-                    ConnectionException, IOException, FlightRecorderException,
-                    ServiceNotAvailableException, QuantityConversionException, EventOptionException,
-                    EventTypeException {
-        return start(recordingOptions, eventTemplate.getName(), eventTemplate.getType());
-    }
-
-    default IRecordingDescriptor start(IConstrainedMap<String> recordingOptions, Document template)
-            throws FlightRecorderException, ParseException, IOException {
-        XMLModel model = EventConfiguration.createModel(template.toString());
+                    ConnectionException, ParseException, IOException, ServiceNotAvailableException,
+                    QuantityConversionException, EventOptionException, EventTypeException {
+        XMLModel model = EventConfiguration.createModel(template);
         IConstrainedMap<EventOptionID> eventOptions =
                 new EventConfiguration(model)
                         .getEventOptions(getDefaultEventOptions().emptyWithSameConstraints());
