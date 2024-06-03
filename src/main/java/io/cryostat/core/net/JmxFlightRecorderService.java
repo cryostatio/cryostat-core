@@ -229,16 +229,13 @@ public class JmxFlightRecorderService implements CryostatFlightRecorderService {
     }
 
     @Override
-    public IRecordingDescriptor start(
-            IConstrainedMap<String> recordingOptions,
-            String templateName,
-            TemplateType preferredTemplateType)
+    public IRecordingDescriptor start(IConstrainedMap<String> recordingOptions, Template template)
             throws io.cryostat.core.FlightRecorderException, FlightRecorderException,
                     ConnectionException, IOException, FlightRecorderException,
                     ServiceNotAvailableException, QuantityConversionException, EventOptionException,
                     EventTypeException {
         return tryConnect()
-                .start(recordingOptions, enableEvents(templateName, preferredTemplateType));
+                .start(recordingOptions, enableEvents(template.getName(), template.getType()));
     }
 
     private IConstrainedMap<EventOptionID> enableEvents(
