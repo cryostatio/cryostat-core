@@ -4,16 +4,22 @@
 
 <modelVersion>4.0.0</modelVersion>
 
-<name>Cryostat Core Parent</name>
-<description>Parent POM - Core library for Cryostat</description>
+<name>Cryostat Core</name>
+<description>Core library for Cryostat</description>
 <url>https://github.com/cryostatio/cryostat-core</url>
 <inceptionYear>2019</inceptionYear>
 
 <groupId>io.cryostat</groupId>
-<artifactId>cryostat-core-parent</artifactId>
+<artifactId>cryostat-core</artifactId>
 
 <version>4.0.0-SNAPSHOT</version>
-<packaging>pom</packaging>
+<packaging>jar</packaging>
+
+<parent>
+  <groupId>io.cryostat</groupId>
+  <artifactId>cryostat-core-parent</artifactId>
+  <version>4.0.0-SNAPSHOT</version>
+</parent>
 
 <licenses>
   <license>
@@ -44,137 +50,136 @@
   </developer>
 </developers>
 
-<modules>
-  <module>cryostat-core</module>
-  <module>libcryostat</module>
-</modules>
-
-<distributionManagement>
+<repositories>
   <repository>
-    <id>github</id>
-    <name>GitHub Packages</name>
-    <url>https://maven.pkg.github.com/cryostatio/cryostat-core</url>
+    <!-- FIXME when JMC 9 is on Central, remove this and remove verifyPom from JReleaser config -->
+    <id>jmc-libs</id>
+    <name>Adoptium JDK Mission Control Core Libraries</name>
+    <url>https://adoptium.jfrog.io/artifactory/jmc-libs</url>
+    <layout>default</layout>
   </repository>
-</distributionManagement>
-
-<scm>
-  <connection>scm:git://github.com/cryostatio/cryostat-core.git</connection>
-  <developerConnection>scm:git:ssh://github.com:cryostatio/cryostat-core.git</developerConnection>
-  <url>https://github.com/cryostatio/cryostat-core/tree/main</url>
-</scm>
+</repositories>
 
 <properties>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   <java.version>17</java.version>
   <maven.compiler.target>${java.version}</maven.compiler.target>
   <maven.compiler.source>${java.version}</maven.compiler.source>
-
-  <io.smallrye.jandex.plugin.version>3.1.8</io.smallrye.jandex.plugin.version>
-  <org.apache.maven.plugins.compiler.version>3.13.0</org.apache.maven.plugins.compiler.version>
-  <org.apache.maven.plugins.surefire.version>3.3.1</org.apache.maven.plugins.surefire.version>
-  <org.apache.maven.plugins.site.version>3.12.1</org.apache.maven.plugins.site.version>
-  <org.apache.maven.plugins.info.reports.version>3.6.2</org.apache.maven.plugins.info.reports.version>
-  <com.mycila.license.maven.plugin.version>4.5</com.mycila.license.maven.plugin.version>
-
-  <org.apache.commons.lang3.version>3.13.0</org.apache.commons.lang3.version>
-  <org.apache.commons.codec.version>1.16.1</org.apache.commons.codec.version>
-  <org.apache.commons.io.version>2.13.0</org.apache.commons.io.version>
-  <org.apache.commons.text.version>1.11.0</org.apache.commons.text.version>
-
-  <com.github.spotbugs.version>4.8.6</com.github.spotbugs.version>
-  <com.github.spotbugs.plugin.version>4.8.6.2</com.github.spotbugs.plugin.version>
-  <org.junit.jupiter.version>5.10.3</org.junit.jupiter.version>
-  <org.hamcrest.version>2.2</org.hamcrest.version>
-  <org.mockito.version>5.2.0</org.mockito.version>
-  <org.jacoco.maven.plugin.version>0.8.12</org.jacoco.maven.plugin.version>
-  <com.diffplug.spotless.maven.plugin.version>2.43.0</com.diffplug.spotless.maven.plugin.version>
-  <org.slf4j.version>2.0.12</org.slf4j.version>
-
-  <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
-  <maven-javadoc-plugin.version>3.7.0</maven-javadoc-plugin.version>
-  <jreleaser-maven-plugin.version>1.11.0</jreleaser-maven-plugin.version>
+  <io.cryostat.libcryostat.version>4.0.0-SNAPSHOT</io.cryostat.libcryostat.version>
+  <org.openjdk.jmc.version>9.0.0</org.openjdk.jmc.version>
+  <org.jsoup.version>1.17.2</org.jsoup.version>
 </properties>
 
-<dependencyManagement>
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-      <version>${org.apache.commons.lang3.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>${org.apache.commons.codec.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>${org.apache.commons.io.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.github.spotbugs</groupId>
-      <artifactId>spotbugs-annotations</artifactId>
-      <version>${com.github.spotbugs.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>${org.slf4j.version}</version>
-    </dependency>
+<dependencies>
+  <dependency>
+    <groupId>io.cryostat</groupId>
+    <artifactId>libcryostat</artifactId>
+    <version>${io.cryostat.libcryostat.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.openjdk.jmc</groupId>
+    <artifactId>common</artifactId>
+    <version>${org.openjdk.jmc.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.openjdk.jmc</groupId>
+    <artifactId>flightrecorder</artifactId>
+    <version>${org.openjdk.jmc.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.openjdk.jmc</groupId>
+    <artifactId>flightrecorder.configuration</artifactId>
+    <version>${org.openjdk.jmc.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.openjdk.jmc</groupId>
+    <artifactId>flightrecorder.rules</artifactId>
+    <version>${org.openjdk.jmc.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.openjdk.jmc</groupId>
+    <artifactId>flightrecorder.rules.jdk</artifactId>
+    <version>${org.openjdk.jmc.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.openjdk.jmc</groupId>
+    <artifactId>jdp</artifactId>
+    <version>${org.openjdk.jmc.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.openjdk.jmc</groupId>
+    <artifactId>rjmx.common</artifactId>
+    <version>${org.openjdk.jmc.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-lang3</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>commons-codec</groupId>
+    <artifactId>commons-codec</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>commons-io</groupId>
+    <artifactId>commons-io</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.jsoup</groupId>
+    <artifactId>jsoup</artifactId>
+    <version>${org.jsoup.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>com.github.spotbugs</groupId>
+    <artifactId>spotbugs-annotations</artifactId>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-api</artifactId>
+  </dependency>
 
-    <!-- test deps -->
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <version>${org.junit.jupiter.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-params</artifactId>
-      <version>${org.junit.jupiter.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest</artifactId>
-      <version>${org.hamcrest.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-junit-jupiter</artifactId>
-      <version>${org.mockito.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-inline</artifactId>
-      <version>${org.mockito.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-text</artifactId>
-      <version>${org.apache.commons.text.version}</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-</dependencyManagement>
+  <!-- test deps -->
+  <dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter-api</artifactId>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter-params</artifactId>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.hamcrest</groupId>
+    <artifactId>hamcrest</artifactId>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.mockito</groupId>
+    <artifactId>mockito-junit-jupiter</artifactId>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.mockito</groupId>
+    <artifactId>mockito-inline</artifactId>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-text</artifactId>
+    <scope>test</scope>
+  </dependency>
+</dependencies>
 
 <build>
   <plugins>
     <plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-compiler-plugin</artifactId>
-      <version>${org.apache.maven.plugins.compiler.version}</version>
     </plugin>
     <plugin>
       <groupId>io.smallrye</groupId>
       <artifactId>jandex-maven-plugin</artifactId>
-      <version>${io.smallrye.jandex.plugin.version}</version>
       <executions>
         <execution>
           <id>make-index</id>
@@ -187,7 +192,6 @@
     <plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-surefire-plugin</artifactId>
-      <version>${org.apache.maven.plugins.surefire.version}</version>
       <configuration>
         <properties>
           <configurationParameters>
@@ -201,7 +205,6 @@
     <plugin>
       <groupId>com.github.spotbugs</groupId>
       <artifactId>spotbugs-maven-plugin</artifactId>
-      <version>${com.github.spotbugs.plugin.version}</version>
       <configuration>
         <onlyAnalyze>io.cryostat.-</onlyAnalyze>
       </configuration>
@@ -218,7 +221,6 @@
     <plugin>
       <groupId>org.jacoco</groupId>
       <artifactId>jacoco-maven-plugin</artifactId>
-      <version>${org.jacoco.maven.plugin.version}</version>
       <executions>
         <execution>
           <goals>
@@ -237,7 +239,6 @@
     <plugin>
       <groupId>com.diffplug.spotless</groupId>
       <artifactId>spotless-maven-plugin</artifactId>
-      <version>${com.diffplug.spotless.maven.plugin.version}</version>
       <executions>
         <execution>
           <id>spotless</id>
@@ -269,17 +270,14 @@
     <plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-site-plugin</artifactId>
-      <version>${org.apache.maven.plugins.site.version}</version>
     </plugin>
     <plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-project-info-reports-plugin</artifactId>
-      <version>${org.apache.maven.plugins.info.reports.version}</version>
     </plugin>
     <plugin>
       <groupId>com.mycila</groupId>
       <artifactId>license-maven-plugin</artifactId>
-      <version>${com.mycila.license.maven.plugin.version}</version>
       <configuration>
         <licenseSets>
           <licenseSet>
@@ -315,7 +313,6 @@
         <plugin>
           <groupId>org.jreleaser</groupId>
           <artifactId>jreleaser-maven-plugin</artifactId>
-          <version>${jreleaser-maven-plugin.version}</version>
           <inherited>false</inherited>
           <configuration>
             <jreleaser>
@@ -356,7 +353,6 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>${maven-javadoc-plugin.version}</version>
           <executions>
             <execution>
               <id>attach-javadocs</id>
@@ -373,7 +369,6 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
-          <version>${maven-source-plugin.version}</version>
           <executions>
             <execution>
               <id>attach-sources</id>
@@ -396,12 +391,10 @@
     <plugin>
       <groupId>com.github.spotbugs</groupId>
       <artifactId>spotbugs-maven-plugin</artifactId>
-      <version>${com.github.spotbugs.plugin.version}</version>
     </plugin>
     <plugin>
       <groupId>org.jacoco</groupId>
       <artifactId>jacoco-maven-plugin</artifactId>
-      <version>${org.jacoco.maven.plugin.version}</version>
       <configuration>
         <excludes>
           <exclude>io/cryostat/core/jmc/**/*</exclude>
