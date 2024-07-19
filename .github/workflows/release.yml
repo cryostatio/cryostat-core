@@ -9,21 +9,9 @@ on:
     #     required: true
 
 jobs:
-
-  publish-release-core:
+  publish-release:
     uses: ./.github/workflows/maven-central-publish.yml
     secrets: inherit
     with:
-      jdk-version: 17
-      publish-directory: 'cryostat-core'
-      publish-cmd: './release.sh'
-    if: ${{ github.repository_owner == 'cryostatio' }}
-
-  publish-release-libcryostat:
-    uses: ./.github/workflows/maven-central-publish.yml
-    secrets: inherit
-    with:
-      jdk-version: 11
-      publish-directory: 'libcryostat'
       publish-cmd: './release.sh'
     if: ${{ github.repository_owner == 'cryostatio' }}
