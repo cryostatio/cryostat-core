@@ -38,7 +38,7 @@ jobs:
     secrets: inherit
     with:
       jdk-version: 17
-      publish-directory: 'cryostat-core'
+      publish-direectory: 'cryostat-core'
       publish-cmd: './release-snapshot.sh'
     if: ${{ github.repository_owner == 'cryostatio' && endsWith(needs.get-version.outputs.project-version, '-SNAPSHOT') }}
 
@@ -49,6 +49,6 @@ jobs:
     secrets: inherit
     with:
       jdk-version: 11
-      publish-directory: 'libcryostat'
+      publish-direectory: 'libcryostat'
       publish-cmd: './release-snapshot.sh'
     if: ${{ github.repository_owner == 'cryostatio' && endsWith(needs.get-version.outputs.project-version, '-SNAPSHOT') }}
