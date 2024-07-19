@@ -4,8 +4,16 @@ name: Publish a new Maven Central release
 on:
   workflow_call:
     inputs:
+      jdk-version:
+        description: 'JDK version for build'
+        required: true
+        type: string
       publish-cmd:
         description: 'Command to perform publish'
+        required: true
+        type: string
+      publish-directory:
+        description: 'Directory to perform publish'
         required: true
         type: string
 
@@ -20,11 +28,11 @@ jobs:
       - name: Java setup
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
+          java-version: ${{ inputs.jdk-version }}
           distribution: 'temurin'
           cache: maven
       - name: Run a build of the code base before release
-        run: ./mvnw --batch-mode --no-transfer-progress clean install
+        run: cd ${{ inputs.publish-directory }} && ./mvnw --batch-mode --no-transfer-progress clean install
       # - name: Set release version
       #   run: ./mvnw --batch-mode --no-transfer-progress versions:set -DnewVersion=${{ github.event.inputs.version }}
       - name: Release with JReleaser

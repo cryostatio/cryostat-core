@@ -31,10 +31,24 @@ jobs:
       run: |
         PROJECT_VERSION="$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
         echo "project-version=${PROJECT_VERSION}" >> "${GITHUB_OUTPUT}"
-  publish-snapshot:
+
+  publish-core-snapshot:
     needs: get-version
     uses: ./.github/workflows/maven-central-publish.yml
     secrets: inherit
     with:
+      jdk-version: 17
+      publish-direectory: 'cryostat-core'
+      publish-cmd: './release-snapshot.sh'
+    if: ${{ github.repository_owner == 'cryostatio' && endsWith(needs.get-version.outputs.project-version, '-SNAPSHOT') }}
+
+
+  publish-libcryostat-snapshot:
+    needs: get-version
+    uses: ./.github/workflows/maven-central-publish.yml
+    secrets: inherit
+    with:
+      jdk-version: 11
+      publish-direectory: 'libcryostat'
       publish-cmd: './release-snapshot.sh'
     if: ${{ github.repository_owner == 'cryostatio' && endsWith(needs.get-version.outputs.project-version, '-SNAPSHOT') }}
