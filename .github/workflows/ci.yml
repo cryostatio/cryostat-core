@@ -54,6 +54,26 @@ jobs:
         key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml') }}
     - run: mvn -B -U clean install
 
+
+  build-libcryostat:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: ${{ github.event.pull_request.head.repo.full_name }}
+        ref: ${{ github.event.pull_request.head.ref }}
+        fetch-depth: 0
+    - uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+    - run: cd libcryostat
+    - uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml') }}
+    - run: mvn -B -U clean install
+
   build-cryostat:
     needs: [build-core]
     runs-on: ubuntu-latest
