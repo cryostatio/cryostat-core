@@ -13,11 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     - uses: actions/setup-java@v3
       with:
         java-version: '17'
         distribution: 'temurin'
     - run: mvn -B -U clean verify
+
   get-version:
     runs-on: ubuntu-latest
     outputs:
