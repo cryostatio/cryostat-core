@@ -54,7 +54,6 @@ jobs:
         key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml') }}
     - run: mvn -B -U clean install
 
-
   build-libcryostat:
     runs-on: ubuntu-latest
     steps:
