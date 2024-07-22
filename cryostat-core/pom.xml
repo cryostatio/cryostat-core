@@ -53,8 +53,6 @@
 <properties>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   <java.version>17</java.version>
-  <maven.compiler.target>${java.version}</maven.compiler.target>
-  <maven.compiler.source>${java.version}</maven.compiler.source>
   <io.cryostat.libcryostat.version>4.0.0-SNAPSHOT</io.cryostat.libcryostat.version>
   <org.openjdk.jmc.version>9.0.0</org.openjdk.jmc.version>
   <org.jsoup.version>1.17.2</org.jsoup.version>
