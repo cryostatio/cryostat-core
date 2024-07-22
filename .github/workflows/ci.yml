@@ -59,12 +59,9 @@ jobs:
   build-cryostat:
     needs: [build-core]
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        java: ['17']
     env:
         cache-name: cache-yarn
-    name: Build Java ${{ matrix.java }}
+    name: Build Cryostat
     permissions:
         packages: write
         contents: read
@@ -91,7 +88,7 @@ jobs:
         fetch-depth: 0
     - uses: actions/setup-java@v3
       with:
-        java-version: ${{ matrix.java }}
+        java-version: '17'
         distribution: 'temurin'
         cache: 'maven'
     - name: maven-settings
@@ -132,7 +129,6 @@ jobs:
       run: echo "DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock" >> "$GITHUB_ENV"
     - name: Build cryostat
       run: ./mvnw -B -U -Dio.cryostat.core.version=${{ needs.build-core.outputs.core_version }} clean verify
-      continue-on-error: ${{ matrix.java != '17' }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Debug podman images
@@ -163,13 +159,13 @@ jobs:
     - name: Load cryostat image
       run: podman load -i cryostat.tar
     - name: Tag cryostat image
-      run: podman tag cryostat:latest ghcr.io/${{ github.repository_owner }}/cryostat-core:pr-${{ github.event.number }}-${{ github.event.pull_request.head.sha }}-linux-java${{ matrix.java }}
+      run: podman tag cryostat:latest ghcr.io/${{ github.repository_owner }}/cryostat-core:pr-${{ github.event.number }}-${{ github.event.pull_request.head.sha }}-linux
     - name: Push PR test image to ghcr.io
       id: push-cryostat-to-ghcr
       uses: redhat-actions/push-to-registry@v2
       with:
         image: cryostat-core
-        tags: pr-${{ github.event.number }}-${{ github.event.pull_request.head.sha }}-linux-java${{ matrix.java }}
+        tags: pr-${{ github.event.number }}-${{ github.event.pull_request.head.sha }}-linux
         registry: ghcr.io/${{ github.repository_owner }}
         username: ${{ github.event.pull_request.user.login }}
         password: ${{ secrets.GITHUB_TOKEN }}
