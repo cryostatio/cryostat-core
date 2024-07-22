@@ -46,7 +46,9 @@ jobs:
         echo "name=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)" >> $GITHUB_OUTPUT
     - uses: actions/setup-java@v3
       with:
-        java-version: '17'
+        java-version: |
+          11
+          17
         distribution: 'temurin'
     - uses: actions/cache@v3
       with:

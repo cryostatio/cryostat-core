@@ -14,4 +14,7 @@ jobs:
     secrets: inherit
     with:
       publish-cmd: './release.sh'
+      jdk-versions: |
+        11
+        17
     if: ${{ github.repository_owner == 'cryostatio' }}

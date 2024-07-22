@@ -8,6 +8,10 @@ on:
         description: 'Command to perform publish'
         required: true
         type: string
+      jdk-versions:
+        description: 'JDK version(s) to install for module builds'
+        required: true
+        type: string
 
 jobs:
   build:
@@ -20,7 +24,7 @@ jobs:
       - name: Java setup
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
+          java-version: ${{ inputs.jdk-versions }}
           distribution: 'temurin'
           cache: maven
       - name: Run a build of the code base before release
