@@ -36,7 +36,7 @@ jobs:
     secrets: inherit
     with:
       publish-cmd: './release-snapshot.sh'
-      jdk-versions:
+      jdk-versions: |
         11
         17
     if: ${{ github.repository_owner == 'cryostatio' && endsWith(needs.get-version.outputs.project-version, '-SNAPSHOT') }}
