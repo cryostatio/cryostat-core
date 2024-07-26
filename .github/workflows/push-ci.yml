@@ -15,7 +15,9 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/setup-java@v3
       with:
-        java-version: '17'
+        java-version: |
+          11
+          17
         distribution: 'temurin'
     - run: mvn -B -U clean verify
   get-version:
@@ -34,4 +36,7 @@ jobs:
     secrets: inherit
     with:
       publish-cmd: './release-snapshot.sh'
+      jdk-versions: |
+        11
+        17
     if: ${{ github.repository_owner == 'cryostatio' && endsWith(needs.get-version.outputs.project-version, '-SNAPSHOT') }}
