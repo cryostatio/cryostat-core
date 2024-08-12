@@ -77,7 +77,7 @@
   <org.apache.maven.plugins.info.reports.version>3.6.2</org.apache.maven.plugins.info.reports.version>
   <com.mycila.license.maven.plugin.version>4.5</com.mycila.license.maven.plugin.version>
 
-  <org.apache.commons.lang3.version>3.13.0</org.apache.commons.lang3.version>
+  <org.apache.commons.lang3.version>3.14.0</org.apache.commons.lang3.version>
   <org.apache.commons.codec.version>1.16.1</org.apache.commons.codec.version>
   <org.apache.commons.io.version>2.13.0</org.apache.commons.io.version>
   <org.apache.commons.text.version>1.11.0</org.apache.commons.text.version>
