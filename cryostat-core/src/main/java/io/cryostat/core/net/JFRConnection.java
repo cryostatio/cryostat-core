@@ -19,6 +19,8 @@ import java.io.IOException;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
+import javax.management.MBeanException;
+import javax.management.MalformedObjectNameException;
 import javax.management.ReflectionException;
 import javax.management.remote.JMXServiceURL;
 
@@ -55,6 +57,17 @@ public interface JFRConnection extends AutoCloseable {
     }
 
     public JvmIdentifier getJvmIdentifier() throws IDException, IOException;
+
+    public default <T> T invokeMBeanOperation(
+            String beanName,
+            String operation,
+            Object[] params,
+            String[] signature,
+            Class<T> returnType)
+            throws MalformedObjectNameException, InstanceNotFoundException, MBeanException,
+                    ReflectionException, IOException, ConnectionException {
+        throw new ConnectionException("Unimplemented");
+    }
 
     public MBeanMetrics getMBeanMetrics()
             throws ConnectionException, IOException, InstanceNotFoundException,

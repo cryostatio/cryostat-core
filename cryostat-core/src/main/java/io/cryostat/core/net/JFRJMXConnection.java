@@ -31,6 +31,7 @@ import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeData;
@@ -204,6 +205,24 @@ public class JFRJMXConnection implements JFRConnection {
         } catch (ReflectionException | IntrospectionException | InstanceNotFoundException e) {
             throw new IDException(e);
         }
+    }
+
+    @Override
+    public <T> T invokeMBeanOperation(
+            String beanName,
+            String operation,
+            Object[] params,
+            String[] signature,
+            Class<T> returnType)
+            throws MalformedObjectNameException, InstanceNotFoundException, MBeanException,
+                    ReflectionException, IOException, ConnectionException {
+        if (!isConnected()) {
+            connect();
+        }
+        return (T)
+                this.rjmxConnection
+                        .getMBeanServer()
+                        .invoke(ObjectName.getInstance(beanName), operation, params, signature);
     }
 
     private Map<String, Object> parseCompositeData(CompositeData compositeData) {
