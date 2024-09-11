@@ -374,12 +374,8 @@
                     <maven-central>
                       <active>ALWAYS</active>
                       <url>https://s01.oss.sonatype.org/service/local</url>
-<<<<<<< HEAD
-                      <snapshotUrl>https://s01.oss.sonatype.org/content/repositories/snapshots/</snapshotUrl>
-                      <verifyPom>false</verifyPom><!-- FIXME remove this once the Adoptium JMC repository is removed -->
-=======
                       <snapshotUrl>https://s01.oss.sonatype.org/content/repositories/snapshots</snapshotUrl>
->>>>>>> b521ed6 (ci(snapshots): remove trailing slash (#461))
+                      <verifyPom>false</verifyPom><!-- FIXME remove this once the Adoptium JMC repository is removed -->
                       <closeRepository>true</closeRepository>
                       <releaseRepository>true</releaseRepository>
                       <stagingRepositories>target/staging-deploy</stagingRepositories>
