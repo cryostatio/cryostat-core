@@ -374,7 +374,7 @@
                     <maven-central>
                       <active>ALWAYS</active>
                       <url>https://s01.oss.sonatype.org/service/local</url>
-                      <snapshotUrl>https://s01.oss.sonatype.org/content/repositories/snapshots/</snapshotUrl>
+                      <snapshotUrl>https://s01.oss.sonatype.org/content/repositories/snapshots</snapshotUrl>
                       <verifyPom>false</verifyPom><!-- FIXME remove this once the Adoptium JMC repository is removed -->
                       <closeRepository>true</closeRepository>
                       <releaseRepository>true</releaseRepository>
