@@ -75,7 +75,7 @@
   <org.apache.maven.plugins.surefire.version>3.5.0</org.apache.maven.plugins.surefire.version>
   <org.apache.maven.plugins.site.version>3.20.0</org.apache.maven.plugins.site.version>
   <org.apache.maven.plugins.info.reports.version>3.7.0</org.apache.maven.plugins.info.reports.version>
-  <com.mycila.license.maven.plugin.version>4.5</com.mycila.license.maven.plugin.version>
+  <com.mycila.license.maven.plugin.version>4.6</com.mycila.license.maven.plugin.version>
 
   <org.apache.commons.lang3.version>3.14.0</org.apache.commons.lang3.version>
   <org.apache.commons.codec.version>1.16.1</org.apache.commons.codec.version>
