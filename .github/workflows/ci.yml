@@ -88,7 +88,7 @@ jobs:
         fetch-depth: 0
     - uses: actions/setup-java@v3
       with:
-        java-version: '17'
+        java-version: '21'
         distribution: 'temurin'
         cache: 'maven'
     - name: maven-settings
@@ -145,7 +145,7 @@ jobs:
     needs: [build-cryostat]
     strategy:
       matrix:
-        java: ['17']
+        java: ['21']
     outputs:
       amd64_image: ${{ steps.cryostat_amd64_image.outputs.image }}
 
