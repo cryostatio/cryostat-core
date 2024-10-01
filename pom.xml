@@ -86,7 +86,7 @@
   <com.github.spotbugs.plugin.version>4.8.6.4</com.github.spotbugs.plugin.version>
   <org.junit.jupiter.version>5.11.1</org.junit.jupiter.version>
   <org.hamcrest.version>3.0</org.hamcrest.version>
-  <org.mockito.version>5.2.0</org.mockito.version>
+  <org.mockito.version>5.14.1</org.mockito.version>
   <org.jacoco.maven.plugin.version>0.8.12</org.jacoco.maven.plugin.version>
   <com.diffplug.spotless.maven.plugin.version>2.43.0</com.diffplug.spotless.maven.plugin.version>
   <org.slf4j.version>2.0.16</org.slf4j.version>
@@ -152,7 +152,7 @@
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
-      <artifactId>mockito-inline</artifactId>
+      <artifactId>mockito-core</artifactId>
       <version>${org.mockito.version}</version>
       <scope>test</scope>
     </dependency>
@@ -279,7 +279,7 @@
             <exclude>src/main/java/org/openjdk/jmc/**</exclude>
           </excludes>
           <googleJavaFormat>
-            <version>1.15.0</version>
+            <version>1.17.0</version>
             <style>AOSP</style>
             <reflowLongStrings>true</reflowLongStrings>
           </googleJavaFormat>
