@@ -95,7 +95,8 @@ public class EventOptionsBuilder {
 
     public static class Factory {
         public EventOptionsBuilder create(JFRConnection connection)
-                throws IOException, ServiceNotAvailableException,
+                throws IOException,
+                        ServiceNotAvailableException,
                         org.openjdk.jmc.flightrecorder.configuration.FlightRecorderException {
             if (!FlightRecorderServiceV2.isAvailable(connection.getHandle())) {
                 throw new UnsupportedOperationException("Only FlightRecorder V2 is supported");

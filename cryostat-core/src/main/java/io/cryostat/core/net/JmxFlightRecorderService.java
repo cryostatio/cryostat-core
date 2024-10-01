@@ -230,9 +230,14 @@ public class JmxFlightRecorderService implements CryostatFlightRecorderService {
 
     @Override
     public IRecordingDescriptor start(IConstrainedMap<String> recordingOptions, Template template)
-            throws io.cryostat.core.FlightRecorderException, FlightRecorderException,
-                    ConnectionException, IOException, FlightRecorderException,
-                    ServiceNotAvailableException, QuantityConversionException, EventOptionException,
+            throws io.cryostat.core.FlightRecorderException,
+                    FlightRecorderException,
+                    ConnectionException,
+                    IOException,
+                    FlightRecorderException,
+                    ServiceNotAvailableException,
+                    QuantityConversionException,
+                    EventOptionException,
                     EventTypeException {
         return tryConnect()
                 .start(recordingOptions, enableEvents(template.getName(), template.getType()));
@@ -240,9 +245,14 @@ public class JmxFlightRecorderService implements CryostatFlightRecorderService {
 
     private IConstrainedMap<EventOptionID> enableEvents(
             String templateName, TemplateType templateType)
-            throws ConnectionException, IOException, io.cryostat.core.FlightRecorderException,
-                    FlightRecorderException, ServiceNotAvailableException,
-                    QuantityConversionException, EventOptionException, EventTypeException {
+            throws ConnectionException,
+                    IOException,
+                    io.cryostat.core.FlightRecorderException,
+                    FlightRecorderException,
+                    ServiceNotAvailableException,
+                    QuantityConversionException,
+                    EventOptionException,
+                    EventTypeException {
         if (templateName.equals("ALL")) {
             return enableAllEvents();
         }
@@ -254,8 +264,12 @@ public class JmxFlightRecorderService implements CryostatFlightRecorderService {
     }
 
     private IConstrainedMap<EventOptionID> enableAllEvents()
-            throws ConnectionException, IOException, FlightRecorderException,
-                    ServiceNotAvailableException, QuantityConversionException, EventOptionException,
+            throws ConnectionException,
+                    IOException,
+                    FlightRecorderException,
+                    ServiceNotAvailableException,
+                    QuantityConversionException,
+                    EventOptionException,
                     EventTypeException {
         EventOptionsBuilder builder = new EventOptionsBuilder.Factory().create(conn);
 

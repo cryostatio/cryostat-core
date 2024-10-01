@@ -41,7 +41,9 @@ public class EventOptionsCustomizer {
     }
 
     public EventOptionsCustomizer set(String typeId, String option, String value)
-            throws FlightRecorderException, EventTypeException, EventOptionException,
+            throws FlightRecorderException,
+                    EventTypeException,
+                    EventOptionException,
                     OptionValueException {
         if (!isInitialized()) {
             initialize();

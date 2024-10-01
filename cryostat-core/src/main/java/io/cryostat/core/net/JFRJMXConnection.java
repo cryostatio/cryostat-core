@@ -31,6 +31,7 @@ import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeData;
@@ -206,6 +207,28 @@ public class JFRJMXConnection implements JFRConnection {
         }
     }
 
+    @Override
+    public <T> T invokeMBeanOperation(
+            String beanName,
+            String operation,
+            Object[] params,
+            String[] signature,
+            Class<T> returnType)
+            throws MalformedObjectNameException,
+                    InstanceNotFoundException,
+                    MBeanException,
+                    ReflectionException,
+                    IOException,
+                    ConnectionException {
+        if (!isConnected()) {
+            connect();
+        }
+        return (T)
+                this.rjmxConnection
+                        .getMBeanServer()
+                        .invoke(ObjectName.getInstance(beanName), operation, params, signature);
+    }
+
     private Map<String, Object> parseCompositeData(CompositeData compositeData) {
         Map<String, Object> map = new HashMap<>();
         for (String key : compositeData.getCompositeType().keySet()) {
@@ -256,14 +279,18 @@ public class JFRJMXConnection implements JFRConnection {
     }
 
     private Map<String, Object> getAttributeMap(ObjectName beanName)
-            throws InstanceNotFoundException, IntrospectionException, ReflectionException,
+            throws InstanceNotFoundException,
+                    IntrospectionException,
+                    ReflectionException,
                     IOException {
         return getAttributeMap(beanName, m -> true);
     }
 
     private Map<String, Object> getAttributeMap(
             ObjectName beanName, Predicate<MBeanAttributeInfo> attrPredicate)
-            throws InstanceNotFoundException, IntrospectionException, ReflectionException,
+            throws InstanceNotFoundException,
+                    IntrospectionException,
+                    ReflectionException,
                     IOException {
         Map<String, Object> attrMap = new HashMap<>();
 
@@ -294,7 +321,9 @@ public class JFRJMXConnection implements JFRConnection {
     }
 
     public synchronized MBeanMetrics getMBeanMetrics()
-            throws IOException, InstanceNotFoundException, IntrospectionException,
+            throws IOException,
+                    InstanceNotFoundException,
+                    IntrospectionException,
                     ReflectionException {
         if (!isConnected()) {
             connect();
