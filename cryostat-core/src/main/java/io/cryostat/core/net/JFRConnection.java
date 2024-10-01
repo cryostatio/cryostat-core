@@ -64,14 +64,21 @@ public interface JFRConnection extends AutoCloseable {
             Object[] params,
             String[] signature,
             Class<T> returnType)
-            throws MalformedObjectNameException, InstanceNotFoundException, MBeanException,
-                    ReflectionException, IOException, ConnectionException {
+            throws MalformedObjectNameException,
+                    InstanceNotFoundException,
+                    MBeanException,
+                    ReflectionException,
+                    IOException,
+                    ConnectionException {
         throw new ConnectionException("Unimplemented");
     }
 
     public MBeanMetrics getMBeanMetrics()
-            throws ConnectionException, IOException, InstanceNotFoundException,
-                    IntrospectionException, ReflectionException;
+            throws ConnectionException,
+                    IOException,
+                    InstanceNotFoundException,
+                    IntrospectionException,
+                    ReflectionException;
 
     public boolean isConnected();
 

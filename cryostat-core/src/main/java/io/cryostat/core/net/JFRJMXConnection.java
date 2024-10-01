@@ -214,8 +214,12 @@ public class JFRJMXConnection implements JFRConnection {
             Object[] params,
             String[] signature,
             Class<T> returnType)
-            throws MalformedObjectNameException, InstanceNotFoundException, MBeanException,
-                    ReflectionException, IOException, ConnectionException {
+            throws MalformedObjectNameException,
+                    InstanceNotFoundException,
+                    MBeanException,
+                    ReflectionException,
+                    IOException,
+                    ConnectionException {
         if (!isConnected()) {
             connect();
         }
@@ -275,14 +279,18 @@ public class JFRJMXConnection implements JFRConnection {
     }
 
     private Map<String, Object> getAttributeMap(ObjectName beanName)
-            throws InstanceNotFoundException, IntrospectionException, ReflectionException,
+            throws InstanceNotFoundException,
+                    IntrospectionException,
+                    ReflectionException,
                     IOException {
         return getAttributeMap(beanName, m -> true);
     }
 
     private Map<String, Object> getAttributeMap(
             ObjectName beanName, Predicate<MBeanAttributeInfo> attrPredicate)
-            throws InstanceNotFoundException, IntrospectionException, ReflectionException,
+            throws InstanceNotFoundException,
+                    IntrospectionException,
+                    ReflectionException,
                     IOException {
         Map<String, Object> attrMap = new HashMap<>();
 
@@ -313,7 +321,9 @@ public class JFRJMXConnection implements JFRConnection {
     }
 
     public synchronized MBeanMetrics getMBeanMetrics()
-            throws IOException, InstanceNotFoundException, IntrospectionException,
+            throws IOException,
+                    InstanceNotFoundException,
+                    IntrospectionException,
                     ReflectionException {
         if (!isConnected()) {
             connect();

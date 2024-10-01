@@ -101,7 +101,9 @@ public class InterruptibleReportGenerator {
 
     private Pair<Collection<IResult>, Long> generateResultHelper(
             InputStream recording, Predicate<IRule> predicate)
-            throws InterruptedException, IOException, ExecutionException,
+            throws InterruptedException,
+                    IOException,
+                    ExecutionException,
                     CouldNotLoadRecordingException {
         Collection<IRule> rules =
                 RuleRegistry.getRules().stream().filter(predicate).collect(Collectors.toList());

@@ -36,15 +36,27 @@ import io.cryostat.libcryostat.templates.Template;
 public interface CryostatFlightRecorderService extends IFlightRecorderService {
 
     IRecordingDescriptor start(IConstrainedMap<String> recordingOptions, Template eventTemplate)
-            throws io.cryostat.core.FlightRecorderException, FlightRecorderException,
-                    ConnectionException, ParseException, IOException, FlightRecorderException,
-                    ServiceNotAvailableException, QuantityConversionException, EventOptionException,
+            throws io.cryostat.core.FlightRecorderException,
+                    FlightRecorderException,
+                    ConnectionException,
+                    ParseException,
+                    IOException,
+                    FlightRecorderException,
+                    ServiceNotAvailableException,
+                    QuantityConversionException,
+                    EventOptionException,
                     EventTypeException;
 
     default IRecordingDescriptor start(IConstrainedMap<String> recordingOptions, String template)
-            throws io.cryostat.core.FlightRecorderException, FlightRecorderException,
-                    ConnectionException, ParseException, IOException, ServiceNotAvailableException,
-                    QuantityConversionException, EventOptionException, EventTypeException {
+            throws io.cryostat.core.FlightRecorderException,
+                    FlightRecorderException,
+                    ConnectionException,
+                    ParseException,
+                    IOException,
+                    ServiceNotAvailableException,
+                    QuantityConversionException,
+                    EventOptionException,
+                    EventTypeException {
         XMLModel model = EventConfiguration.createModel(template);
         IConstrainedMap<EventOptionID> eventOptions =
                 new EventConfiguration(model)
