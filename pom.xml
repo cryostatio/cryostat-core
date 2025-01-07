@@ -88,7 +88,7 @@
   <org.hamcrest.version>3.0</org.hamcrest.version>
   <org.mockito.version>5.15.2</org.mockito.version>
   <org.jacoco.maven.plugin.version>0.8.12</org.jacoco.maven.plugin.version>
-  <com.diffplug.spotless.maven.plugin.version>2.43.0</com.diffplug.spotless.maven.plugin.version>
+  <com.diffplug.spotless.maven.plugin.version>2.44.1</com.diffplug.spotless.maven.plugin.version>
   <org.slf4j.version>2.0.16</org.slf4j.version>
 
   <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
