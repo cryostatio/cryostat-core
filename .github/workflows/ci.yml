@@ -111,6 +111,8 @@ jobs:
         cd src/main/webui
         yarn install && yarn yarn:frzinstall
         cd -
+    - name: Add CRIU PPA
+      run: sudo add-apt-repository ppa:criu/ppa && sudo apt update
     - name: Install podman v4
       run: |
         echo "deb $OPENSUSE_UNOFFICIAL_LIBCONTAINERS_SOURCE_URL/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:unstable.list
