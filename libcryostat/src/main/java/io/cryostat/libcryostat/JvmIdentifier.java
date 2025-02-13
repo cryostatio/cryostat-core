@@ -43,12 +43,12 @@ public class JvmIdentifier {
     public static JvmIdentifier from(RuntimeMetrics metrics) throws IDException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
                 DataOutputStream dos = new DataOutputStream(baos)) {
-            dos.writeUTF(metrics.getClassPath());
-            dos.writeUTF(metrics.getName());
-            dos.writeUTF(stringifyArray(metrics.getInputArguments()));
-            dos.writeUTF(metrics.getLibraryPath());
-            dos.writeUTF(metrics.getVmVendor());
-            dos.writeUTF(metrics.getVmVersion());
+            safeWrite(dos, metrics.getClassPath());
+            safeWrite(dos, metrics.getName());
+            safeWrite(dos, stringifyArray(metrics.getInputArguments()));
+            safeWrite(dos, metrics.getLibraryPath());
+            safeWrite(dos, metrics.getVmVendor());
+            safeWrite(dos, metrics.getVmVersion());
             dos.writeLong(metrics.getStartTime());
             byte[] hash = DigestUtils.sha256(baos.toByteArray());
             return new JvmIdentifier(
@@ -58,11 +58,21 @@ public class JvmIdentifier {
         }
     }
 
+    private static void safeWrite(DataOutputStream dos, String value) throws IOException {
+        if (value == null) {
+            return;
+        }
+        dos.writeUTF(value);
+    }
+
     public String getHash() {
         return hash;
     }
 
     private static String stringifyArray(Object arrayObject) {
+        if (arrayObject == null) {
+            return null;
+        }
         String stringified;
         String componentType = arrayObject.getClass().getComponentType().toString();
         switch (componentType) {
