@@ -18,5 +18,6 @@ package io.cryostat.libcryostat.templates;
 public enum TemplateType {
     TARGET,
     CUSTOM,
+    PRESET,
     ;
 }
