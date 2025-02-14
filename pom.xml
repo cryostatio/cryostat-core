@@ -69,7 +69,7 @@
   <maven.compiler.target>${java.version}</maven.compiler.target>
   <maven.compiler.source>${java.version}</maven.compiler.source>
 
-  <io.smallrye.jandex.plugin.version>3.1.8</io.smallrye.jandex.plugin.version>
+  <io.smallrye.jandex.plugin.version>3.2.6</io.smallrye.jandex.plugin.version>
   <org.apache.maven.plugins.compiler.version>3.13.0</org.apache.maven.plugins.compiler.version>
   <org.apache.maven.plugins.toolchains.version>3.2.0</org.apache.maven.plugins.toolchains.version>
   <org.apache.maven.plugins.surefire.version>3.5.2</org.apache.maven.plugins.surefire.version>
