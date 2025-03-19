@@ -12,13 +12,13 @@
 <groupId>io.cryostat</groupId>
 <artifactId>cryostat-core</artifactId>
 
-<version>4.0.0</version>
+<version>4.0.1-SNAPSHOT</version>
 <packaging>jar</packaging>
 
 <parent>
   <groupId>io.cryostat</groupId>
   <artifactId>cryostat-core-parent</artifactId>
-  <version>4.0.0</version>
+  <version>4.0.1-SNAPSHOT</version>
 </parent>
 
 <licenses>
@@ -53,7 +53,7 @@
 <properties>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   <java.version>17</java.version>
-  <io.cryostat.libcryostat.version>4.0.0</io.cryostat.libcryostat.version>
+  <io.cryostat.libcryostat.version>4.0.1-SNAPSHOT</io.cryostat.libcryostat.version>
   <org.openjdk.jmc.version>9.0.0</org.openjdk.jmc.version>
   <org.jsoup.version>1.18.3</org.jsoup.version>
 </properties>
