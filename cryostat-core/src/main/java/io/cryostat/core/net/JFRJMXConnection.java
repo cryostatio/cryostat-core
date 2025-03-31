@@ -419,7 +419,7 @@ public class JFRJMXConnection implements JFRConnection {
         throw new ConnectionFailureException("Connection Failed");
     }
 
-    static class ConnectionFailureException extends RuntimeException {
+    public static class ConnectionFailureException extends RuntimeException {
         public ConnectionFailureException(String message) {
             super(message);
         }
