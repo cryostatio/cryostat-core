@@ -54,7 +54,7 @@
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   <java.version>17</java.version>
   <io.cryostat.libcryostat.version>4.1.0-SNAPSHOT</io.cryostat.libcryostat.version>
-  <org.openjdk.jmc.version>9.0.0</org.openjdk.jmc.version>
+  <org.openjdk.jmc.version>9.1.0</org.openjdk.jmc.version>
   <org.jsoup.version>1.18.3</org.jsoup.version>
 </properties>
 
