@@ -16,6 +16,7 @@
 package io.cryostat.core.util;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.RunnableFuture;
@@ -35,6 +36,7 @@ import org.openjdk.jmc.flightrecorder.rules.util.RulesToolkit.EventAvailability;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -63,7 +65,9 @@ public class RuleFilterParserTest {
         ruleSet = Set.of("Rule0", "Rule1", "Rule2", "Rule3", "Rule4");
         topicSet = Set.of("Topic0", "Topic1", "Topic2");
 
-        Mockito.when(iRules.stream()).thenReturn(Stream.of(rule0, rule1, rule2, rule3, rule4));
+        Mockito.lenient()
+                .when(iRules.stream())
+                .thenReturn(Stream.of(rule0, rule1, rule2, rule3, rule4));
 
         parser = new RuleFilterParser(ruleSet, topicSet);
     }
@@ -76,7 +80,53 @@ public class RuleFilterParserTest {
         Collection<IRule> rules = iRules.stream().filter(result).collect(Collectors.toList());
 
         MatcherAssert.assertThat(result, Matchers.notNullValue());
-        MatcherAssert.assertThat(rules, Matchers.hasSize(5));
+        MatcherAssert.assertThat(
+                rules, Matchers.equalTo(List.of(rule0, rule1, rule2, rule3, rule4)));
+    }
+
+    @Test
+    void shouldAcceptWildcard() {
+        String rawFilter = "*";
+
+        Predicate<IRule> result = parser.parse(rawFilter);
+        Collection<IRule> rules = iRules.stream().filter(result).collect(Collectors.toList());
+
+        MatcherAssert.assertThat(result, Matchers.notNullValue());
+        MatcherAssert.assertThat(
+                rules, Matchers.equalTo(List.of(rule0, rule1, rule2, rule3, rule4)));
+    }
+
+    @Test
+    void shouldAcceptWithWildcardAndRuleNegation() {
+        String rawFilter = "*,!Rule0,!Rule4";
+
+        Predicate<IRule> result = parser.parse(rawFilter);
+        Collection<IRule> rules = iRules.stream().filter(result).collect(Collectors.toList());
+
+        MatcherAssert.assertThat(result, Matchers.notNullValue());
+        MatcherAssert.assertThat(rules, Matchers.equalTo(List.of(rule1, rule2, rule3)));
+    }
+
+    @Test
+    void shouldAcceptWithWildcardAndTopicNegation() {
+        String rawFilter = "*,!Topic0";
+
+        Predicate<IRule> result = parser.parse(rawFilter);
+        Collection<IRule> rules = iRules.stream().filter(result).collect(Collectors.toList());
+
+        MatcherAssert.assertThat(result, Matchers.notNullValue());
+        MatcherAssert.assertThat(rules, Matchers.equalTo(List.of(rule1, rule2)));
+    }
+
+    @Test
+    void shouldAcceptNegation() {
+        String rawFilter = "Topic0,!Rule0";
+
+        Predicate<IRule> result = parser.parse(rawFilter);
+        Collection<IRule> rules = iRules.stream().filter(result).collect(Collectors.toList());
+
+        MatcherAssert.assertThat(result, Matchers.notNullValue());
+        MatcherAssert.assertThat(rules, Matchers.equalTo(List.of(rule3, rule4)));
     }
 
     @Test
@@ -87,7 +137,7 @@ public class RuleFilterParserTest {
         Collection<IRule> rules = iRules.stream().filter(result).collect(Collectors.toList());
 
         MatcherAssert.assertThat(result, Matchers.notNullValue());
-        MatcherAssert.assertThat(rules, Matchers.hasSize(3));
+        MatcherAssert.assertThat(rules, Matchers.equalTo(List.of(rule0, rule3, rule4)));
     }
 
     @Test
@@ -98,7 +148,7 @@ public class RuleFilterParserTest {
         Collection<IRule> rules = iRules.stream().filter(result).collect(Collectors.toList());
 
         MatcherAssert.assertThat(result, Matchers.notNullValue());
-        MatcherAssert.assertThat(rules, Matchers.hasSize(2));
+        MatcherAssert.assertThat(rules, Matchers.equalTo(List.of(rule2, rule4)));
     }
 
     @ParameterizedTest
@@ -108,7 +158,101 @@ public class RuleFilterParserTest {
         Collection<IRule> rules = iRules.stream().filter(result).collect(Collectors.toList());
 
         MatcherAssert.assertThat(result, Matchers.notNullValue());
-        MatcherAssert.assertThat(rules, Matchers.hasSize(5));
+        MatcherAssert.assertThat(
+                rules, Matchers.equalTo(List.of(rule0, rule1, rule2, rule3, rule4)));
+    }
+
+    @Nested
+    public class BuilderTest {
+
+        RuleFilterParser.Builder builder;
+
+        @BeforeEach
+        void createBuilder() {
+            builder = RuleFilterParser.Builder.create(parser);
+        }
+
+        @Test
+        void shouldAcceptAllRules() {
+            Predicate<IRule> result =
+                    builder.with("Rule0")
+                            .with("Rule1")
+                            .with("rule4")
+                            .with("rule2")
+                            .with("rule3")
+                            .build();
+            Collection<IRule> rules = iRules.stream().filter(result).collect(Collectors.toList());
+
+            MatcherAssert.assertThat(result, Matchers.notNullValue());
+            MatcherAssert.assertThat(
+                    rules, Matchers.equalTo(List.of(rule0, rule1, rule2, rule3, rule4)));
+        }
+
+        @Test
+        void shouldAcceptWildcard() {
+            Predicate<IRule> result = builder.acceptAll().build();
+            Collection<IRule> rules = iRules.stream().filter(result).collect(Collectors.toList());
+
+            MatcherAssert.assertThat(result, Matchers.notNullValue());
+            MatcherAssert.assertThat(
+                    rules, Matchers.equalTo(List.of(rule0, rule1, rule2, rule3, rule4)));
+        }
+
+        @Test
+        void shouldAcceptWithWildcardAndRuleNegation() {
+            Predicate<IRule> result = builder.acceptAll().without("Rule0").without("Rule4").build();
+            Collection<IRule> rules = iRules.stream().filter(result).collect(Collectors.toList());
+
+            MatcherAssert.assertThat(result, Matchers.notNullValue());
+            MatcherAssert.assertThat(rules, Matchers.equalTo(List.of(rule1, rule2, rule3)));
+        }
+
+        @Test
+        void shouldAcceptWithWildcardAndTopicNegation() {
+            Predicate<IRule> result = builder.acceptAll().without("Topic0").build();
+            Collection<IRule> rules = iRules.stream().filter(result).collect(Collectors.toList());
+
+            MatcherAssert.assertThat(result, Matchers.notNullValue());
+            MatcherAssert.assertThat(rules, Matchers.equalTo(List.of(rule1, rule2)));
+        }
+
+        @Test
+        void shouldAcceptNegation() {
+            Predicate<IRule> result = builder.with("Topic0").without("Rule0").build();
+            Collection<IRule> rules = iRules.stream().filter(result).collect(Collectors.toList());
+
+            MatcherAssert.assertThat(result, Matchers.notNullValue());
+            MatcherAssert.assertThat(rules, Matchers.equalTo(List.of(rule3, rule4)));
+        }
+
+        @Test
+        void shouldAcceptSomeRulesOfTopic() {
+            Predicate<IRule> result = builder.with("topic0").build();
+            Collection<IRule> rules = iRules.stream().filter(result).collect(Collectors.toList());
+
+            MatcherAssert.assertThat(result, Matchers.notNullValue());
+            MatcherAssert.assertThat(rules, Matchers.equalTo(List.of(rule0, rule3, rule4)));
+        }
+
+        @Test
+        void shouldAcceptBothNoOverlap() {
+            Predicate<IRule> result = builder.with("Topic2").with("Rule2").with("Rule4").build();
+            Collection<IRule> rules = iRules.stream().filter(result).collect(Collectors.toList());
+
+            MatcherAssert.assertThat(result, Matchers.notNullValue());
+            MatcherAssert.assertThat(rules, Matchers.equalTo(List.of(rule2, rule4)));
+        }
+
+        @ParameterizedTest
+        @NullAndEmptySource
+        void shouldAcceptAllWhenFilterBlank(String rawFilter) {
+            Predicate<IRule> result = builder.build();
+            Collection<IRule> rules = iRules.stream().filter(result).collect(Collectors.toList());
+
+            MatcherAssert.assertThat(result, Matchers.notNullValue());
+            MatcherAssert.assertThat(
+                    rules, Matchers.equalTo(List.of(rule0, rule1, rule2, rule3, rule4)));
+        }
     }
 
     private class TestRule implements IRule {
@@ -156,6 +300,11 @@ public class RuleFilterParserTest {
         @Override
         public Collection<TypedResult<?>> getResults() {
             return null;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%s [%s]", getId(), getTopic());
         }
     }
 }
