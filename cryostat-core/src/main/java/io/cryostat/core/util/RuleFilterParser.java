@@ -15,6 +15,9 @@
  */
 package io.cryostat.core.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -23,8 +26,16 @@ import org.openjdk.jmc.flightrecorder.rules.IRule;
 import org.openjdk.jmc.flightrecorder.rules.RuleRegistry;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RuleFilterParser {
+
+    private static final String ALL_WILDCARD = "*";
+    private static final String NEGATION_PREFIX = "!";
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     private final Set<String> ruleIds;
     private final Set<String> ruleTopics;
 
@@ -45,22 +56,72 @@ public class RuleFilterParser {
     }
 
     public Predicate<IRule> parse(String rawFilter) {
-        if (StringUtils.isNotBlank(rawFilter)) {
-            String[] filterArray = rawFilter.split(",");
-            Predicate<IRule> combinedPredicate = (r) -> false;
-            for (String filter : filterArray) {
-                String cleanFilter = filter.trim();
-                if (ruleIds.stream().anyMatch(cleanFilter::equalsIgnoreCase)) {
-                    Predicate<IRule> pr = (rule) -> rule.getId().equalsIgnoreCase(cleanFilter);
-                    combinedPredicate = combinedPredicate.or(pr);
-                } else if (ruleTopics.stream().anyMatch(cleanFilter::equalsIgnoreCase)) {
-                    Predicate<IRule> pr = (rule) -> rule.getTopic().equalsIgnoreCase(cleanFilter);
-                    combinedPredicate = combinedPredicate.or(pr);
-                }
-            }
-            return combinedPredicate;
-        } else {
+        if (StringUtils.isBlank(rawFilter)) {
             return (r) -> true;
+        }
+        List<String> keys =
+                Arrays.asList(rawFilter.split(",")).stream()
+                        .map(String::strip)
+                        .collect(Collectors.toList());
+        Predicate<IRule> combinedPredicate = (r) -> false;
+        for (String key : keys) {
+            boolean negated = key.startsWith(NEGATION_PREFIX);
+            if (negated) {
+                key = key.substring(1);
+            }
+            final String fKey = key;
+            Predicate<IRule> predicate;
+            if (ALL_WILDCARD.equals(fKey)) {
+                predicate = (rule) -> true;
+            } else if (ruleIds.stream().anyMatch(key::equalsIgnoreCase)) {
+                predicate = (rule) -> rule.getId().equalsIgnoreCase(fKey);
+            } else if (ruleTopics.stream().anyMatch(key::equalsIgnoreCase)) {
+                predicate = (rule) -> rule.getTopic().equalsIgnoreCase(fKey);
+            } else {
+                logger.warn(
+                        "Filter \"{}\" did not match any known rule IDs or topics, ignoring.", key);
+                continue;
+            }
+            if (negated) {
+                combinedPredicate = combinedPredicate.and(predicate.negate());
+            } else {
+                combinedPredicate = combinedPredicate.or(predicate);
+            }
+        }
+        return combinedPredicate;
+    }
+
+    public static class Builder {
+        private final RuleFilterParser rfp;
+        private final List<String> l = new ArrayList<>();
+
+        private Builder(RuleFilterParser rfp) {
+            this.rfp = rfp;
+        }
+
+        public Builder acceptAll() {
+            return with(RuleFilterParser.ALL_WILDCARD);
+        }
+
+        public Builder with(String s) {
+            l.add(s);
+            return this;
+        }
+
+        public Builder without(String s) {
+            return with(RuleFilterParser.NEGATION_PREFIX + s);
+        }
+
+        public Predicate<IRule> build() {
+            return rfp.parse(String.join(",", l));
+        }
+
+        public static Builder create() {
+            return create(new RuleFilterParser());
+        }
+
+        static Builder create(RuleFilterParser rfp) {
+            return new Builder(rfp);
         }
     }
 }
