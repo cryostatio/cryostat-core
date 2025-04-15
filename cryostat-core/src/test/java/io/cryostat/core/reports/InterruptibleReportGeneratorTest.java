@@ -24,6 +24,8 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.openjdk.jmc.flightrecorder.rules.RuleRegistry;
+
 import io.cryostat.core.reports.InterruptibleReportGenerator.AnalysisResult;
 
 import org.hamcrest.MatcherAssert;
@@ -80,13 +82,29 @@ class InterruptibleReportGeneratorTest {
 
     @Test
     void shouldProduceEvalMapWithFilteredRules() throws Exception {
+        // with rule filtered out, result should always be -1.0 (N/A)
         try (InputStream is = new FileInputStream(getJfrFile())) {
             Future<Map<String, AnalysisResult>> scoreMap =
-                    generator.generateEvalMapInterruptibly(is, rule -> rule.getId() == "ClassLeak");
+                    generator.generateEvalMapInterruptibly(
+                            is, rule -> !"PID1Rule".equals(rule.getId()));
 
             MatcherAssert.assertThat(
-                    scoreMap.get().get("ClassLeak"), Matchers.not(Matchers.nullValue()));
-            MatcherAssert.assertThat(scoreMap.get().size(), Matchers.equalTo(1));
+                    scoreMap.get().size(), Matchers.equalTo(RuleRegistry.getRules().size()));
+            MatcherAssert.assertThat(
+                    scoreMap.get().get("PID1Rule"), Matchers.not(Matchers.nullValue()));
+            MatcherAssert.assertThat(
+                    scoreMap.get().get("PID1Rule").getScore(), Matchers.equalTo(-1.0));
+        }
+
+        // when rule is not filtered, rule should be processed and score should be determined
+        try (InputStream is = new FileInputStream(getJfrFile())) {
+            Future<Map<String, AnalysisResult>> scoreMap =
+                    generator.generateEvalMapInterruptibly(is, rule -> true);
+
+            MatcherAssert.assertThat(
+                    scoreMap.get().size(), Matchers.equalTo(RuleRegistry.getRules().size()));
+            MatcherAssert.assertThat(
+                    scoreMap.get().get("PID1Rule").getScore(), Matchers.greaterThanOrEqualTo(0.0));
         }
     }
 
