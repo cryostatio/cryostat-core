@@ -15,6 +15,7 @@
  */
 package io.cryostat.core.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -99,6 +100,17 @@ public class RuleFilterParserTest {
     @Test
     void shouldAcceptWithWildcardAndRuleNegation() {
         String rawFilter = "*,!Rule0,!Rule4";
+
+        Predicate<IRule> result = parser.parse(rawFilter);
+        Collection<IRule> rules = iRules.stream().filter(result).collect(Collectors.toList());
+
+        MatcherAssert.assertThat(result, Matchers.notNullValue());
+        MatcherAssert.assertThat(rules, Matchers.equalTo(List.of(rule1, rule2, rule3)));
+    }
+
+    @Test
+    void shouldAcceptWithRuleNegationAndDuplicateWildcard() {
+        String rawFilter = "*,!Rule0,!Rule4,*";
 
         Predicate<IRule> result = parser.parse(rawFilter);
         Collection<IRule> rules = iRules.stream().filter(result).collect(Collectors.toList());
@@ -252,6 +264,99 @@ public class RuleFilterParserTest {
             MatcherAssert.assertThat(result, Matchers.notNullValue());
             MatcherAssert.assertThat(
                     rules, Matchers.equalTo(List.of(rule0, rule1, rule2, rule3, rule4)));
+        }
+    }
+
+    @Nested
+    class ComparatorTest {
+        @Test
+        void testSortWord() {
+            List<String> l = new ArrayList<>(List.of("c", "r", "y", "o", "s", "t", "a", "t"));
+            l.sort(new RuleFilterParser.FilterComparator());
+            MatcherAssert.assertThat(
+                    l, Matchers.equalTo(List.of("a", "c", "o", "r", "s", "t", "t", "y")));
+        }
+
+        @Test
+        void testSortRuleIds() {
+            List<String> l =
+                    new ArrayList<>(
+                            List.of(
+                                    "PasswordsInSystemProperties",
+                                    "PasswordsInEnvironment",
+                                    "HighGc"));
+            l.sort(new RuleFilterParser.FilterComparator());
+            MatcherAssert.assertThat(
+                    l,
+                    Matchers.equalTo(
+                            List.of(
+                                    "HighGc",
+                                    "PasswordsInEnvironment",
+                                    "PasswordsInSystemProperties")));
+        }
+
+        @Test
+        void testSortRuleIdsWithWildcard() {
+            List<String> l =
+                    new ArrayList<>(
+                            List.of(
+                                    "PasswordsInSystemProperties",
+                                    "PasswordsInEnvironment",
+                                    "*",
+                                    "HighGc"));
+            l.sort(new RuleFilterParser.FilterComparator());
+            MatcherAssert.assertThat(
+                    l,
+                    Matchers.equalTo(
+                            List.of(
+                                    "*",
+                                    "HighGc",
+                                    "PasswordsInEnvironment",
+                                    "PasswordsInSystemProperties")));
+        }
+
+        @Test
+        void testSortRuleIdsWithWildcards() {
+            List<String> l =
+                    new ArrayList<>(
+                            List.of(
+                                    "*",
+                                    "PasswordsInSystemProperties",
+                                    "PasswordsInEnvironment",
+                                    "HighGc",
+                                    "*"));
+            l.sort(new RuleFilterParser.FilterComparator());
+            MatcherAssert.assertThat(
+                    l,
+                    Matchers.equalTo(
+                            List.of(
+                                    "*",
+                                    "*",
+                                    "HighGc",
+                                    "PasswordsInEnvironment",
+                                    "PasswordsInSystemProperties")));
+        }
+
+        @Test
+        void testSortRuleIdsWithWildcardsAndNegations() {
+            List<String> l =
+                    new ArrayList<>(
+                            List.of(
+                                    "*",
+                                    "PasswordsInSystemProperties",
+                                    "!PasswordsInEnvironment",
+                                    "HighGc",
+                                    "*"));
+            l.sort(new RuleFilterParser.FilterComparator());
+            MatcherAssert.assertThat(
+                    l,
+                    Matchers.equalTo(
+                            List.of(
+                                    "*",
+                                    "*",
+                                    "HighGc",
+                                    "PasswordsInSystemProperties",
+                                    "!PasswordsInEnvironment")));
         }
     }
 

@@ -15,10 +15,14 @@
  */
 package io.cryostat.core.util;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -59,10 +63,11 @@ public class RuleFilterParser {
         if (StringUtils.isBlank(rawFilter)) {
             return (r) -> true;
         }
-        List<String> keys =
+        SortedSet<String> keys = new TreeSet<>(new FilterComparator());
+        keys.addAll(
                 Arrays.asList(rawFilter.split(",")).stream()
                         .map(String::strip)
-                        .collect(Collectors.toList());
+                        .collect(Collectors.toSet()));
         Predicate<IRule> combinedPredicate = (r) -> false;
         for (String key : keys) {
             boolean negated = key.startsWith(NEGATION_PREFIX_TOKEN);
@@ -89,6 +94,27 @@ public class RuleFilterParser {
             }
         }
         return combinedPredicate;
+    }
+
+    static class FilterComparator implements Comparator<String>, Serializable {
+        @Override
+        public int compare(String a, String b) {
+            if (ALL_WILDCARD_TOKEN.equals(a)) {
+                return -1;
+            }
+            if (ALL_WILDCARD_TOKEN.equals(b)) {
+                return 1;
+            }
+            if (a != null && b != null) {
+                if (a.startsWith(NEGATION_PREFIX_TOKEN)) {
+                    return 1;
+                }
+                if (b.startsWith(NEGATION_PREFIX_TOKEN)) {
+                    return -1;
+                }
+            }
+            return StringUtils.compare(a, b);
+        }
     }
 
     public static class Builder {
