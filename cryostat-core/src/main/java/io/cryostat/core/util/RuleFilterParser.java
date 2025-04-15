@@ -31,8 +31,8 @@ import org.slf4j.LoggerFactory;
 
 public class RuleFilterParser {
 
-    private static final String ALL_WILDCARD = "*";
-    private static final String NEGATION_PREFIX = "!";
+    public static final String ALL_WILDCARD_TOKEN = "*";
+    public static final String NEGATION_PREFIX_TOKEN = "!";
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -65,13 +65,13 @@ public class RuleFilterParser {
                         .collect(Collectors.toList());
         Predicate<IRule> combinedPredicate = (r) -> false;
         for (String key : keys) {
-            boolean negated = key.startsWith(NEGATION_PREFIX);
+            boolean negated = key.startsWith(NEGATION_PREFIX_TOKEN);
             if (negated) {
                 key = key.substring(1);
             }
             final String fKey = key;
             Predicate<IRule> predicate;
-            if (ALL_WILDCARD.equals(fKey)) {
+            if (ALL_WILDCARD_TOKEN.equals(fKey)) {
                 predicate = (rule) -> true;
             } else if (ruleIds.stream().anyMatch(key::equalsIgnoreCase)) {
                 predicate = (rule) -> rule.getId().equalsIgnoreCase(fKey);
@@ -100,7 +100,7 @@ public class RuleFilterParser {
         }
 
         public Builder acceptAll() {
-            return with(RuleFilterParser.ALL_WILDCARD);
+            return with(RuleFilterParser.ALL_WILDCARD_TOKEN);
         }
 
         public Builder with(String s) {
@@ -109,7 +109,7 @@ public class RuleFilterParser {
         }
 
         public Builder without(String s) {
-            return with(RuleFilterParser.NEGATION_PREFIX + s);
+            return with(RuleFilterParser.NEGATION_PREFIX_TOKEN + s);
         }
 
         public Predicate<IRule> build() {
