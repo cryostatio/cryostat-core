@@ -105,8 +105,7 @@ public class InterruptibleReportGenerator {
                     IOException,
                     ExecutionException,
                     CouldNotLoadRecordingException {
-        Collection<IRule> rules =
-                RuleRegistry.getRules().stream().filter(predicate).collect(Collectors.toList());
+        Collection<IRule> rules = RuleRegistry.getRules();
         ResultProvider resultProvider = new ResultProvider();
         Map<IRule, Future<IResult>> resultFutures = new HashMap<>();
         Queue<RunnableFuture<IResult>> futureQueue = new ConcurrentLinkedQueue<>();
@@ -120,7 +119,9 @@ public class InterruptibleReportGenerator {
             // queue more work on the executor.
             IItemCollection items = JfrLoaderToolkit.loadEvents(countingRecordingStream);
             for (IRule rule : rules) {
-                if (RulesToolkit.matchesEventAvailabilityMap(items, rule.getRequiredEvents())) {
+                if (predicate.test(rule)
+                        && RulesToolkit.matchesEventAvailabilityMap(
+                                items, rule.getRequiredEvents())) {
                     if (hasDependency(rule)) {
                         IRule depRule =
                                 rules.stream()
