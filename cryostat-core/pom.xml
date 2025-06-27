@@ -55,7 +55,7 @@
   <java.version>17</java.version>
   <io.cryostat.libcryostat.version>4.1.0-SNAPSHOT</io.cryostat.libcryostat.version>
   <org.openjdk.jmc.version>9.1.0</org.openjdk.jmc.version>
-  <org.jsoup.version>1.18.3</org.jsoup.version>
+  <org.jsoup.version>1.21.1</org.jsoup.version>
 </properties>
 
 <dependencies>
