@@ -118,7 +118,7 @@ jobs:
     - name: Set DOCKER_HOST environment variable
       run: echo "DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock" >> "$GITHUB_ENV"
     - name: Build cryostat
-      run: ./mvnw -B -U -Dio.cryostat.core.version=${{ needs.build-core.outputs.core_version }} clean verify
+      run: ./mvnw -B -Dio.cryostat.core.version=${{ needs.build-core.outputs.core_version }} clean verify
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Debug podman images
