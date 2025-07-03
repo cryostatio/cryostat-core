@@ -123,6 +123,8 @@ jobs:
             -Dio.cryostat.core.version=${{ needs.build-core.outputs.core_version }} \
             -Dquarkus.hibernate-orm.log.sql=false \
             -Dquarkus.log.level=error \
+            -Dquarkus.http.access-log.enabled=false \
+            -Dquarkus.smallrye-graphql.log-payload=off \
             clean verify
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
