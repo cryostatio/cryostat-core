@@ -38,8 +38,8 @@ jobs:
         fetch-depth: 0
     - id: get_core_version
       run: |
-        echo "core_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
-        echo "name=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)" >> $GITHUB_OUTPUT
+        echo "core_version=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+        echo "name=$(./mvnw help:evaluate -Dexpression=project.artifactId -q -DforceStdout)" >> $GITHUB_OUTPUT
     - uses: actions/setup-java@v3
       with:
         java-version: |
@@ -50,7 +50,7 @@ jobs:
       with:
         path: ~/.m2
         key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml') }}
-    - run: mvn -B -U clean install
+    - run: ./mvnw -B -U clean install
 
   build-cryostat:
     needs: [build-core]
@@ -118,11 +118,16 @@ jobs:
     - name: Set DOCKER_HOST environment variable
       run: echo "DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock" >> "$GITHUB_ENV"
     - name: Build cryostat
-      run: ./mvnw -B -U -Dio.cryostat.core.version=${{ needs.build-core.outputs.core_version }} clean verify
+      run: |
+          ./mvnw -B \
+            -Dio.cryostat.core.version=${{ needs.build-core.outputs.core_version }} \
+            -Dquarkus.hibernate-orm.log.sql=false \
+            -Dquarkus.log.level=error \
+            -Dquarkus.http.access-log.enabled=false \
+            -Dquarkus.smallrye-graphql.log-payload=off \
+            clean verify
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Debug podman images
-      run: podman images
     - name: Save cryostat image
       run: podman save -o cryostat.tar --format oci-archive quay.io/cryostat/cryostat:latest
     - uses: actions/upload-artifact@v4
