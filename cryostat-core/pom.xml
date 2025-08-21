@@ -53,15 +53,10 @@
 <properties>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   <java.version>17</java.version>
-<<<<<<< HEAD
   <io.cryostat.libcryostat.version>4.0.2-SNAPSHOT</io.cryostat.libcryostat.version>
-  <org.openjdk.jmc.version>9.0.0</org.openjdk.jmc.version>
-  <org.jsoup.version>1.18.3</org.jsoup.version>
-=======
   <io.cryostat.libcryostat.version>${project.version}</io.cryostat.libcryostat.version>
   <org.openjdk.jmc.version>9.1.0</org.openjdk.jmc.version>
   <org.jsoup.version>1.21.1</org.jsoup.version>
->>>>>>> 159ee3b (chore(pom): use project.version property for libcryostat (#568))
 </properties>
 
 <dependencies>
