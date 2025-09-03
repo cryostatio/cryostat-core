@@ -12,7 +12,7 @@
 <groupId>io.cryostat</groupId>
 <artifactId>cryostat-core-parent</artifactId>
 
-<version>4.0.2-SNAPSHOT</version>
+<version>4.0.2</version>
 <packaging>pom</packaging>
 
 <licenses>
