@@ -40,6 +40,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class InterruptibleReportGeneratorTest {
 
+    private static final int CUSTOM_RULES_SIZE = 1; // QuarkusRestRule
+
     @Mock InputStream recording;
 
     InterruptibleReportGenerator generator;
@@ -89,7 +91,8 @@ class InterruptibleReportGeneratorTest {
                             is, rule -> !"PID1Rule".equals(rule.getId()));
 
             MatcherAssert.assertThat(
-                    scoreMap.get().size(), Matchers.equalTo(RuleRegistry.getRules().size()));
+                    scoreMap.get().size(),
+                    Matchers.equalTo(RuleRegistry.getRules().size() + CUSTOM_RULES_SIZE));
             MatcherAssert.assertThat(
                     scoreMap.get().get("PID1Rule"), Matchers.not(Matchers.nullValue()));
             MatcherAssert.assertThat(
@@ -102,7 +105,8 @@ class InterruptibleReportGeneratorTest {
                     generator.generateEvalMapInterruptibly(is, rule -> true);
 
             MatcherAssert.assertThat(
-                    scoreMap.get().size(), Matchers.equalTo(RuleRegistry.getRules().size()));
+                    scoreMap.get().size(),
+                    Matchers.equalTo(RuleRegistry.getRules().size() + CUSTOM_RULES_SIZE));
             MatcherAssert.assertThat(
                     scoreMap.get().get("PID1Rule").getScore(), Matchers.greaterThanOrEqualTo(0.0));
         }
