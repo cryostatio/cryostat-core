@@ -57,14 +57,14 @@ public class QuarkusRestRule implements IRule {
                     "Quarkus REST event duration info limit",
                     "The shortest Quarkus REST event duration that should trigger an info notice",
                     UnitLookup.TIMESPAN,
-                    UnitLookup.MILLISECOND.quantity(50));
+                    UnitLookup.MILLISECOND.quantity(500));
     public static final TypedPreference<IQuantity> WRITE_WARNING_LIMIT =
             new TypedPreference<>(
                     "io.quarkus.rest.warning.limit",
                     "Quarkus REST event duration warning limit",
                     "The shortest Quarkus REST event duration that should trigger a warning",
                     UnitLookup.TIMESPAN,
-                    UnitLookup.MILLISECOND.quantity(200));
+                    UnitLookup.MILLISECOND.quantity(2000));
 
     private static final List<TypedPreference<?>> CONFIG_ATTRIBUTES =
             Arrays.<TypedPreference<?>>asList(WRITE_INFO_LIMIT, WRITE_WARNING_LIMIT);
