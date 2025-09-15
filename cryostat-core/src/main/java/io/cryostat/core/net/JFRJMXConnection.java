@@ -213,7 +213,8 @@ public class JFRJMXConnection implements JFRConnection {
             String operation,
             Object[] params,
             String[] signature,
-            Class<T> returnType)
+            Class<T> returnType,
+            String jobId)
             throws MalformedObjectNameException,
                     InstanceNotFoundException,
                     MBeanException,

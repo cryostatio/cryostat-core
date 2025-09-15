@@ -63,7 +63,8 @@ public interface JFRConnection extends AutoCloseable {
             String operation,
             Object[] params,
             String[] signature,
-            Class<T> returnType)
+            Class<T> returnType,
+            String requestId)
             throws MalformedObjectNameException,
                     InstanceNotFoundException,
                     MBeanException,
