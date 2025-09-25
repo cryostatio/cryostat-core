@@ -17,6 +17,7 @@ package io.cryostat.core.reports;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -63,10 +64,13 @@ public class InterruptibleReportGenerator {
 
     private final ExecutorService qThread = Executors.newCachedThreadPool();
     private final ExecutorService executor;
+    private final List<IRule> rules = new ArrayList<>();
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public InterruptibleReportGenerator(ExecutorService executor) {
         this.executor = executor;
+        this.rules.addAll(RuleRegistry.getRules());
+        this.rules.add(new QuarkusRestRule());
     }
 
     public Future<Map<String, AnalysisResult>> generateEvalMapInterruptibly(
@@ -105,7 +109,6 @@ public class InterruptibleReportGenerator {
                     IOException,
                     ExecutionException,
                     CouldNotLoadRecordingException {
-        Collection<IRule> rules = RuleRegistry.getRules();
         ResultProvider resultProvider = new ResultProvider();
         Map<IRule, Future<IResult>> resultFutures = new HashMap<>();
         Queue<RunnableFuture<IResult>> futureQueue = new ConcurrentLinkedQueue<>();
@@ -118,13 +121,13 @@ public class InterruptibleReportGenerator {
             // so that this method can return to the qThread more quickly and free up the ability to
             // queue more work on the executor.
             IItemCollection items = JfrLoaderToolkit.loadEvents(countingRecordingStream);
-            for (IRule rule : rules) {
+            for (IRule rule : this.rules) {
                 if (predicate.test(rule)
                         && RulesToolkit.matchesEventAvailabilityMap(
                                 items, rule.getRequiredEvents())) {
                     if (hasDependency(rule)) {
                         IRule depRule =
-                                rules.stream()
+                                this.rules.stream()
                                         .filter(r -> r.getId().equals(getRuleDependencyName(rule)))
                                         .findFirst()
                                         .orElse(null);
