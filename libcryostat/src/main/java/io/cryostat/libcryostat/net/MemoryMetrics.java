@@ -45,7 +45,7 @@ public class MemoryMetrics {
         this.objectPendingFinalizationCount =
                 (int) attributes.getOrDefault("ObjectPendingFinalizationCount", Integer.MIN_VALUE);
 
-        // these are metrics that we won't be able
+        // these are metrics synthetic attributes that we won't be able
         // to fetch from the mbean like this. Instead we calculate it here.
         this.heapMemoryUsagePercent =
                 (double) this.heapMemoryUsage.getUsed()
