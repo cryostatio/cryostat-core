@@ -44,11 +44,16 @@ public class MemoryMetrics {
                                         "NonHeapMemoryUsage", new MemoryUsage(-1, 0, 0, -1)));
         this.objectPendingFinalizationCount =
                 (int) attributes.getOrDefault("ObjectPendingFinalizationCount", Integer.MIN_VALUE);
-        this.freeHeapMemory = (long) attributes.getOrDefault("FreeHeapMemory", Long.MIN_VALUE);
-        this.freeNonHeapMemory =
-                (long) attributes.getOrDefault("FreeNonHeapMemory", Long.MIN_VALUE);
+
+        // these are metrics that we won't be able
+        // to fetch from the mbean like this. Instead we calculate it here.
         this.heapMemoryUsagePercent =
-                (double) attributes.getOrDefault("HeapMemoryUsagePercent", Double.MIN_VALUE);
+                (double) this.heapMemoryUsage.getUsed()
+                        / (double) this.heapMemoryUsage.getCommitted();
+        this.freeHeapMemory = this.heapMemoryUsage.getCommitted() - this.heapMemoryUsage.getUsed();
+        this.freeNonHeapMemory =
+                this.nonHeapMemoryUsage.getCommitted() - this.nonHeapMemoryUsage.getUsed();
+
         this.verbose = (boolean) attributes.getOrDefault("Verbose", false);
     }
 
