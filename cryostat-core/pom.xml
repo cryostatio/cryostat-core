@@ -12,13 +12,13 @@
 <groupId>io.cryostat</groupId>
 <artifactId>cryostat-core</artifactId>
 
-<version>4.0.3-SNAPSHOT</version>
+<version>4.0.3</version>
 <packaging>jar</packaging>
 
 <parent>
   <groupId>io.cryostat</groupId>
   <artifactId>cryostat-core-parent</artifactId>
-  <version>4.0.3-SNAPSHOT</version>
+  <version>4.0.3</version>
 </parent>
 
 <licenses>
