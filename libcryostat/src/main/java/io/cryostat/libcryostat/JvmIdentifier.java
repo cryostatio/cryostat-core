@@ -28,6 +28,7 @@ import javax.management.JMX;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
+import io.cryostat.libcryostat.net.CryostatAgentMXBean;
 import io.cryostat.libcryostat.net.IDException;
 import io.cryostat.libcryostat.net.RuntimeMetrics;
 
@@ -168,9 +169,5 @@ public class JvmIdentifier {
         }
         JvmIdentifier other = (JvmIdentifier) obj;
         return Objects.equals(hash, other.hash);
-    }
-
-    static interface CryostatAgentMXBean {
-        public String getId();
     }
 }
