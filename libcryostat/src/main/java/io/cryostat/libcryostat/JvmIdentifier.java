@@ -93,7 +93,7 @@ public class JvmIdentifier {
             CryostatAgentMXBean agentMXBean =
                     JMX.newMXBeanProxy(
                             mbs,
-                            new ObjectName("io.cryostat.agent.CryostatAgent:name=agent"),
+                            new ObjectName(CryostatAgentMXBean.OBJECT_NAME),
                             CryostatAgentMXBean.class);
             return agentMXBean.getId();
         } catch (Exception e) {

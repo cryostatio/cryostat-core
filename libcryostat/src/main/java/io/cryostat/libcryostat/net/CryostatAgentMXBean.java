@@ -16,5 +16,7 @@
 package io.cryostat.libcryostat.net;
 
 public interface CryostatAgentMXBean {
+    public static final String OBJECT_NAME = "io.cryostat.agent.CryostatAgent:name=cryostat-agent";
+
     public String getId();
 }
