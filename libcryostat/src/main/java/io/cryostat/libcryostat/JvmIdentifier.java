@@ -18,11 +18,17 @@ package io.cryostat.libcryostat;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Objects;
 
+import javax.management.JMX;
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+
+import io.cryostat.libcryostat.net.CryostatAgentMXBean;
 import io.cryostat.libcryostat.net.IDException;
 import io.cryostat.libcryostat.net.RuntimeMetrics;
 
@@ -36,13 +42,22 @@ public class JvmIdentifier {
         this.hash = hash;
     }
 
-    public static JvmIdentifier getLocal() throws IDException {
-        return from(RuntimeMetrics.readLocalMetrics());
+    public String getHash() {
+        return hash;
     }
 
-    public static JvmIdentifier from(RuntimeMetrics metrics) throws IDException {
+    public static JvmIdentifier getLocal() throws IDException {
+        return getLocal(getAgentId());
+    }
+
+    public static JvmIdentifier getLocal(String id) throws IDException {
+        return from(id, RuntimeMetrics.readLocalMetrics());
+    }
+
+    public static JvmIdentifier from(String id, RuntimeMetrics metrics) throws IDException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
                 DataOutputStream dos = new DataOutputStream(baos)) {
+            safeWrite(dos, id);
             safeWrite(dos, metrics.getClassPath());
             safeWrite(dos, metrics.getName());
             safeWrite(dos, stringifyArray(metrics.getInputArguments()));
@@ -65,8 +80,25 @@ public class JvmIdentifier {
         dos.writeUTF(value);
     }
 
-    public String getHash() {
-        return hash;
+    private static String getAgentId() {
+        try {
+            return getAgentId(ManagementFactory.getPlatformMBeanServer());
+        } catch (SecurityException se) {
+            return null;
+        }
+    }
+
+    public static String getAgentId(MBeanServerConnection mbs) {
+        try {
+            CryostatAgentMXBean agentMXBean =
+                    JMX.newMXBeanProxy(
+                            mbs,
+                            new ObjectName(CryostatAgentMXBean.OBJECT_NAME),
+                            CryostatAgentMXBean.class);
+            return agentMXBean.getId();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private static String stringifyArray(Object arrayObject) {

@@ -198,6 +198,7 @@ public class JFRJMXConnection implements JFRConnection {
                                 "StartTime"));
         try {
             return JvmIdentifier.from(
+                    JvmIdentifier.getAgentId(this.rjmxConnection.getMBeanServer()),
                     new RuntimeMetrics(
                             getAttributeMap(
                                     ConnectionToolkit.RUNTIME_BEAN_NAME,
@@ -340,7 +341,10 @@ public class JFRJMXConnection implements JFRConnection {
                 new MemoryMetrics(memoryMap),
                 new ThreadMetrics(threadMap),
                 new OperatingSystemMetrics(osMap),
-                JvmIdentifier.from(runtimeMetrics).getHash());
+                JvmIdentifier.from(
+                                JvmIdentifier.getAgentId(this.rjmxConnection.getMBeanServer()),
+                                runtimeMetrics)
+                        .getHash());
     }
 
     public synchronized boolean isV1() throws ConnectionException, IOException {
