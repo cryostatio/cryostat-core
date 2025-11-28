@@ -54,7 +54,6 @@ public class JvmIdentifier {
     }
 
     public static JvmIdentifier from(String id, RuntimeMetrics metrics) throws IDException {
-        System.out.println(String.format("Creating JvmIdentifier using ID string: %s", id));
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
                 DataOutputStream dos = new DataOutputStream(baos)) {
             safeWrite(dos, id);
