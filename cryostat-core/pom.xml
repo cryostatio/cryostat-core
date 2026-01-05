@@ -54,13 +54,8 @@
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   <java.version>17</java.version>
   <io.cryostat.libcryostat.version>${project.version}</io.cryostat.libcryostat.version>
-<<<<<<< HEAD
   <org.openjdk.jmc.version>9.1.0</org.openjdk.jmc.version>
-  <org.jsoup.version>1.21.2</org.jsoup.version>
-=======
-  <org.openjdk.jmc.version>9.1.1</org.openjdk.jmc.version>
   <org.jsoup.version>1.22.1</org.jsoup.version>
->>>>>>> aa18c46 (build(deps): bump org.jsoup:jsoup from 1.21.2 to 1.22.1 (#621))
 </properties>
 
 <dependencies>
