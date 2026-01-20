@@ -167,6 +167,7 @@ public class JFRJMXConnection implements JFRConnection {
                     this.rjmxConnection.getConnectionDescriptor().createJMXServiceURL());
         } catch (IOException e) {
             cw.println(e);
+            e.printStackTrace();
             return "unknown";
         }
     }
@@ -176,6 +177,7 @@ public class JFRJMXConnection implements JFRConnection {
             return ConnectionToolkit.getPort(
                     this.rjmxConnection.getConnectionDescriptor().createJMXServiceURL());
         } catch (IOException e) {
+            e.printStackTrace();
             cw.println(e);
             return 0;
         }
@@ -414,6 +416,7 @@ public class JFRJMXConnection implements JFRConnection {
             return conn;
         } catch (ConnectionException e) {
             cw.println("connection attempt failed.");
+            e.printStackTrace();
             closeListeners.forEach(Runnable::run);
             throw e;
         }
