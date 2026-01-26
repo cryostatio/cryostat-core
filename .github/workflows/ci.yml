@@ -179,7 +179,7 @@ jobs:
     steps:
     - name: Create markdown table
       id: md-table
-      uses: petems/csv-to-md-table-action@v3.0.0
+      uses: petems/csv-to-md-table-action@v4.0.0
       with:
         csvinput: |
           ARCH, IMAGE
