@@ -185,7 +185,7 @@ jobs:
           ARCH, IMAGE
           amd64, ${{ env.amd64_image }}
 
-    - uses: thollander/actions-comment-pull-request@v2
+    - uses: thollander/actions-comment-pull-request@v3
       with:
         message: |-
           ${{ steps.md-table.outputs.markdown-table }}
