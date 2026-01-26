@@ -46,7 +46,7 @@ jobs:
           11
           17
         distribution: 'temurin'
-    - uses: actions/cache@v3
+    - uses: actions/cache@v5
       with:
         path: ~/.m2
         key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml') }}
@@ -69,7 +69,7 @@ jobs:
         repository: ${{ github.event.pull_request.head.repo.full_name }}
         ref: ${{ github.event.pull_request.head.ref }}
         fetch-depth: 0
-    - uses: actions/cache@v3
+    - uses: actions/cache@v5
       with:
         path: ~/.m2
         key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml') }}
@@ -94,7 +94,7 @@ jobs:
         githubServer: false
     - run: git submodule init && git submodule update
     - name: Cache yarn packages
-      uses: actions/cache@v3
+      uses: actions/cache@v5
       with:
         path: "./src/main/webui/.yarn/cache"
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
