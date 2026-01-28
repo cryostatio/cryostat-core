@@ -31,7 +31,7 @@ jobs:
     outputs:
       core_version: ${{ steps.get_core_version.outputs.core_version }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         repository: ${{ github.event.pull_request.head.repo.full_name }}
         ref: ${{ github.event.pull_request.head.ref }}
@@ -40,13 +40,13 @@ jobs:
       run: |
         echo "core_version=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
         echo "name=$(./mvnw help:evaluate -Dexpression=project.artifactId -q -DforceStdout)" >> $GITHUB_OUTPUT
-    - uses: actions/setup-java@v3
+    - uses: actions/setup-java@v5
       with:
         java-version: |
           11
           17
         distribution: 'temurin'
-    - uses: actions/cache@v3
+    - uses: actions/cache@v5
       with:
         path: ~/.m2
         key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml') }}
@@ -64,25 +64,25 @@ jobs:
         pull-requests: write
         statuses: write
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         repository: ${{ github.event.pull_request.head.repo.full_name }}
         ref: ${{ github.event.pull_request.head.ref }}
         fetch-depth: 0
-    - uses: actions/cache@v3
+    - uses: actions/cache@v5
       with:
         path: ~/.m2
         key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-build-
           ${{ runner.os }}-
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         repository: ${{ github.repository_owner }}/cryostat
         ref: main
         submodules: true
         fetch-depth: 0
-    - uses: actions/setup-java@v3
+    - uses: actions/setup-java@v5
       with:
         java-version: '21'
         distribution: 'temurin'
@@ -94,7 +94,7 @@ jobs:
         githubServer: false
     - run: git submodule init && git submodule update
     - name: Cache yarn packages
-      uses: actions/cache@v3
+      uses: actions/cache@v5
       with:
         path: "./src/main/webui/.yarn/cache"
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
@@ -130,7 +130,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Save cryostat image
       run: podman save -o cryostat.tar --format oci-archive quay.io/cryostat/cryostat:latest
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v6
       with:
         name: cryostat
         path: ${{ github.workspace }}/cryostat.tar
@@ -148,7 +148,7 @@ jobs:
         packages: write
     steps:
     - name: Download cryostat artifact
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v7
       with:
         name: cryostat
     - name: Load cryostat image
@@ -179,13 +179,13 @@ jobs:
     steps:
     - name: Create markdown table
       id: md-table
-      uses: petems/csv-to-md-table-action@v3.0.0
+      uses: petems/csv-to-md-table-action@v4.0.0
       with:
         csvinput: |
           ARCH, IMAGE
           amd64, ${{ env.amd64_image }}
 
-    - uses: thollander/actions-comment-pull-request@v2
+    - uses: thollander/actions-comment-pull-request@v3
       with:
         message: |-
           ${{ steps.md-table.outputs.markdown-table }}
