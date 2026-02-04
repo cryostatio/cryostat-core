@@ -75,7 +75,7 @@ public interface JFRConnection extends AutoCloseable {
         throw new ConnectionException("Unimplemented");
     }
 
-    public default void addSmartTriggers(String definitions) throws ConnectionException {
+    public default List<String> addSmartTriggers(String definitions) throws ConnectionException {
         throw new ConnectionException("Unimplemented");
     }
 
@@ -83,7 +83,7 @@ public interface JFRConnection extends AutoCloseable {
         throw new ConnectionException("Unimplemented");
     }
 
-    public default void removeSmartTriggers(String definitions) throws ConnectionException {
+    public default void removeSmartTrigger(String definitions) throws ConnectionException {
         throw new ConnectionException("Unimplemented");
     }
 

@@ -39,6 +39,8 @@ public class SmartTrigger {
         COMPLETE
     };
 
+    // Unique UUID to identify the smart trigger
+    private final String uuid;
     private final String rawExpression;
     private final String durationConstraint;
     private final String triggerCondition;
@@ -50,9 +52,10 @@ public class SmartTrigger {
     private volatile Date firstMetTime;
     private volatile TriggerState state;
 
-    public SmartTrigger(String expression, String templateName) {
+    public SmartTrigger(String uuid, String expression, String templateName) {
         this.rawExpression = expression;
         this.recordingTemplate = templateName;
+        this.uuid = uuid;
         this.state = TriggerState.NEW;
         Matcher m = DEFINITION_PATTERN.matcher(expression);
         if (m.matches()) {
@@ -81,6 +84,10 @@ public class SmartTrigger {
 
     public String getRecordingTemplateName() {
         return recordingTemplate;
+    }
+
+    public String getUUID() {
+        return this.uuid;
     }
 
     public boolean isSimple() {
@@ -138,7 +145,9 @@ public class SmartTrigger {
 
     @Override
     public String toString() {
-        return "SmartTrigger [rawExpression="
+        return "SmartTrigger [uuid="
+                + uuid
+                + ", rawExpression="
                 + rawExpression
                 + ", durationConstraint="
                 + durationConstraint
