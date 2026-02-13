@@ -40,11 +40,11 @@ public class SmartTrigger {
     };
 
     // Unique UUID to identify the smart trigger
-    private final String uuid;
-    private final String rawExpression;
+    private final String id;
+    private final String expression;
     private final String durationConstraint;
     private final String triggerCondition;
-    private final String recordingTemplate;
+    private final String recordingTemplateName;
     private final Duration targetDuration;
     /* Keep track of the time the condition was first met for
      * sustained durations
@@ -52,10 +52,10 @@ public class SmartTrigger {
     private volatile Date firstMetTime;
     private volatile TriggerState state;
 
-    public SmartTrigger(String uuid, String expression, String templateName) {
-        this.rawExpression = expression;
-        this.recordingTemplate = templateName;
-        this.uuid = uuid;
+    public SmartTrigger(String id, String expression, String templateName) {
+        this.expression = expression;
+        this.recordingTemplateName = templateName;
+        this.id = id;
         this.state = TriggerState.NEW;
         Matcher m = DEFINITION_PATTERN.matcher(expression);
         if (m.matches()) {
@@ -70,8 +70,13 @@ public class SmartTrigger {
         }
     }
 
+    // Default Constructor for ObjectMapper Serialization
+    public SmartTrigger() {
+        this("", "", "");
+    }
+
     public String getExpression() {
-        return rawExpression;
+        return expression;
     }
 
     public TriggerState getState() {
@@ -83,11 +88,11 @@ public class SmartTrigger {
     }
 
     public String getRecordingTemplateName() {
-        return recordingTemplate;
+        return recordingTemplateName;
     }
 
-    public String getUUID() {
-        return this.uuid;
+    public String getID() {
+        return this.id;
     }
 
     public boolean isSimple() {
@@ -117,10 +122,11 @@ public class SmartTrigger {
     @Override
     public int hashCode() {
         return Objects.hash(
-                rawExpression,
+                id,
+                expression,
                 durationConstraint,
                 triggerCondition,
-                recordingTemplate,
+                recordingTemplateName,
                 targetDuration);
     }
 
@@ -136,23 +142,24 @@ public class SmartTrigger {
             return false;
         }
         SmartTrigger other = (SmartTrigger) obj;
-        return Objects.equals(rawExpression, other.rawExpression)
+        return Objects.equals(id, other.id)
+                && Objects.equals(expression, other.expression)
                 && Objects.equals(durationConstraint, other.durationConstraint)
                 && Objects.equals(triggerCondition, other.triggerCondition)
-                && Objects.equals(recordingTemplate, other.recordingTemplate)
+                && Objects.equals(recordingTemplateName, other.recordingTemplateName)
                 && Objects.equals(targetDuration, other.targetDuration);
     }
 
     @Override
     public String toString() {
-        return "SmartTrigger [uuid="
-                + uuid
-                + ", rawExpression="
-                + rawExpression
+        return "SmartTrigger [id="
+                + id
+                + ", expression="
+                + expression
                 + ", durationConstraint="
                 + durationConstraint
-                + ", recordingTemplate="
-                + recordingTemplate
+                + ", recordingTemplateName="
+                + recordingTemplateName
                 + ", targetDuration="
                 + targetDuration
                 + ", triggerCondition="
