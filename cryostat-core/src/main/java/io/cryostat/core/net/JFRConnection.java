@@ -16,6 +16,7 @@
 package io.cryostat.core.net;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
@@ -33,6 +34,7 @@ import io.cryostat.libcryostat.JvmIdentifier;
 import io.cryostat.libcryostat.net.IDException;
 import io.cryostat.libcryostat.net.MBeanMetrics;
 import io.cryostat.libcryostat.sys.Clock;
+import io.cryostat.libcryostat.triggers.SmartTrigger;
 
 public interface JFRConnection extends AutoCloseable {
 
@@ -70,6 +72,18 @@ public interface JFRConnection extends AutoCloseable {
                     ReflectionException,
                     IOException,
                     ConnectionException {
+        throw new ConnectionException("Unimplemented");
+    }
+
+    public default List<String> enableSmartTriggers(String definitions) throws ConnectionException {
+        throw new ConnectionException("Unimplemented");
+    }
+
+    public default List<SmartTrigger> listSmartTriggers() throws ConnectionException {
+        throw new ConnectionException("Unimplemented");
+    }
+
+    public default void disableSmartTrigger(String definitions) throws ConnectionException {
         throw new ConnectionException("Unimplemented");
     }
 
