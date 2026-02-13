@@ -68,6 +68,7 @@ public class SmartTrigger {
             durationConstraint = "";
             targetDuration = Duration.ZERO;
         }
+        this.firstMetTime = new Date(0);
     }
 
     // Default Constructor for ObjectMapper Serialization
@@ -108,7 +109,7 @@ public class SmartTrigger {
     }
 
     public Date getTimeConditionFirstMet() {
-        return firstMetTime == null ? null : new Date(firstMetTime.getTime());
+        return new Date(firstMetTime.getTime());
     }
 
     public String getTriggerCondition() {
