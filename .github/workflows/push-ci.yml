@@ -19,7 +19,11 @@ jobs:
           11
           17
         distribution: 'temurin'
-    - run: mvn -B -U clean verify
+    - name: Build and verify
+      uses: Wandalen/wretry.action@v3.8.0
+      with:
+        attempt_limit: 3
+        command: mvn -B -U clean verify
   get-version:
     runs-on: ubuntu-latest
     outputs:

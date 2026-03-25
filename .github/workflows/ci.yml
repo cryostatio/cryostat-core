@@ -50,7 +50,11 @@ jobs:
       with:
         path: ~/.m2
         key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml') }}
-    - run: ./mvnw -B -U clean install
+    - name: Build cryostat-core
+      uses: Wandalen/wretry.action@v3.8.0
+      with:
+        attempt_limit: 3
+        command: ./mvnw -B -U clean install
 
   build-cryostat:
     needs: [build-core]
@@ -118,7 +122,10 @@ jobs:
     - name: Set DOCKER_HOST environment variable
       run: echo "DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock" >> "$GITHUB_ENV"
     - name: Build cryostat
-      run: |
+      uses: Wandalen/wretry.action@v3.8.0
+      with:
+        attempt_limit: 3
+        command: |
           ./mvnw -B \
             -Dio.cryostat.core.version=${{ needs.build-core.outputs.core_version }} \
             -Dquarkus.hibernate-orm.log.sql=false \
