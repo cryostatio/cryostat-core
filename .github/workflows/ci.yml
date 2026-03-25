@@ -92,7 +92,7 @@ jobs:
         distribution: 'temurin'
         cache: 'maven'
     - name: maven-settings
-      uses: s4u/maven-settings-action@45b6ca948aeeb205adebe97c67b26e2b50896844 # v4.0.0
+      uses: s4u/maven-settings-action@894661b3ddae382f1ae8edbeab60987e08cf0788 # v4.0.0
       with:
         servers: '[{"id": "github", "username": "dummy", "password": "${{ secrets.GITHUB_TOKEN }}"}]'
         githubServer: false
@@ -183,7 +183,7 @@ jobs:
     steps:
     - name: Create markdown table
       id: md-table
-      uses: petems/csv-to-md-table-action@48d24d6b5a45e19d8e2d1c8f2e2e2e2e2e2e2e2e # v4.0.0
+      uses: petems/csv-to-md-table-action@401501a2cdf2512164c1be3b70411976a2b838b9 # v4.0.0
       with:
         csvinput: |
           ARCH, IMAGE
