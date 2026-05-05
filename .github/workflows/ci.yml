@@ -92,7 +92,7 @@ jobs:
         distribution: 'temurin'
         cache: 'maven'
     - name: maven-settings
-      uses: s4u/maven-settings-action@v2
+      uses: s4u/maven-settings-action@v4.0.0
       with:
         servers: '[{"id": "github", "username": "dummy", "password": "${{ secrets.GITHUB_TOKEN }}"}]'
         githubServer: false
