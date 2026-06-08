@@ -87,7 +87,7 @@
   <org.junit.jupiter.version>6.1.0</org.junit.jupiter.version>
   <org.hamcrest.version>3.0</org.hamcrest.version>
   <org.mockito.version>5.23.0</org.mockito.version>
-  <org.jacoco.maven.plugin.version>0.8.14</org.jacoco.maven.plugin.version>
+  <org.jacoco.maven.plugin.version>0.8.15</org.jacoco.maven.plugin.version>
   <com.diffplug.spotless.maven.plugin.version>3.6.0</com.diffplug.spotless.maven.plugin.version>
   <org.slf4j.version>2.0.18</org.slf4j.version>
 
