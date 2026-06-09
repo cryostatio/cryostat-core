@@ -49,9 +49,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public class HeapDumpAnalysis {
 
-    private HeapDumpReader reader;
-    private InputStream heapDumpStream;
-
     // Passed into the constructor
     private int readBufferMemoryLimit;
 
@@ -89,8 +86,7 @@ public class HeapDumpAnalysis {
     private HeapStats heapStats;
     private DetailedStats detailedStats;
 
-    public HeapDumpAnalysis(InputStream inputStream, int readBufferLimit) {
-        heapDumpStream = inputStream;
+    public HeapDumpAnalysis(int readBufferLimit) {
         readBufferMemoryLimit = readBufferLimit;
         classLoaderInstanceStats = new ArrayList<AggregateValue>();
         classLoaderClassStats = new ArrayList<AggregateValue>();
@@ -99,13 +95,13 @@ public class HeapDumpAnalysis {
     @SuppressFBWarnings(
             value = "NP_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD",
             justification = "key in ObjectToIntMap is written when entry map is generated")
-    public void analyze()
+    public void analyze(InputStream heapDumpStream)
             throws IOException, DumpCorruptedException, HprofParsingCancelledException {
         Path tmpFile = Files.createTempFile("", ".hprof");
         // Copy the heap dump from storage to a temporary file for analysis
         Files.copy(heapDumpStream, tmpFile);
         VerboseOutputCollector vc = new VerboseOutputCollector();
-        reader =
+        HeapDumpReader reader =
                 HeapDumpReader.createReader(
                         new ReadBuffer.CachedReadBufferFactory(
                                 tmpFile.toString(), calculateReadBufMemory()),

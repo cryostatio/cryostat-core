@@ -27,10 +27,12 @@ public class HeapDumpReportGenerator {
         executor = exec;
     }
 
-    public Future<HeapDumpAnalysis> generate(InputStream stream, int readBufferLimit) {
+    public Future<HeapDumpAnalysis> generate(InputStream inputStream, int readBufferLimit) {
         return executor.submit(
                 () -> {
-                    return new HeapDumpAnalysis(stream, readBufferLimit);
+                    HeapDumpAnalysis analysisResult = new HeapDumpAnalysis(readBufferLimit);
+                    analysisResult.analyze(inputStream);
+                    return analysisResult;
                 });
     }
 }
