@@ -16,24 +16,21 @@
 package io.cryostat.core.diagnostic;
 
 import java.io.InputStream;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class InterruptibleHeapDumpReportGenerator {
+public class HeapDumpReportGenerator {
 
-    private final ExecutorService qThread = Executors.newCachedThreadPool();
+    private final ExecutorService executor;
 
-    public InterruptibleHeapDumpReportGenerator() {}
+    public HeapDumpReportGenerator(ExecutorService exec) {
+        executor = exec;
+    }
 
-    public Future<HeapDumpAnalysis> generateInterruptibly(
-            String jvmId, String heapDumpId, InputStream stream) {
-        Objects.requireNonNull(jvmId);
-        Objects.requireNonNull(heapDumpId);
-        return qThread.submit(
+    public Future<HeapDumpAnalysis> generate(InputStream stream, int readBufferLimit) {
+        return executor.submit(
                 () -> {
-                    return new HeapDumpAnalysis(jvmId, heapDumpId, stream);
+                    return new HeapDumpAnalysis(stream, readBufferLimit);
                 });
     }
 }

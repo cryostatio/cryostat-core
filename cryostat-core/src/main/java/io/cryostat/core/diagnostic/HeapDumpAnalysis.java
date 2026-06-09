@@ -15,6 +15,8 @@
  */
 package io.cryostat.core.diagnostic;
 
+import static java.util.Collections.unmodifiableList;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -48,64 +50,74 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 public class HeapDumpAnalysis {
 
     private HeapDumpReader reader;
+    private InputStream heapDumpStream;
+
+    // Passed into the constructor
+    private int readBufferMemoryLimit;
 
     // Reference Chains
-    public List<List<Collections>> collectionClusters;
-    public List<List<DupArrays>> duplicateArrayClusters;
-    public List<List<DupStrings>> duplicateStringClusters;
-    public List<List<HighSizeObjects>> highSizeObjectClusters;
-    public List<List<WeakHashMaps>> weakHashMapClusters;
+    private List<List<Collections>> collectionClusters;
+    private List<List<DupArrays>> duplicateArrayClusters;
+    private List<List<DupStrings>> duplicateStringClusters;
+    private List<List<HighSizeObjects>> highSizeObjectClusters;
+    private List<List<WeakHashMaps>> weakHashMapClusters;
 
     // Class Histogram
-    public List<ObjectHistogram.Entry> objectHistogram;
-    public HistogramStats histogramStats;
+    private List<ObjectHistogram.Entry> objectHistogram;
+    private HistogramStats histogramStats;
 
     // Fundamental Stats
-    public FundamentalStats fundamentalStats;
+    private FundamentalStats fundamentalStats;
 
     // Problem Fields (null)
-    public List<ProblemFieldsEntry> nullProblemFields;
+    private List<ProblemFieldsEntry> nullProblemFields;
     // Problem Fields (nearly null)
-    public List<ProblemFieldsEntry> nearNullProblemFields;
+    private List<ProblemFieldsEntry> nearNullProblemFields;
     // Problem Fields (null)
-    public List<ProblemFieldsEntry> fullBytesFields;
+    private List<ProblemFieldsEntry> fullBytesFields;
     // Problem Fields (nearly null)
-    public List<ProblemFieldsEntry> highBytesFields;
+    private List<ProblemFieldsEntry> highBytesFields;
 
     // Classloader Stats
-    public List<AggregateValue> classLoaderInstanceStats = new ArrayList<AggregateValue>();
-    public List<AggregateValue> classLoaderClassStats = new ArrayList<AggregateValue>();
+    private List<AggregateValue> classLoaderInstanceStats;
+    private List<AggregateValue> classLoaderClassStats;
 
     // String Stats
-    public CompressibleStringStats compressibleStringStats;
-    public DuplicateStringStats duplicateStringStats;
+    private CompressibleStringStats compressibleStringStats;
+    private DuplicateStringStats duplicateStringStats;
 
     private HeapStats heapStats;
     private DetailedStats detailedStats;
 
-    @SuppressFBWarnings({
-        "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD",
-        "NP_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"
-    })
-    public HeapDumpAnalysis(String heapDumpId, String jvmId, InputStream inputStream) {
-        try {
-            Path tmpFile =
-                    Files.createTempFile(String.format("%s-%s", jvmId, heapDumpId), ".hprof");
-            // Copy the heap dump from storage to a temporary file for analysis
-            Files.copy(inputStream, tmpFile);
+    public HeapDumpAnalysis(InputStream inputStream, int readBufferLimit) {
+        heapDumpStream = inputStream;
+        readBufferMemoryLimit = readBufferLimit;
+        classLoaderInstanceStats = new ArrayList<AggregateValue>();
+        classLoaderClassStats = new ArrayList<AggregateValue>();
+    }
 
+    @SuppressFBWarnings(
+            value = "NP_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD",
+            justification = "key in ObjectToIntMap is written when entry map is generated")
+    public void analyze()
+            throws IOException, DumpCorruptedException, HprofParsingCancelledException {
+        Path tmpFile = Files.createTempFile("", ".hprof");
+        // Copy the heap dump from storage to a temporary file for analysis
+        Files.copy(heapDumpStream, tmpFile);
+        VerboseOutputCollector vc = new VerboseOutputCollector();
+        reader =
+                HeapDumpReader.createReader(
+                        new ReadBuffer.CachedReadBufferFactory(
+                                tmpFile.toString(), calculateReadBufMemory()),
+                        0,
+                        vc);
+        Snapshot snapshot = reader.read();
+        try {
             // Parse the heap dump using the JOVerflow libraries
-            VerboseOutputCollector vc = new VerboseOutputCollector();
-            reader =
-                    HeapDumpReader.createReader(
-                            new ReadBuffer.CachedReadBufferFactory(
-                                    tmpFile.toString(), calculateReadBufMemory()),
-                            0,
-                            vc);
-            Snapshot snapshot = reader.read();
             BatchProblemRecorder recorder = new BatchProblemRecorder();
             StandardStatsCalculator ssc = new StandardStatsCalculator(snapshot, recorder, true);
             heapStats = ssc.calculate();
+
             // TODO: Should this be configurable?
             int minOvhdToReport = (int) heapStats.totalObjSize / 1000;
             detailedStats = recorder.getDetailedStats(minOvhdToReport);
@@ -177,24 +189,103 @@ public class HeapDumpAnalysis {
                             heapStats.dupStringStats.nUniqueDupStringValues,
                             heapStats.dupStringStats.dupStringsOverhead);
 
-            // Cleanup
+        } catch (DumpCorruptedException | HprofParsingCancelledException e) {
+            // Rethrow, the caller will deal with it
+            throw e;
+        } finally {
+            // Clean up the temporary file and reset the memory buffer
+            Files.deleteIfExists(tmpFile);
             snapshot.discard();
             snapshot.resetReadBuffer(
                     new ReadBuffer.CachedReadBufferFactory(tmpFile.toString(), 25 * 1024 * 1024));
-            Files.deleteIfExists(tmpFile);
-        } catch (IOException | DumpCorruptedException | HprofParsingCancelledException e) {
-            e.printStackTrace();
         }
     }
 
     @SuppressFBWarnings("DM_GC")
     // Taken from JMC's model generation for the JOverflow UI.
     // Dynamically determine read buffer size, we should have this be configurable
-    private static int calculateReadBufMemory() {
-        System.gc();
-        Runtime runtime = Runtime.getRuntime();
-        long availableMemory = runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory();
-        return (int) Math.min(1000 * 1024 * 1024, availableMemory / 3);
+    private int calculateReadBufMemory() {
+        if (readBufferMemoryLimit == 0) {
+            System.gc();
+            Runtime runtime = Runtime.getRuntime();
+            long availableMemory =
+                    runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory();
+            return (int) Math.min(1000 * 1024 * 1024, availableMemory / 3);
+        } else {
+            return readBufferMemoryLimit;
+        }
+    }
+
+    public List<List<Collections>> getCollectionClusters() {
+        return unmodifiableList(collectionClusters);
+    }
+
+    public List<List<DupArrays>> getDuplicateArrayClusters() {
+        return unmodifiableList(duplicateArrayClusters);
+    }
+
+    public List<List<DupStrings>> getDuplicateStringClusters() {
+        return unmodifiableList(duplicateStringClusters);
+    }
+
+    public List<List<HighSizeObjects>> getHighSizeObjectClusters() {
+        return unmodifiableList(highSizeObjectClusters);
+    }
+
+    public List<List<WeakHashMaps>> getWeakHashMapClusters() {
+        return unmodifiableList(weakHashMapClusters);
+    }
+
+    public List<ObjectHistogram.Entry> getObjectHistogram() {
+        return unmodifiableList(objectHistogram);
+    }
+
+    public HistogramStats getHistogramStats() {
+        return histogramStats;
+    }
+
+    public FundamentalStats getFundamentalStats() {
+        return fundamentalStats;
+    }
+
+    public List<ProblemFieldsEntry> getNullProblemFields() {
+        return unmodifiableList(nullProblemFields);
+    }
+
+    public List<ProblemFieldsEntry> getNearNullProblemFields() {
+        return unmodifiableList(nearNullProblemFields);
+    }
+
+    public List<ProblemFieldsEntry> getFullBytesFields() {
+        return unmodifiableList(fullBytesFields);
+    }
+
+    public List<ProblemFieldsEntry> getHighBytesFields() {
+        return unmodifiableList(highBytesFields);
+    }
+
+    public List<AggregateValue> getClassLoaderInstanceStats() {
+        return unmodifiableList(classLoaderInstanceStats);
+    }
+
+    public List<AggregateValue> getClassLoaderClassStats() {
+        return unmodifiableList(classLoaderClassStats);
+    }
+
+    public CompressibleStringStats getCompressibleStringStats() {
+        return compressibleStringStats;
+    }
+
+    public DuplicateStringStats getDuplicateStringStats() {
+        return duplicateStringStats;
+    }
+
+    public HeapStats getHeapStats() {
+        return heapStats;
+    }
+
+    public DetailedStats getDetailedStats() {
+        return detailedStats;
     }
 
     public record FundamentalStats(
