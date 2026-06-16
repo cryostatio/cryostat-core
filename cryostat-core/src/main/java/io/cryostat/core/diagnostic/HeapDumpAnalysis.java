@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -99,7 +100,7 @@ public class HeapDumpAnalysis {
             throws IOException, DumpCorruptedException, HprofParsingCancelledException {
         Path tmpFile = Files.createTempFile("", ".hprof");
         // Copy the heap dump from storage to a temporary file for analysis
-        Files.copy(heapDumpStream, tmpFile);
+        Files.copy(heapDumpStream, tmpFile, StandardCopyOption.REPLACE_EXISTING);
         VerboseOutputCollector vc = new VerboseOutputCollector();
         HeapDumpReader reader =
                 HeapDumpReader.createReader(
@@ -190,10 +191,10 @@ public class HeapDumpAnalysis {
             throw e;
         } finally {
             // Clean up the temporary file and reset the memory buffer
-            Files.deleteIfExists(tmpFile);
             snapshot.discard();
             snapshot.resetReadBuffer(
                     new ReadBuffer.CachedReadBufferFactory(tmpFile.toString(), 25 * 1024 * 1024));
+            Files.deleteIfExists(tmpFile);
         }
     }
 
@@ -274,14 +275,6 @@ public class HeapDumpAnalysis {
 
     public DuplicateStringStats getDuplicateStringStats() {
         return duplicateStringStats;
-    }
-
-    public HeapStats getHeapStats() {
-        return heapStats;
-    }
-
-    public DetailedStats getDetailedStats() {
-        return detailedStats;
     }
 
     public record FundamentalStats(
