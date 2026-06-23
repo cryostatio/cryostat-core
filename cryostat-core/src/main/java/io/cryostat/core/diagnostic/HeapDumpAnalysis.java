@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.openjdk.jmc.joverflow.batch.BatchProblemRecorder;
@@ -42,7 +43,13 @@ import org.openjdk.jmc.joverflow.heap.parser.ReadBuffer;
 import org.openjdk.jmc.joverflow.stats.ObjectHistogram;
 import org.openjdk.jmc.joverflow.stats.ObjectHistogram.ProblemFieldsEntry;
 import org.openjdk.jmc.joverflow.stats.StandardStatsCalculator;
+import org.openjdk.jmc.joverflow.support.ClassAndOvhdCombo;
+import org.openjdk.jmc.joverflow.support.ClassAndSizeCombo;
 import org.openjdk.jmc.joverflow.support.HeapStats;
+import org.openjdk.jmc.joverflow.support.PrimitiveArrayWrapper;
+import org.openjdk.jmc.joverflow.support.RefChainElement;
+import org.openjdk.jmc.joverflow.support.RefChainElementImpl;
+import org.openjdk.jmc.joverflow.support.ReferenceChain;
 import org.openjdk.jmc.joverflow.util.ObjectToIntMap.Entry;
 import org.openjdk.jmc.joverflow.util.VerboseOutputCollector;
 
@@ -54,27 +61,27 @@ public class HeapDumpAnalysis {
     private int readBufferMemoryLimit;
 
     // Reference Chains
-    private List<List<Collections>> collectionClusters;
-    private List<List<DupArrays>> duplicateArrayClusters;
-    private List<List<DupStrings>> duplicateStringClusters;
-    private List<List<HighSizeObjects>> highSizeObjectClusters;
-    private List<List<WeakHashMaps>> weakHashMapClusters;
+    private List<ProblemCollection> problemCollections;
+    private List<DuplicateArray> duplicateArrays;
+    private List<DuplicateString> duplicateStrings;
+    private List<HighSizeObject> highSizeObjects;
+    private List<WeakHashMapEntry> weakHashMaps;
 
     // Class Histogram
-    private List<ObjectHistogram.Entry> objectHistogram;
+    private List<HistogramEntry> objectHistogram;
     private HistogramStats histogramStats;
 
     // Fundamental Stats
     private FundamentalStats fundamentalStats;
 
     // Problem Fields (null)
-    private List<ProblemFieldsEntry> nullProblemFields;
+    private List<ProblemField> nullProblemFields;
     // Problem Fields (nearly null)
-    private List<ProblemFieldsEntry> nearNullProblemFields;
+    private List<ProblemField> nearNullProblemFields;
     // Problem Fields (null)
-    private List<ProblemFieldsEntry> fullBytesFields;
+    private List<ProblemField> fullBytesFields;
     // Problem Fields (nearly null)
-    private List<ProblemFieldsEntry> highBytesFields;
+    private List<ProblemField> highBytesFields;
 
     // Classloader Stats
     private List<AggregateValue> classLoaderInstanceStats;
@@ -89,8 +96,14 @@ public class HeapDumpAnalysis {
 
     public HeapDumpAnalysis(int readBufferLimit) {
         readBufferMemoryLimit = readBufferLimit;
+        objectHistogram = new ArrayList<HistogramEntry>();
         classLoaderInstanceStats = new ArrayList<AggregateValue>();
         classLoaderClassStats = new ArrayList<AggregateValue>();
+        problemCollections = new ArrayList<ProblemCollection>();
+        duplicateArrays = new ArrayList<DuplicateArray>();
+        duplicateStrings = new ArrayList<DuplicateString>();
+        highSizeObjects = new ArrayList<HighSizeObject>();
+        weakHashMaps = new ArrayList<WeakHashMapEntry>();
     }
 
     @SuppressFBWarnings(
@@ -120,21 +133,179 @@ public class HeapDumpAnalysis {
             detailedStats = recorder.getDetailedStats(minOvhdToReport);
 
             // Reference Chains
-            collectionClusters = detailedStats.collectionClusters;
-            duplicateArrayClusters = detailedStats.dupArrayClusters;
-            duplicateStringClusters = detailedStats.dupStringClusters;
-            highSizeObjectClusters = detailedStats.highSizeObjClusters;
-            weakHashMapClusters = detailedStats.weakHashMapClusters;
+            List<List<Collections>> collectionClusters = detailedStats.collectionClusters;
+            List<List<DupArrays>> duplicateArrayClusters = detailedStats.dupArrayClusters;
+            List<List<DupStrings>> duplicateStringClusters = detailedStats.dupStringClusters;
+            List<List<HighSizeObjects>> highSizeObjectClusters = detailedStats.highSizeObjClusters;
+            List<List<WeakHashMaps>> weakHashMapClusters = detailedStats.weakHashMapClusters;
+
+            // Problem Collections
+            for (Collections r : collectionClusters.get(1)) {
+                System.out.println("======================");
+                RefChainElement classAndField = r.getReferer();
+                String classAndFieldStr = ReferenceChain.toStringInStraightOrder(classAndField);
+                String fieldDefiningClass =
+                        getFieldDefiningClassFromFieldRefChain(
+                                ReferenceChain.getRootElement(classAndField));
+                if (fieldDefiningClass != null) {
+                    classAndFieldStr += " (defined in " + fieldDefiningClass + ")";
+                }
+
+                var problemClasses = new ArrayList<ProblemClass>();
+                for (ClassAndOvhdCombo c : r.getList()) {
+                    var problemClass =
+                            new ProblemClass(
+                                    c.getClazz().idAsString(),
+                                    c.getProblemKind().toString(),
+                                    c.getNumInstances(),
+                                    c.getOverhead());
+                    problemClasses.add(problemClass);
+                }
+
+                problemCollections.add(
+                        new ProblemCollection(
+                                classAndFieldStr,
+                                fieldDefiningClass,
+                                r.getTotalOverhead(),
+                                r.getNumBadObjects(),
+                                r.getNumGoodCollections(),
+                                problemClasses));
+            }
+
+            // Duplicate Arrays
+            for (DupArrays d : duplicateArrayClusters.get(1)) {
+                RefChainElement classAndField = d.getReferer();
+                String classAndFieldStr = ReferenceChain.toStringInStraightOrder(classAndField);
+
+                String fieldDefiningClass =
+                        getFieldDefiningClassFromFieldRefChain(
+                                ReferenceChain.getRootElement(classAndField));
+                if (fieldDefiningClass != null) {
+                    classAndFieldStr += " (defined in " + fieldDefiningClass + ")";
+                }
+
+                var aggregates = new ArrayList<AggregateValue>();
+                for (Entry<PrimitiveArrayWrapper> e : d.getEntries()) {
+                    var array = e.key.getArray();
+                    aggregates.add(new AggregateValue(array.valueAsString(), e.value));
+                }
+
+                DuplicateArray dup =
+                        new DuplicateArray(
+                                classAndFieldStr,
+                                fieldDefiningClass,
+                                d.getNumBadObjects(),
+                                d.getNumNonDupArrays(),
+                                d.getTotalOverhead(),
+                                aggregates);
+                duplicateArrays.add(dup);
+            }
+
+            // Duplicate Strings
+            for (DupStrings d : duplicateStringClusters.get(1)) {
+                RefChainElement classAndField = d.getReferer();
+                String classAndFieldStr = ReferenceChain.toStringInStraightOrder(classAndField);
+
+                String fieldDefiningClass =
+                        getFieldDefiningClassFromFieldRefChain(
+                                ReferenceChain.getRootElement(classAndField));
+                if (fieldDefiningClass != null) {
+                    classAndFieldStr += " (defined in " + fieldDefiningClass + ")";
+                }
+
+                var aggregates = new ArrayList<AggregateValue>();
+                for (Entry<String> e : d.getEntries()) {
+                    aggregates.add(new AggregateValue(e.key, e.value));
+                }
+
+                DuplicateString dup =
+                        new DuplicateString(
+                                classAndFieldStr,
+                                fieldDefiningClass,
+                                d.getTotalOverhead(),
+                                d.getNumBadObjects(),
+                                d.getNumDupBackingCharArrays(),
+                                d.getNumNonDupStrings(),
+                                aggregates);
+                duplicateStrings.add(dup);
+            }
+
+            // HighSizeObjects
+            for (HighSizeObjects h : highSizeObjectClusters.get(1)) {
+                RefChainElement classAndField = h.getReferer();
+                String classAndFieldStr = ReferenceChain.toStringInStraightOrder(classAndField);
+
+                String fieldDefiningClass =
+                        getFieldDefiningClassFromFieldRefChain(
+                                ReferenceChain.getRootElement(classAndField));
+                if (fieldDefiningClass != null) {
+                    classAndFieldStr += " (defined in " + fieldDefiningClass + ")";
+                }
+
+                var objectEntries = new ArrayList<ObjectEntry>();
+                for (ClassAndSizeCombo c : h.getList()) {
+                    objectEntries.add(
+                            new ObjectEntry(
+                                    c.getClazz().idAsString(),
+                                    c.getNumInstances(),
+                                    c.getSizeOrOvhd()));
+                }
+
+                HighSizeObject obj =
+                        new HighSizeObject(
+                                classAndFieldStr,
+                                fieldDefiningClass,
+                                h.getTotalOverhead(),
+                                h.getNumBadObjects(),
+                                objectEntries);
+                highSizeObjects.add(obj);
+            }
+
+            // WeakHashMaps
+            for (WeakHashMaps w : weakHashMapClusters.get(1)) {
+                RefChainElement classAndField = w.getReferer();
+                String classAndFieldStr = ReferenceChain.toStringInStraightOrder(classAndField);
+
+                String fieldDefiningClass =
+                        getFieldDefiningClassFromFieldRefChain(
+                                ReferenceChain.getRootElement(classAndField));
+                if (fieldDefiningClass != null) {
+                    classAndFieldStr += " (defined in " + fieldDefiningClass + ")";
+                }
+                WeakHashMapEntry entry =
+                        new WeakHashMapEntry(
+                                classAndFieldStr,
+                                fieldDefiningClass,
+                                w.getTotalOverhead(),
+                                w.getNumBadObjects(),
+                                Arrays.asList(w.getClasses()));
+                weakHashMaps.add(entry);
+            }
 
             // Object Histogram
             // 0 lists the full histogram
-            objectHistogram = heapStats.objHisto.getListSortedByInclusiveSize(0);
+            for (ObjectHistogram.Entry e : heapStats.objHisto.getListSortedByInclusiveSize(0)) {
+                objectHistogram.add(
+                        new HistogramEntry(
+                                e.getClazz().idAsString(),
+                                e.getNumInstances(),
+                                e.getTotalInclusiveSize(),
+                                e.getTotalShallowSize()));
+            }
+
             // Fields that are null/zero/non-existent
-            nullProblemFields = heapStats.objHisto.getListSortedByNullFieldsOvhd(1.0f);
-            nearNullProblemFields = heapStats.objHisto.getListSortedByNullFieldsOvhd(0.9f);
+            nullProblemFields =
+                    parseProblemFields(heapStats.objHisto.getListSortedByNullFieldsOvhd(1.0f));
+            nearNullProblemFields =
+                    parseProblemFields(heapStats.objHisto.getListSortedByNullFieldsOvhd(0.9f));
             // Fields with unused high bytes (100th, 90th percentile)
-            fullBytesFields = heapStats.objHisto.getListSortedByUnusedHiByteFieldsOvhd(1.0f);
-            highBytesFields = heapStats.objHisto.getListSortedByUnusedHiByteFieldsOvhd(0.9f);
+            fullBytesFields =
+                    parseProblemFields(
+                            heapStats.objHisto.getListSortedByUnusedHiByteFieldsOvhd(1.0f));
+            highBytesFields =
+                    parseProblemFields(
+                            heapStats.objHisto.getListSortedByUnusedHiByteFieldsOvhd(0.9f));
+
             histogramStats =
                     new HistogramStats(
                             heapStats.nClasses,
@@ -213,27 +384,66 @@ public class HeapDumpAnalysis {
         }
     }
 
-    public List<List<Collections>> getCollectionClusters() {
-        return unmodifiableList(collectionClusters);
+    private static String getFieldDefiningClassFromFieldRefChain(RefChainElement desc) {
+        if (!(desc instanceof RefChainElementImpl.AbstractField)) {
+            return null;
+        }
+
+        RefChainElementImpl.AbstractField fieldDesc = (RefChainElementImpl.AbstractField) desc;
+        JavaClass clazz = fieldDesc.getJavaClass();
+        int fieldIdx = fieldDesc.getFieldIdx();
+
+        JavaClass defClazz = clazz.getDeclaringClassForField(fieldIdx);
+        if (defClazz == clazz || defClazz == null) {
+            return null;
+        } else {
+            return defClazz.getName();
+        }
     }
 
-    public List<List<DupArrays>> getDuplicateArrayClusters() {
-        return unmodifiableList(duplicateArrayClusters);
+    private List<ProblemField> parseProblemFields(List<ProblemFieldsEntry> entries) {
+        var returnVal = new ArrayList<ProblemField>();
+        for (ProblemFieldsEntry e : entries) {
+            var fieldList = new ArrayList<Field>();
+            for (int i = 0; i < e.getProblemFieldNames().length; i++) {
+                fieldList.add(
+                        new Field(
+                                e.getProblemFieldDeclaringClasses()[i].idAsString(),
+                                e.getProblemFieldNames()[i],
+                                e.getPerFieldOvhd()[i]));
+            }
+            returnVal.add(
+                    new ProblemField(
+                            e.getClazz().idAsString(),
+                            e.getNumInstances(),
+                            fieldList,
+                            e.getAllProblemFieldsOvhd(),
+                            e.getStatus().toString()));
+        }
+        return returnVal;
     }
 
-    public List<List<DupStrings>> getDuplicateStringClusters() {
-        return unmodifiableList(duplicateStringClusters);
+    public List<ProblemCollection> getProblemCollections() {
+        return unmodifiableList(problemCollections);
     }
 
-    public List<List<HighSizeObjects>> getHighSizeObjectClusters() {
-        return unmodifiableList(highSizeObjectClusters);
+    public List<DuplicateArray> getDuplicateArrayrs() {
+        return unmodifiableList(duplicateArrays);
     }
 
-    public List<List<WeakHashMaps>> getWeakHashMapClusters() {
-        return unmodifiableList(weakHashMapClusters);
+    public List<DuplicateString> getDuplicateStrings() {
+        return unmodifiableList(duplicateStrings);
     }
 
-    public List<ObjectHistogram.Entry> getObjectHistogram() {
+    public List<HighSizeObject> getHighSizeObjects() {
+        return unmodifiableList(highSizeObjects);
+    }
+
+    public List<WeakHashMapEntry> getWeakHashMapClusters() {
+        return unmodifiableList(weakHashMaps);
+    }
+
+    public List<HistogramEntry> getObjectHistogram() {
         return unmodifiableList(objectHistogram);
     }
 
@@ -245,19 +455,19 @@ public class HeapDumpAnalysis {
         return fundamentalStats;
     }
 
-    public List<ProblemFieldsEntry> getNullProblemFields() {
+    public List<ProblemField> getNullProblemFields() {
         return unmodifiableList(nullProblemFields);
     }
 
-    public List<ProblemFieldsEntry> getNearNullProblemFields() {
+    public List<ProblemField> getNearNullProblemFields() {
         return unmodifiableList(nearNullProblemFields);
     }
 
-    public List<ProblemFieldsEntry> getFullBytesFields() {
+    public List<ProblemField> getFullBytesFields() {
         return unmodifiableList(fullBytesFields);
     }
 
-    public List<ProblemFieldsEntry> getHighBytesFields() {
+    public List<ProblemField> getHighBytesFields() {
         return unmodifiableList(highBytesFields);
     }
 
@@ -276,6 +486,10 @@ public class HeapDumpAnalysis {
     public DuplicateStringStats getDuplicateStringStats() {
         return duplicateStringStats;
     }
+
+    public record HistogramEntry(
+            String clazz, int numInstances, long inclusiveSize, long shallowSize) {}
+    ;
 
     public record FundamentalStats(
             int pointerSize,
@@ -310,5 +524,112 @@ public class HeapDumpAnalysis {
     ;
 
     public record AggregateValue(String value, long count) {}
+    ;
+
+    public record ProblemClass(String clazz, String problemKind, int numInstances, int overhead) {}
+    ;
+
+    public record ProblemCollection(
+            String classAndField,
+            String definingClass,
+            int overhead,
+            int badObjs,
+            int goodCollections,
+            List<ProblemClass> classAndOvhds) {
+
+        public ProblemCollection {
+            classAndOvhds = List.copyOf(classAndOvhds);
+        }
+
+        public List<ProblemClass> getClassAndOvhds() {
+            return java.util.Collections.unmodifiableList(classAndOvhds);
+        }
+    }
+    ;
+
+    public record DuplicateArray(
+            String classAndField,
+            String definingClass,
+            int overhead,
+            int badObjs,
+            int nonDupArrays,
+            List<AggregateValue> aggregates) {
+
+        public DuplicateArray {
+            aggregates = List.copyOf(aggregates);
+        }
+
+        public List<AggregateValue> getAggregateValues() {
+            return java.util.Collections.unmodifiableList(aggregates);
+        }
+    }
+    ;
+
+    public record DuplicateString(
+            String classAndField,
+            String definingClass,
+            int overhead,
+            int badObjs,
+            int dupBackingCharArrays,
+            int nonDupStrings,
+            List<AggregateValue> aggregates) {
+
+        public DuplicateString {
+            aggregates = List.copyOf(aggregates);
+        }
+
+        public List<AggregateValue> getAggregateValues() {
+            return java.util.Collections.unmodifiableList(aggregates);
+        }
+    }
+    ;
+
+    public record ObjectEntry(String clazz, int numInstances, int overhead) {}
+    ;
+
+    public record HighSizeObject(
+            String classAndfield,
+            String definingClass,
+            int overhead,
+            int badObjs,
+            List<ObjectEntry> classAndSizeCombos) {
+        public HighSizeObject {
+            classAndSizeCombos = List.copyOf(classAndSizeCombos);
+        }
+
+        public List<ObjectEntry> getClassAndSizeCombos() {
+            return java.util.Collections.unmodifiableList(classAndSizeCombos);
+        }
+    }
+
+    public record WeakHashMapEntry(
+            String classAndField,
+            String definingClass,
+            int overhead,
+            int badObjs,
+            List<String> classes) {
+        public WeakHashMapEntry {
+            classes = List.copyOf(classes);
+        }
+
+        public List<String> getClasses() {
+            return java.util.Collections.unmodifiableList(classes);
+        }
+    }
+    ;
+
+    public record ProblemField(
+            String clazz, int numInstances, List<Field> fields, long overhead, String problemKind) {
+        public ProblemField {
+            fields = List.copyOf(fields);
+        }
+
+        public List<Field> getFields() {
+            return java.util.Collections.unmodifiableList(fields);
+        }
+    }
+    ;
+
+    public record Field(String clazz, String field, long overhead) {}
     ;
 }
