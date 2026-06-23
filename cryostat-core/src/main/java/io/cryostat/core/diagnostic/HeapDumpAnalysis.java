@@ -427,7 +427,7 @@ public class HeapDumpAnalysis {
         return unmodifiableList(problemCollections);
     }
 
-    public List<DuplicateArray> getDuplicateArrayrs() {
+    public List<DuplicateArray> getDuplicateArrays() {
         return unmodifiableList(duplicateArrays);
     }
 
