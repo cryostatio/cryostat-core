@@ -155,7 +155,7 @@ public class HeapDumpAnalysis {
                 for (ClassAndOvhdCombo c : r.getList()) {
                     var problemClass =
                             new ProblemClass(
-                                    c.getClazz().idAsString(),
+                                    c.getClazz().getHumanFriendlyNameWithLoaderIfNeeded(),
                                     c.getProblemKind().toString(),
                                     c.getNumInstances(),
                                     c.getOverhead());
@@ -246,7 +246,7 @@ public class HeapDumpAnalysis {
                 for (ClassAndSizeCombo c : h.getList()) {
                     objectEntries.add(
                             new ObjectEntry(
-                                    c.getClazz().idAsString(),
+                                    c.getClazz().getHumanFriendlyNameWithLoaderIfNeeded(),
                                     c.getNumInstances(),
                                     c.getSizeOrOvhd()));
                 }
@@ -287,7 +287,7 @@ public class HeapDumpAnalysis {
             for (ObjectHistogram.Entry e : heapStats.objHisto.getListSortedByInclusiveSize(0)) {
                 objectHistogram.add(
                         new HistogramEntry(
-                                e.getClazz().idAsString(),
+                                e.getClazz().getHumanFriendlyNameWithLoaderIfNeeded(),
                                 e.getNumInstances(),
                                 e.getTotalInclusiveSize(),
                                 e.getTotalShallowSize()));
@@ -408,13 +408,14 @@ public class HeapDumpAnalysis {
             for (int i = 0; i < e.getProblemFieldNames().length; i++) {
                 fieldList.add(
                         new Field(
-                                e.getProblemFieldDeclaringClasses()[i].idAsString(),
+                                e.getProblemFieldDeclaringClasses()[i]
+                                        .getHumanFriendlyNameWithLoaderIfNeeded(),
                                 e.getProblemFieldNames()[i],
                                 e.getPerFieldOvhd()[i]));
             }
             returnVal.add(
                     new ProblemField(
-                            e.getClazz().idAsString(),
+                            e.getClazz().getHumanFriendlyNameWithLoaderIfNeeded(),
                             e.getNumInstances(),
                             fieldList,
                             e.getAllProblemFieldsOvhd(),
@@ -439,7 +440,7 @@ public class HeapDumpAnalysis {
         return unmodifiableList(highSizeObjects);
     }
 
-    public List<WeakHashMapEntry> getWeakHashMapClusters() {
+    public List<WeakHashMapEntry> getWeakHashMaps() {
         return unmodifiableList(weakHashMaps);
     }
 
@@ -559,7 +560,7 @@ public class HeapDumpAnalysis {
             aggregates = List.copyOf(aggregates);
         }
 
-        public List<AggregateValue> getAggregateValues() {
+        public List<AggregateValue> getAggregates() {
             return java.util.Collections.unmodifiableList(aggregates);
         }
     }
@@ -588,7 +589,7 @@ public class HeapDumpAnalysis {
     ;
 
     public record HighSizeObject(
-            String classAndfield,
+            String classAndField,
             String definingClass,
             int overhead,
             int badObjs,
