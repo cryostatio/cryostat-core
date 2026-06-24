@@ -161,7 +161,7 @@ jobs:
       run: podman tag cryostat:latest ghcr.io/${{ github.repository_owner }}/cryostat-core:pr-${{ github.event.number }}-${{ github.event.pull_request.head.sha }}-linux
     - name: Push PR test image to ghcr.io
       id: push-cryostat-to-ghcr
-      uses: redhat-actions/push-to-registry@6a46770abca42ac80304301261712a93af6289a0 # v2.2.1
+      uses: redhat-actions/push-to-registry@f787883d70a3cc66d399816d0385ac4aec7079f9 # v2.5.1
       with:
         image: cryostat-core
         tags: pr-${{ github.event.number }}-${{ github.event.pull_request.head.sha }}-linux
