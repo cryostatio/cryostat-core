@@ -46,7 +46,7 @@ jobs:
           11
           17
         distribution: 'temurin'
-    - uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
+    - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ~/.m2
         key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml') }}
@@ -73,7 +73,7 @@ jobs:
         repository: ${{ github.event.pull_request.head.repo.full_name }}
         ref: ${{ github.event.pull_request.head.ref }}
         fetch-depth: 0
-    - uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
+    - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ~/.m2
         key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml') }}
@@ -98,7 +98,7 @@ jobs:
         githubServer: false
     - run: git submodule init && git submodule update
     - name: Cache yarn packages
-      uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: "./src/main/webui/.yarn/cache"
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
