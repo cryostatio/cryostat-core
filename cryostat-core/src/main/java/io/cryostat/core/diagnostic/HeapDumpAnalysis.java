@@ -94,6 +94,11 @@ public class HeapDumpAnalysis {
     private HeapStats heapStats;
     private DetailedStats detailedStats;
 
+    // Default Constructor for serializer
+    public HeapDumpAnalysis() {
+        this(0);
+    }
+
     public HeapDumpAnalysis(int readBufferLimit) {
         readBufferMemoryLimit = readBufferLimit;
         objectHistogram = new ArrayList<HistogramEntry>();
