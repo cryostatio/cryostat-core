@@ -89,6 +89,7 @@
   <org.mockito.version>5.23.0</org.mockito.version>
   <org.jacoco.maven.plugin.version>0.8.15</org.jacoco.maven.plugin.version>
   <com.diffplug.spotless.maven.plugin.version>3.7.0</com.diffplug.spotless.maven.plugin.version>
+  <com.google.java-format.version>1.35.0</com.google.java-format.version>
   <org.slf4j.version>2.0.18</org.slf4j.version>
 
   <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
@@ -279,7 +280,7 @@
             <exclude>src/main/java/org/openjdk/jmc/**</exclude>
           </excludes>
           <googleJavaFormat>
-            <version>1.17.0</version>
+            <version>${com.google.java-format.version}</version>
             <style>AOSP</style>
             <reflowLongStrings>true</reflowLongStrings>
           </googleJavaFormat>
