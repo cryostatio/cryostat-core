@@ -15,8 +15,6 @@
  */
 package io.cryostat.core.diagnostic;
 
-import static java.util.Collections.unmodifiableList;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -426,27 +424,27 @@ public class HeapDumpAnalysis {
     }
 
     public List<ProblemCollection> getProblemCollections() {
-        return unmodifiableList(problemCollections);
+        return new ArrayList<ProblemCollection>(problemCollections);
     }
 
     public List<DuplicateArray> getDuplicateArrays() {
-        return unmodifiableList(duplicateArrays);
+        return new ArrayList<DuplicateArray>(duplicateArrays);
     }
 
     public List<DuplicateString> getDuplicateStrings() {
-        return unmodifiableList(duplicateStrings);
+        return new ArrayList<DuplicateString>(duplicateStrings);
     }
 
     public List<HighSizeObject> getHighSizeObjects() {
-        return unmodifiableList(highSizeObjects);
+        return new ArrayList<HighSizeObject>(highSizeObjects);
     }
 
     public List<WeakHashMapEntry> getWeakHashMaps() {
-        return unmodifiableList(weakHashMaps);
+        return new ArrayList<WeakHashMapEntry>(weakHashMaps);
     }
 
     public List<HistogramEntry> getObjectHistogram() {
-        return unmodifiableList(objectHistogram);
+        return new ArrayList<HistogramEntry>(objectHistogram);
     }
 
     public HistogramStats getHistogramStats() {
@@ -458,27 +456,27 @@ public class HeapDumpAnalysis {
     }
 
     public List<ProblemField> getNullProblemFields() {
-        return unmodifiableList(nullProblemFields);
+        return new ArrayList<ProblemField>(nullProblemFields);
     }
 
     public List<ProblemField> getNearNullProblemFields() {
-        return unmodifiableList(nearNullProblemFields);
+        return new ArrayList<ProblemField>(nearNullProblemFields);
     }
 
     public List<ProblemField> getFullBytesFields() {
-        return unmodifiableList(fullBytesFields);
+        return new ArrayList<ProblemField>(fullBytesFields);
     }
 
     public List<ProblemField> getHighBytesFields() {
-        return unmodifiableList(highBytesFields);
+        return new ArrayList<ProblemField>(highBytesFields);
     }
 
     public List<AggregateValue> getClassLoaderInstanceStats() {
-        return unmodifiableList(classLoaderInstanceStats);
+        return new ArrayList<AggregateValue>(classLoaderInstanceStats);
     }
 
     public List<AggregateValue> getClassLoaderClassStats() {
-        return unmodifiableList(classLoaderClassStats);
+        return new ArrayList<AggregateValue>(classLoaderClassStats);
     }
 
     public CompressibleStringStats getCompressibleStringStats() {
@@ -544,7 +542,7 @@ public class HeapDumpAnalysis {
         }
 
         public List<ProblemClass> getClassAndOvhds() {
-            return java.util.Collections.unmodifiableList(classAndOvhds);
+            return new ArrayList<ProblemClass>(classAndOvhds);
         }
     }
     ;
@@ -562,7 +560,7 @@ public class HeapDumpAnalysis {
         }
 
         public List<AggregateValue> getAggregates() {
-            return java.util.Collections.unmodifiableList(aggregates);
+            return new ArrayList<AggregateValue>(aggregates);
         }
     }
     ;
@@ -581,7 +579,7 @@ public class HeapDumpAnalysis {
         }
 
         public List<AggregateValue> getAggregateValues() {
-            return java.util.Collections.unmodifiableList(aggregates);
+            return new ArrayList<AggregateValue>(aggregates);
         }
     }
     ;
@@ -600,7 +598,7 @@ public class HeapDumpAnalysis {
         }
 
         public List<ObjectEntry> getClassAndSizeCombos() {
-            return java.util.Collections.unmodifiableList(classAndSizeCombos);
+            return new ArrayList<ObjectEntry>(classAndSizeCombos);
         }
     }
 
@@ -615,7 +613,7 @@ public class HeapDumpAnalysis {
         }
 
         public List<String> getClasses() {
-            return java.util.Collections.unmodifiableList(classes);
+            return new ArrayList<String>(classes);
         }
     }
     ;
@@ -627,7 +625,7 @@ public class HeapDumpAnalysis {
         }
 
         public List<Field> getFields() {
-            return java.util.Collections.unmodifiableList(fields);
+            return new ArrayList<Field>(fields);
         }
     }
     ;
