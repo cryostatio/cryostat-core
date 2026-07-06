@@ -130,7 +130,6 @@ public class HeapDumpAnalysis {
             StandardStatsCalculator ssc = new StandardStatsCalculator(snapshot, recorder, true);
             heapStats = ssc.calculate();
 
-            // TODO: Should this be configurable?
             int minOvhdToReport = (int) heapStats.totalObjSize / 1000;
             detailedStats = recorder.getDetailedStats(minOvhdToReport);
 
