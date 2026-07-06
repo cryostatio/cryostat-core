@@ -79,7 +79,12 @@ jobs:
         distribution: 'temurin'
         cache: 'maven'
     - id: get_core_version
-      run: echo "core_version=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+      run: |
+        base_version=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
+        short_sha=$(git rev-parse --short HEAD)
+        core_version="${base_version}-${short_sha}"
+        ./mvnw -B versions:set -DnewVersion="${core_version}" -DprocessAllModules
+        echo "core_version=${core_version}" >> $GITHUB_OUTPUT
     - name: Compile and test cryostat-core
       run: ./mvnw -B clean install -DskipTests=false
     - name: Upload cryostat-core artifacts
