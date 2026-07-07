@@ -140,15 +140,9 @@ public class HeapDumpAnalysis {
 
             // Problem Collections
             for (Collections r : collectionClusters.get(1)) {
-                System.out.println("======================");
                 RefChainElement classAndField = r.getReferer();
-                String classAndFieldStr = ReferenceChain.toStringInStraightOrder(classAndField);
-                String fieldDefiningClass =
-                        getFieldDefiningClassFromFieldRefChain(
-                                ReferenceChain.getRootElement(classAndField));
-                if (fieldDefiningClass != null) {
-                    classAndFieldStr += " (defined in " + fieldDefiningClass + ")";
-                }
+                String fieldDefiningClass = getFieldDefiningClass(classAndField);
+                String classAndFieldStr = classAndFieldLabel(classAndField, fieldDefiningClass);
 
                 var problemClasses = new ArrayList<ProblemClass>();
                 for (ClassAndOvhdCombo c : r.getList()) {
@@ -174,14 +168,8 @@ public class HeapDumpAnalysis {
             // Duplicate Arrays
             for (DupArrays d : duplicateArrayClusters.get(1)) {
                 RefChainElement classAndField = d.getReferer();
-                String classAndFieldStr = ReferenceChain.toStringInStraightOrder(classAndField);
-
-                String fieldDefiningClass =
-                        getFieldDefiningClassFromFieldRefChain(
-                                ReferenceChain.getRootElement(classAndField));
-                if (fieldDefiningClass != null) {
-                    classAndFieldStr += " (defined in " + fieldDefiningClass + ")";
-                }
+                String fieldDefiningClass = getFieldDefiningClass(classAndField);
+                String classAndFieldStr = classAndFieldLabel(classAndField, fieldDefiningClass);
 
                 var aggregates = new ArrayList<AggregateValue>();
                 for (Entry<PrimitiveArrayWrapper> e : d.getEntries()) {
@@ -203,14 +191,8 @@ public class HeapDumpAnalysis {
             // Duplicate Strings
             for (DupStrings d : duplicateStringClusters.get(1)) {
                 RefChainElement classAndField = d.getReferer();
-                String classAndFieldStr = ReferenceChain.toStringInStraightOrder(classAndField);
-
-                String fieldDefiningClass =
-                        getFieldDefiningClassFromFieldRefChain(
-                                ReferenceChain.getRootElement(classAndField));
-                if (fieldDefiningClass != null) {
-                    classAndFieldStr += " (defined in " + fieldDefiningClass + ")";
-                }
+                String fieldDefiningClass = getFieldDefiningClass(classAndField);
+                String classAndFieldStr = classAndFieldLabel(classAndField, fieldDefiningClass);
 
                 var aggregates = new ArrayList<AggregateValue>();
                 for (Entry<String> e : d.getEntries()) {
@@ -232,14 +214,8 @@ public class HeapDumpAnalysis {
             // HighSizeObjects
             for (HighSizeObjects h : highSizeObjectClusters.get(1)) {
                 RefChainElement classAndField = h.getReferer();
-                String classAndFieldStr = ReferenceChain.toStringInStraightOrder(classAndField);
-
-                String fieldDefiningClass =
-                        getFieldDefiningClassFromFieldRefChain(
-                                ReferenceChain.getRootElement(classAndField));
-                if (fieldDefiningClass != null) {
-                    classAndFieldStr += " (defined in " + fieldDefiningClass + ")";
-                }
+                String fieldDefiningClass = getFieldDefiningClass(classAndField);
+                String classAndFieldStr = classAndFieldLabel(classAndField, fieldDefiningClass);
 
                 var objectEntries = new ArrayList<ObjectEntry>();
                 for (ClassAndSizeCombo c : h.getList()) {
@@ -356,9 +332,6 @@ public class HeapDumpAnalysis {
                             heapStats.dupStringStats.nUniqueDupStringValues,
                             heapStats.dupStringStats.dupStringsOverhead);
 
-        } catch (DumpCorruptedException | HprofParsingCancelledException e) {
-            // Rethrow, the caller will deal with it
-            throw e;
         } finally {
             // Clean up the temporary file and reset the memory buffer
             snapshot.discard();
@@ -381,6 +354,18 @@ public class HeapDumpAnalysis {
         } else {
             return readBufferMemoryLimit;
         }
+    }
+
+    private String getFieldDefiningClass(RefChainElement r) {
+        return getFieldDefiningClassFromFieldRefChain(ReferenceChain.getRootElement(r));
+    }
+
+    private String classAndFieldLabel(RefChainElement r, String fieldDefiningClass) {
+        String classAndFieldStr = ReferenceChain.toStringInStraightOrder(r);
+        if (fieldDefiningClass != null) {
+            classAndFieldStr += " (defined in " + fieldDefiningClass + ")";
+        }
+        return classAndFieldStr;
     }
 
     private static String getFieldDefiningClassFromFieldRefChain(RefChainElement desc) {
