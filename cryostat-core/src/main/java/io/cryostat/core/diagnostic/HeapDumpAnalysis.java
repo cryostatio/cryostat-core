@@ -16,6 +16,7 @@
 package io.cryostat.core.diagnostic;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -105,12 +106,13 @@ public class HeapDumpAnalysis {
         weakHashMaps = new ArrayList<WeakHashMapEntry>();
     }
 
-    public void analyze(String fileName)
+    public void analyze(Path file)
             throws IOException, DumpCorruptedException, HprofParsingCancelledException {
         VerboseOutputCollector vc = new VerboseOutputCollector();
         HeapDumpReader reader =
                 HeapDumpReader.createReader(
-                        new ReadBuffer.CachedReadBufferFactory(fileName, calculateReadBufMemory()),
+                        new ReadBuffer.CachedReadBufferFactory(
+                                file.toString(), calculateReadBufMemory()),
                         0,
                         vc);
         Snapshot snapshot = reader.read();
@@ -328,7 +330,7 @@ public class HeapDumpAnalysis {
             // Clean up the temporary file and reset the memory buffer
             snapshot.discard();
             snapshot.resetReadBuffer(
-                    new ReadBuffer.CachedReadBufferFactory(fileName, 25 * 1024 * 1024));
+                    new ReadBuffer.CachedReadBufferFactory(file.toString(), 25 * 1024 * 1024));
         }
     }
 

@@ -15,6 +15,7 @@
  */
 package io.cryostat.core.diagnostic;
 
+import java.nio.file.Path;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -28,13 +29,13 @@ public final class HeapDumpReportGenerator {
         executor = exec;
     }
 
-    public Future<HeapDumpAnalysis> generate(String fileName, int readBufferLimit) {
-        Objects.requireNonNull(fileName);
+    public Future<HeapDumpAnalysis> generate(Path file, int readBufferLimit) {
+        Objects.requireNonNull(file);
         Objects.requireNonNull(readBufferLimit);
         return executor.submit(
                 () -> {
                     HeapDumpAnalysis analysisResult = new HeapDumpAnalysis(readBufferLimit);
-                    analysisResult.analyze(fileName);
+                    analysisResult.analyze(file);
                     return analysisResult;
                 });
     }
