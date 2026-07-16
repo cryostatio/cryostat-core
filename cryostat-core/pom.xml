@@ -57,14 +57,6 @@
   <org.openjdk.jmc.version>9.1.2</org.openjdk.jmc.version>
   <org.jsoup.version>1.22.2</org.jsoup.version>
 </properties>
-<repositories>
-  <repository>
-    <id>adoptium</id>
-    <name>Adoptium</name>
-    <url>https://adoptium.jfrog.io/artifactory/jmc-libs-snapshots</url>
-    <layout>default</layout>
-  </repository>
-</repositories>
 <dependencies>
   <dependency>
     <groupId>io.cryostat</groupId>
@@ -117,11 +109,6 @@
   <dependency>
     <groupId>commons-io</groupId>
     <artifactId>commons-io</artifactId>
-  </dependency>
-  <dependency>
-    <groupId>org.openjdk.jmc</groupId>
-    <artifactId>joverflow</artifactId>
-    <version>10.0.0-SNAPSHOT</version>
   </dependency>
   <dependency>
     <groupId>org.jsoup</groupId>
