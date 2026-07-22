@@ -83,7 +83,7 @@
   <org.apache.commons.text.version>1.15.0</org.apache.commons.text.version>
 
   <com.github.spotbugs.version>4.10.2</com.github.spotbugs.version>
-  <com.github.spotbugs.plugin.version>4.10.2.0</com.github.spotbugs.plugin.version>
+  <com.github.spotbugs.plugin.version>4.10.3.0</com.github.spotbugs.plugin.version>
   <org.junit.jupiter.version>6.1.2</org.junit.jupiter.version>
   <org.hamcrest.version>3.0</org.hamcrest.version>
   <org.mockito.version>5.23.0</org.mockito.version>
