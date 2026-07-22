@@ -56,6 +56,7 @@
   <io.cryostat.libcryostat.version>${project.version}</io.cryostat.libcryostat.version>
   <org.openjdk.jmc.version>9.1.2</org.openjdk.jmc.version>
   <org.jsoup.version>1.22.2</org.jsoup.version>
+  <com.google.java-format.version>1.35.0</com.google.java-format.version>
 </properties>
 <dependencies>
   <dependency>
@@ -241,7 +242,7 @@
             <exclude>src/main/java/org/openjdk/jmc/**</exclude>
           </excludes>
           <googleJavaFormat>
-            <version>1.17.0</version>
+            <version>${com.google.java-format.version}</version>
             <style>AOSP</style>
             <reflowLongStrings>true</reflowLongStrings>
           </googleJavaFormat>
