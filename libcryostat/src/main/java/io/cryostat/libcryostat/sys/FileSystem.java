@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -75,7 +76,10 @@ public class FileSystem {
 
     public List<String> listDirectoryChildren(Path path) throws IOException {
         try (Stream<Path> stream = Files.list(path)) {
-            return stream.map(p -> p.getFileName().toString()).collect(Collectors.toList());
+            return stream.map(Path::getFileName)
+                    .filter(Objects::nonNull)
+                    .map(Path::toString)
+                    .collect(Collectors.toList());
         }
     }
 
