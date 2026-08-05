@@ -47,6 +47,7 @@
 <properties>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   <java.version>11</java.version>
+  <com.google.java-format.version>1.35.0</com.google.java-format.version>
 </properties>
 
 <dependencies>
@@ -177,7 +178,7 @@
       <configuration>
         <java>
           <googleJavaFormat>
-            <version>1.17.0</version>
+            <version>${com.google.java-format.version}</version>
             <style>AOSP</style>
             <reflowLongStrings>true</reflowLongStrings>
           </googleJavaFormat>
