@@ -54,7 +54,7 @@ public class SmartTrigger {
         this.durationConstraint =
                 targetDuration.toMillis() == 0
                         ? ""
-                        : ";TargetDuration>duration(\"" + targetDuration.toMillis() + "ms\")";
+                        : "TargetDuration>duration(\"" + targetDuration.toMillis() + "ms\")";
         this.expression =
                 expression + (durationConstraint.isBlank() ? "" : ";" + durationConstraint);
         this.firstMetTime = new Date(0);
