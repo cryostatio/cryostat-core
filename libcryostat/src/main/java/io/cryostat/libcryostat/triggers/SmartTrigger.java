@@ -34,8 +34,6 @@ public class SmartTrigger {
 
     // Unique UUID to identify the smart trigger
     private final String id;
-    private final String expression;
-    private final String durationConstraint;
     private final String triggerCondition;
     private final String recordingTemplateName;
     private final Duration targetDuration;
@@ -51,22 +49,12 @@ public class SmartTrigger {
         this.state = TriggerState.NEW;
         triggerCondition = expression;
         targetDuration = Duration.ofMillis(duration);
-        this.durationConstraint =
-                targetDuration.toMillis() == 0
-                        ? ""
-                        : "TargetDuration>duration(\"" + targetDuration.toMillis() + "ms\")";
-        this.expression =
-                expression + (durationConstraint.isBlank() ? "" : ";" + durationConstraint);
         this.firstMetTime = new Date(0);
     }
 
     // Default Constructor for ObjectMapper Serialization
     public SmartTrigger() {
         this("", "", 0, "");
-    }
-
-    public String getExpression() {
-        return expression;
     }
 
     public TriggerState getState() {
@@ -105,19 +93,9 @@ public class SmartTrigger {
         return triggerCondition;
     }
 
-    public String getDurationConstraint() {
-        return durationConstraint;
-    }
-
     @Override
     public int hashCode() {
-        return Objects.hash(
-                id,
-                expression,
-                durationConstraint,
-                triggerCondition,
-                recordingTemplateName,
-                targetDuration);
+        return Objects.hash(id, triggerCondition, recordingTemplateName, targetDuration);
     }
 
     @Override
@@ -133,8 +111,6 @@ public class SmartTrigger {
         }
         SmartTrigger other = (SmartTrigger) obj;
         return Objects.equals(id, other.id)
-                && Objects.equals(expression, other.expression)
-                && Objects.equals(durationConstraint, other.durationConstraint)
                 && Objects.equals(triggerCondition, other.triggerCondition)
                 && Objects.equals(recordingTemplateName, other.recordingTemplateName)
                 && Objects.equals(targetDuration, other.targetDuration);
@@ -144,10 +120,6 @@ public class SmartTrigger {
     public String toString() {
         return "SmartTrigger [id="
                 + id
-                + ", expression="
-                + expression
-                + ", durationConstraint="
-                + durationConstraint
                 + ", recordingTemplateName="
                 + recordingTemplateName
                 + ", targetDuration="
