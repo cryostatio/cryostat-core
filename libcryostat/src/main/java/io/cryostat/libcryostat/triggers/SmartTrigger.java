@@ -18,15 +18,8 @@ package io.cryostat.libcryostat.triggers;
 import java.time.Duration;
 import java.util.Date;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class SmartTrigger {
-
-    private static final String DURATION_PATTERN_STR =
-            "(TargetDuration\\s*[<>=]+\\s*duration\\(['\"](\\d+[sSmMhH]+)['\"]\\))";
-    private static final String DEFINITION_PATTERN_STR = "(.+)\\s*(?:;)\\s*" + DURATION_PATTERN_STR;
-    private static final Pattern DEFINITION_PATTERN = Pattern.compile(DEFINITION_PATTERN_STR);
 
     public enum TriggerState {
         /* Newly Created or Condition not met. */
@@ -41,8 +34,6 @@ public class SmartTrigger {
 
     // Unique UUID to identify the smart trigger
     private final String id;
-    private final String expression;
-    private final String durationConstraint;
     private final String triggerCondition;
     private final String recordingTemplateName;
     private final Duration targetDuration;
@@ -52,32 +43,18 @@ public class SmartTrigger {
     private volatile Date firstMetTime;
     private volatile TriggerState state;
 
-    public SmartTrigger(String id, String expression, String templateName) {
-        this.expression = expression;
+    public SmartTrigger(String id, String expression, long duration, String templateName) {
         this.recordingTemplateName = templateName;
         this.id = id;
         this.state = TriggerState.NEW;
-        Matcher m = DEFINITION_PATTERN.matcher(expression);
-        if (m.matches()) {
-            triggerCondition = m.group(1).replaceAll("\\s", "");
-            durationConstraint = m.group(2).replaceAll("'", "\"").replaceAll("\\s", "");
-            /* Duration.parse requires timestamps in ISO8601 Duration format */
-            targetDuration = Duration.parse("PT" + m.group(3).replaceAll("\\s", ""));
-        } else {
-            triggerCondition = expression;
-            durationConstraint = "";
-            targetDuration = Duration.ZERO;
-        }
+        triggerCondition = expression;
+        targetDuration = Duration.ofMillis(duration);
         this.firstMetTime = new Date(0);
     }
 
     // Default Constructor for ObjectMapper Serialization
     public SmartTrigger() {
-        this("", "", "");
-    }
-
-    public String getExpression() {
-        return expression;
+        this("", "", 0, "");
     }
 
     public TriggerState getState() {
@@ -116,19 +93,9 @@ public class SmartTrigger {
         return triggerCondition;
     }
 
-    public String getDurationConstraint() {
-        return durationConstraint;
-    }
-
     @Override
     public int hashCode() {
-        return Objects.hash(
-                id,
-                expression,
-                durationConstraint,
-                triggerCondition,
-                recordingTemplateName,
-                targetDuration);
+        return Objects.hash(id, triggerCondition, recordingTemplateName, targetDuration);
     }
 
     @Override
@@ -144,8 +111,6 @@ public class SmartTrigger {
         }
         SmartTrigger other = (SmartTrigger) obj;
         return Objects.equals(id, other.id)
-                && Objects.equals(expression, other.expression)
-                && Objects.equals(durationConstraint, other.durationConstraint)
                 && Objects.equals(triggerCondition, other.triggerCondition)
                 && Objects.equals(recordingTemplateName, other.recordingTemplateName)
                 && Objects.equals(targetDuration, other.targetDuration);
@@ -155,10 +120,6 @@ public class SmartTrigger {
     public String toString() {
         return "SmartTrigger [id="
                 + id
-                + ", expression="
-                + expression
-                + ", durationConstraint="
-                + durationConstraint
                 + ", recordingTemplateName="
                 + recordingTemplateName
                 + ", targetDuration="
