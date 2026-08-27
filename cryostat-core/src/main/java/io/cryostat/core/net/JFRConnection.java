@@ -33,6 +33,7 @@ import io.cryostat.core.templates.TemplateService;
 import io.cryostat.libcryostat.JvmIdentifier;
 import io.cryostat.libcryostat.net.IDException;
 import io.cryostat.libcryostat.net.MBeanMetrics;
+import io.cryostat.libcryostat.net.MbeanAttributeMap;
 import io.cryostat.libcryostat.sys.Clock;
 import io.cryostat.libcryostat.triggers.SmartTrigger;
 
@@ -86,6 +87,12 @@ public interface JFRConnection extends AutoCloseable {
     public default void disableSmartTrigger(String definitions) throws ConnectionException {
         throw new ConnectionException("Unimplemented");
     }
+
+    public List<MbeanAttributeMap> queryMbeanAttributes()
+            throws IOException,
+                    InstanceNotFoundException,
+                    IntrospectionException,
+                    ReflectionException;
 
     public MBeanMetrics getMBeanMetrics()
             throws ConnectionException,
