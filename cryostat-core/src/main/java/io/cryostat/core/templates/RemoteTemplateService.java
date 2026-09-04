@@ -78,6 +78,11 @@ public class RemoteTemplateService extends AbstractTemplateService {
                                                     + " elements");
                                 }
                                 Element configuration = els.first();
+                                if (configuration == null) {
+                                    throw new MalformedXMLException(
+                                            "Document did not contain \"configuration\""
+                                                    + " element");
+                                }
                                 if (!configuration.hasAttr("label")) {
                                     throw new MalformedXMLException(
                                             "Configuration element did not have \"label\""
