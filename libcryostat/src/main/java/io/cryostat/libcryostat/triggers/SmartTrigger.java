@@ -49,7 +49,7 @@ public class SmartTrigger {
     private volatile TriggerState state;
     private volatile long stopDuration;
     private volatile Date stopMetTime;
-    private volatile long executionTarget;
+    private volatile long invocationCountTarget;
 
     public SmartTrigger(
             String id,
@@ -57,7 +57,7 @@ public class SmartTrigger {
             String stopCondition,
             long duration,
             long stopDuration,
-            long executionTarget,
+            long invocationCountTarget,
             String templateName) {
         this.recordingTemplateName = templateName;
         this.id = id;
@@ -66,7 +66,7 @@ public class SmartTrigger {
         targetDuration = Duration.ofMillis(duration);
         this.firstMetTime = new Date(0);
         this.stopMetTime = new Date(0);
-        this.executionTarget = executionTarget;
+        this.invocationCountTarget = invocationCountTarget;
         this.stopCondition = stopCondition;
         this.stopDuration = stopDuration;
     }
@@ -128,12 +128,12 @@ public class SmartTrigger {
         return new Date(stopMetTime.getTime());
     }
 
-    public void setExecutionTarget(long target) {
-        this.executionTarget = target;
+    public void setInvocationCountTarget(long target) {
+        this.invocationCountTarget = target;
     }
 
-    public long getExecutionTarget() {
-        return executionTarget;
+    public long getInvocationCountTarget() {
+        return invocationCountTarget;
     }
 
     public String getTriggerCondition() {
