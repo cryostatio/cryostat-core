@@ -31,7 +31,9 @@ import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
+import javax.management.MBeanInfo;
 import javax.management.MalformedObjectNameException;
+import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeData;
@@ -62,6 +64,8 @@ import io.cryostat.core.templates.TemplateService;
 import io.cryostat.libcryostat.JvmIdentifier;
 import io.cryostat.libcryostat.net.IDException;
 import io.cryostat.libcryostat.net.MBeanMetrics;
+import io.cryostat.libcryostat.net.MbeanAttributeMap;
+import io.cryostat.libcryostat.net.MbeanAttributeMap.MBeanAttribute;
 import io.cryostat.libcryostat.net.MemoryMetrics;
 import io.cryostat.libcryostat.net.OperatingSystemMetrics;
 import io.cryostat.libcryostat.net.RuntimeMetrics;
@@ -427,5 +431,35 @@ public class JFRJMXConnection implements JFRConnection {
         public ConnectionFailureException(String message) {
             super(message);
         }
+    }
+
+    @Override
+    public synchronized List<MbeanAttributeMap> queryMbeanAttributes()
+            throws IOException,
+                    InstanceNotFoundException,
+                    IntrospectionException,
+                    ReflectionException {
+        if (!isConnected()) {
+            connect();
+        }
+        List<MbeanAttributeMap> attributeMap = new ArrayList<MbeanAttributeMap>();
+        // null,null returns all Mbeans
+        Set<ObjectInstance> beans = rjmxConnection.getMBeanServer().queryMBeans(null, null);
+        for (ObjectInstance bean : beans) {
+            List<MBeanAttribute> attrs = new ArrayList<>();
+            MBeanInfo info = rjmxConnection.getMBeanServer().getMBeanInfo(bean.getObjectName());
+            for (MBeanAttributeInfo a : info.getAttributes()) {
+                attrs.add(
+                        new MBeanAttribute(
+                                a.getName(),
+                                a.getType(),
+                                a.getDescription(),
+                                bean.getClassName(),
+                                a.isReadable(),
+                                a.isWritable()));
+            }
+            attributeMap.add(new MbeanAttributeMap(bean.getClassName(), attrs));
+        }
+        return attributeMap;
     }
 }
