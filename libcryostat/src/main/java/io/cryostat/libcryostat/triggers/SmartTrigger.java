@@ -29,6 +29,10 @@ public class SmartTrigger {
         /* Condition has not been met and target Duration has not been met */
         WAITING_LOW,
         /* Conditions have been met and recording has started */
+        RECORDING_ACTIVE,
+        /* Conditions no longer met, waiting for threshold */
+        RECORDING_STOPPING,
+        /* All conditions met, can be removed */
         COMPLETE
     };
 
@@ -37,24 +41,51 @@ public class SmartTrigger {
     private final String triggerCondition;
     private final String recordingTemplateName;
     private final Duration targetDuration;
+    private final String stopCondition;
     /* Keep track of the time the condition was first met for
      * sustained durations
      */
     private volatile Date firstMetTime;
     private volatile TriggerState state;
+    private volatile long stopDuration;
+    private volatile Date stopMetTime;
+    private volatile long invocationCountTarget;
 
-    public SmartTrigger(String id, String expression, long duration, String templateName) {
+    public SmartTrigger(
+            String id,
+            String expression,
+            String stopCondition,
+            long duration,
+            long stopDuration,
+            long invocationCountTarget,
+            String templateName) {
         this.recordingTemplateName = templateName;
         this.id = id;
         this.state = TriggerState.NEW;
         triggerCondition = expression;
         targetDuration = Duration.ofMillis(duration);
         this.firstMetTime = new Date(0);
+        this.stopMetTime = new Date(0);
+        this.invocationCountTarget = invocationCountTarget;
+        this.stopCondition = stopCondition;
+        this.stopDuration = stopDuration;
     }
 
     // Default Constructor for ObjectMapper Serialization
     public SmartTrigger() {
-        this("", "", 0, "");
+        this("", "", "", 0, 0, -1, "");
+    }
+
+    public long getStopDuration() {
+        return stopDuration;
+    }
+
+    public void setStopDuration(long duration) {
+        this.stopDuration = duration;
+    }
+
+    public String getStopCondition() {
+        return stopCondition;
     }
 
     public TriggerState getState() {
@@ -87,6 +118,22 @@ public class SmartTrigger {
 
     public Date getTimeConditionFirstMet() {
         return new Date(firstMetTime.getTime());
+    }
+
+    public void setTimeStopConditionFirstMet(Date date) {
+        this.stopMetTime = new Date(date.getTime());
+    }
+
+    public Date getTimeStopConditionFirstMet() {
+        return new Date(stopMetTime.getTime());
+    }
+
+    public void setInvocationCountTarget(long target) {
+        this.invocationCountTarget = target;
+    }
+
+    public long getInvocationCountTarget() {
+        return invocationCountTarget;
     }
 
     public String getTriggerCondition() {
