@@ -106,9 +106,6 @@ public class HeapDumpAnalysis {
         weakHashMaps = new ArrayList<WeakHashMapEntry>();
     }
 
-    @SuppressFBWarnings(
-            value = "NP_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD",
-            justification = "ObjectToIntMap.Entry is initialized in the JOverflow code")
     public void analyze(Path file)
             throws IOException, DumpCorruptedException, HprofParsingCancelledException {
         VerboseOutputCollector vc = new VerboseOutputCollector();

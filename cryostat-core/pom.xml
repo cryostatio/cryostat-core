@@ -50,11 +50,20 @@
   </developer>
 </developers>
 
+<repositories>
+  <repository>
+    <id>adoptium</id>
+    <name>Adoptium</name>
+    <url>https://adoptium.jfrog.io/artifactory/jmc-libs-snapshots</url>
+    <layout>default</layout>
+  </repository>
+</repositories>
+
 <properties>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   <java.version>17</java.version>
   <io.cryostat.libcryostat.version>${project.version}</io.cryostat.libcryostat.version>
-  <org.openjdk.jmc.version>9.1.2</org.openjdk.jmc.version>
+  <org.openjdk.jmc.version>10.0.0-SNAPSHOT</org.openjdk.jmc.version>
   <org.jsoup.version>1.23.1</org.jsoup.version>
 </properties>
 <dependencies>
@@ -96,6 +105,11 @@
   <dependency>
     <groupId>org.openjdk.jmc</groupId>
     <artifactId>rjmx.common</artifactId>
+    <version>${org.openjdk.jmc.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.openjdk.jmc</groupId>
+    <artifactId>joverflow</artifactId>
     <version>${org.openjdk.jmc.version}</version>
   </dependency>
   <dependency>
