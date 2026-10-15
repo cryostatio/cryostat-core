@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<modelVersion>4.0.0</modelVersion>
+
+<name>Cryostat Core BOM</name>
+<description>Bill of Materials for Cryostat Core's artifacts and the third-party dependency versions they share with downstream consumers</description>
+<url>https://github.com/cryostatio/cryostat-core</url>
+<inceptionYear>2026</inceptionYear>
+
+<groupId>io.cryostat</groupId>
+<artifactId>cryostat-core-bom</artifactId>
+
+<version>4.3.0-SNAPSHOT</version>
+<packaging>pom</packaging>
+
+<parent>
+  <groupId>io.cryostat</groupId>
+  <artifactId>cryostat-core-parent</artifactId>
+  <version>4.3.0-SNAPSHOT</version>
+</parent>
+
+<licenses>
+  <license>
+    <name>The Apache License, Version 2.0</name>
+    <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    <distribution>repo</distribution>
+  </license>
+</licenses>
+
+<developers>
+  <developer>
+    <name>Andrew Azores</name>
+    <email>aazores@redhat.com</email>
+    <organization>Red Hat</organization>
+    <organizationUrl>https://www.redhat.com</organizationUrl>
+  </developer>
+  <developer>
+    <name>Elliott Baron</name>
+    <email>ebaron@redhat.com</email>
+    <organization>Red Hat</organization>
+    <organizationUrl>https://www.redhat.com</organizationUrl>
+  </developer>
+</developers>
+
+<properties>
+  <org.openjdk.jmc.version>9.1.2</org.openjdk.jmc.version>
+  <org.jsoup.version>1.23.2</org.jsoup.version>
+
+  <org.apache.commons.lang3.version>3.20.0</org.apache.commons.lang3.version>
+  <org.apache.commons.codec.version>1.22.0</org.apache.commons.codec.version>
+  <org.apache.commons.io.version>2.22.0</org.apache.commons.io.version>
+  <org.apache.commons.text.version>1.15.0</org.apache.commons.text.version>
+
+  <org.slf4j.version>2.0.18</org.slf4j.version>
+  <com.github.spotbugs.version>4.10.5</com.github.spotbugs.version>
+
+  <org.junit.jupiter.version>6.1.3</org.junit.jupiter.version>
+  <org.hamcrest.version>3.0</org.hamcrest.version>
+  <org.mockito.version>5.24.0</org.mockito.version>
+</properties>
+
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>io.cryostat</groupId>
+      <artifactId>cryostat-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.cryostat</groupId>
+      <artifactId>libcryostat</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.openjdk.jmc</groupId>
+      <artifactId>common</artifactId>
+      <version>${org.openjdk.jmc.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openjdk.jmc</groupId>
+      <artifactId>flightrecorder</artifactId>
+      <version>${org.openjdk.jmc.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openjdk.jmc</groupId>
+      <artifactId>flightrecorder.configuration</artifactId>
+      <version>${org.openjdk.jmc.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openjdk.jmc</groupId>
+      <artifactId>flightrecorder.rules</artifactId>
+      <version>${org.openjdk.jmc.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openjdk.jmc</groupId>
+      <artifactId>flightrecorder.rules.jdk</artifactId>
+      <version>${org.openjdk.jmc.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openjdk.jmc</groupId>
+      <artifactId>jdp</artifactId>
+      <version>${org.openjdk.jmc.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openjdk.jmc</groupId>
+      <artifactId>rjmx.common</artifactId>
+      <version>${org.openjdk.jmc.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+      <version>${org.jsoup.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${org.apache.commons.lang3.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>${org.apache.commons.codec.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>${org.apache.commons.io.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-text</artifactId>
+      <version>${org.apache.commons.text.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${org.slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-annotations</artifactId>
+      <version>${com.github.spotbugs.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- test deps -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${org.junit.jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>${org.junit.jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest</artifactId>
+      <version>${org.hamcrest.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>${org.mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>${org.mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+
+<distributionManagement>
+  <repository>
+    <id>github</id>
+    <name>GitHub Packages</name>
+    <url>https://maven.pkg.github.com/cryostatio/cryostat-core</url>
+  </repository>
+</distributionManagement>
+
+<scm>
+  <connection>scm:git://github.com/cryostatio/cryostat-core.git</connection>
+  <developerConnection>scm:git:ssh://github.com:cryostatio/cryostat-core.git</developerConnection>
+  <url>https://github.com/cryostatio/cryostat-core/tree/main</url>
+</scm>
+
+<profiles>
+  <profile>
+    <id>release</id>
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>org.jreleaser</groupId>
+          <artifactId>jreleaser-maven-plugin</artifactId>
+          <inherited>false</inherited>
+          <configuration>
+            <jreleaser>
+              <signing>
+                <active>ALWAYS</active>
+                <armored>true</armored>
+              </signing>
+              <deploy>
+                <maven>
+                  <mavenCentral>
+                    <release-deploy>
+                      <active>RELEASE</active>
+                      <url>https://central.sonatype.com/api/v1/publisher</url>
+                      <stagingRepositories>target/staging-deploy</stagingRepositories>
+                    </release-deploy>
+                  </mavenCentral>
+                  <nexus2>
+                    <snapshot-deploy>
+                      <active>SNAPSHOT</active>
+                      <snapshotUrl>https://central.sonatype.com/repository/maven-snapshots/</snapshotUrl>
+                      <applyMavenCentralRules>true</applyMavenCentralRules>
+                      <snapshotSupported>true</snapshotSupported>
+                      <closeRepository>true</closeRepository>
+                      <releaseRepository>true</releaseRepository>
+                      <stagingRepositories>target/staging-deploy</stagingRepositories>
+                    </snapshot-deploy>
+                  </nexus2>
+                </maven>
+              </deploy>
+            </jreleaser>
+          </configuration>
+        </plugin>
+      </plugins>
+    </build>
+  </profile>
+
+  <profile>
+    <id>publication</id>
+    <properties>
+      <altDeploymentRepository>local::file:./target/staging-deploy</altDeploymentRepository>
+    </properties>
+    <build>
+      <defaultGoal>deploy</defaultGoal>
+    </build>
+  </profile>
+</profiles>
+
+</project>
