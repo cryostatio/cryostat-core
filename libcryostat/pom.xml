@@ -49,6 +49,18 @@
   <java.version>11</java.version>
 </properties>
 
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>io.cryostat</groupId>
+      <artifactId>cryostat-core-bom</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+
 <dependencies>
   <dependency>
     <groupId>org.apache.commons</groupId>
