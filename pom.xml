@@ -79,7 +79,7 @@
   <com.mycila.license.maven.plugin.version>5.1.2</com.mycila.license.maven.plugin.version>
 
   <com.github.spotbugs.plugin.version>4.10.5.0</com.github.spotbugs.plugin.version>
-  <org.jacoco.maven.plugin.version>0.8.15</org.jacoco.maven.plugin.version>
+  <org.jacoco.maven.plugin.version>0.8.16</org.jacoco.maven.plugin.version>
   <com.diffplug.spotless.maven.plugin.version>3.10.4</com.diffplug.spotless.maven.plugin.version>
 
   <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
