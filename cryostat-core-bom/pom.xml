@@ -46,7 +46,7 @@
 
 <properties>
   <org.openjdk.jmc.version>9.1.2</org.openjdk.jmc.version>
-  <org.jsoup.version>1.23.2</org.jsoup.version>
+  <org.jsoup.version>1.24.1</org.jsoup.version>
 
   <org.apache.commons.lang3.version>3.20.0</org.apache.commons.lang3.version>
   <org.apache.commons.codec.version>1.22.0</org.apache.commons.codec.version>
