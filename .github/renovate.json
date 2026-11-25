@@ -9,7 +9,9 @@
     ":docker",
     ":separateMajorReleases",
     ":separateMultipleMinorReleases",
-    ":separatePatchReleases"
+    ":separatePatchReleases",
+    "github>cryostatio/cryostat//.github/renovate/release-branch/lockdown",
+    "github>cryostatio/cryostat//.github/renovate/release-branch/default(maven)"
   ],
   "reviewersFromCodeOwners": true,
   "labels": [
@@ -21,5 +23,17 @@
   "major": {
     "dependencyDashboardApproval": true
   },
-  "stopUpdatingLabel": "blocked"
+  "stopUpdatingLabel": "blocked",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Track the VALIDATOR_VERSION pin that the config validator workflow passes to npx, so Renovate raises a PR to bump its own validator",
+      "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],
+      "matchStrings": [
+        "VALIDATOR_VERSION:\\s*(?<currentValue>\\S+)"
+      ],
+      "depNameTemplate": "renovate",
+      "datasourceTemplate": "npm"
+    }
+  ]
 }
